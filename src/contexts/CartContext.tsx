@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 
@@ -23,6 +22,29 @@ export type PaymentMethod = {
   icon: string;
 };
 
+export type OrderStatus = 
+  | "pending" 
+  | "confirmed" 
+  | "preparing" 
+  | "delivering" 
+  | "completed" 
+  | "cancelled";
+
+export type Order = {
+  id: string;
+  items: CartItem[];
+  customerInfo: CustomerInfo;
+  location: DeliveryLocation;
+  paymentMethod: PaymentMethod;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  status: OrderStatus;
+  createdAt: string;
+  notes?: string;
+  paymentStatus: "pending" | "completed";
+};
+
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">) => void;
@@ -37,7 +59,11 @@ type CartContextType = {
   paymentMethods: PaymentMethod[];
   selectedPaymentMethod: PaymentMethod | null;
   setSelectedPaymentMethod: (method: PaymentMethod | null) => void;
-  processPayment: (customerInfo: CustomerInfo) => Promise<boolean>;
+  submitOrder: (customerInfo: CustomerInfo) => Promise<string>;
+  orders: Order[];
+  getOrderById: (id: string) => Order | undefined;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  updateOrderPaymentStatus: (orderId: string, status: "pending" | "completed") => void;
 };
 
 export type CustomerInfo = {
@@ -53,6 +79,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   
   // Dados de localização disponíveis para entrega
   const deliveryLocations: DeliveryLocation[] = [
@@ -81,12 +108,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Erro ao carregar carrinho:", error);
       }
     }
+    
+    // Carregar pedidos do localStorage
+    const savedOrders = localStorage.getItem("cantinho-orders");
+    if (savedOrders) {
+      try {
+        setOrders(JSON.parse(savedOrders));
+      } catch (error) {
+        console.error("Erro ao carregar pedidos:", error);
+      }
+    }
   }, []);
 
   // Salvar dados do carrinho no localStorage quando mudar
   useEffect(() => {
     localStorage.setItem("cantinho-cart", JSON.stringify(items));
   }, [items]);
+  
+  // Salvar pedidos no localStorage quando mudarem
+  useEffect(() => {
+    localStorage.setItem("cantinho-orders", JSON.stringify(orders));
+  }, [orders]);
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setItems(currentItems => {
@@ -149,36 +191,78 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  // Simular processamento de pagamento
-  const processPayment = async (customerInfo: CustomerInfo): Promise<boolean> => {
+  // Novo método para enviar pedido
+  const submitOrder = async (customerInfo: CustomerInfo): Promise<string> => {
     if (!selectedLocation || !selectedPaymentMethod) {
       toast({
         title: "Não foi possível processar",
         description: "Por favor, selecione uma localização e um método de pagamento",
         variant: "destructive"
       });
-      return false;
+      throw new Error("Localização ou método de pagamento não selecionado");
     }
 
-    // Aqui seria integrado um verdadeiro gateway de pagamento
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        toast({
-          title: "Pagamento processado",
-          description: `Seu pedido foi confirmado e será entregue em ${selectedLocation.estimatedTime}`,
-        });
-        
-        console.log("Pedido processado:", {
-          items,
-          subtotal,
-          deliveryFee: selectedLocation.fee,
-          total: subtotal + selectedLocation.fee,
-          paymentMethod: selectedPaymentMethod,
-          customerInfo
-        });
-        
-        resolve(true);
-      }, 2000);
+    // Gerar um ID único para o pedido
+    const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Criar o novo pedido
+    const newOrder: Order = {
+      id: orderId,
+      items: [...items],
+      customerInfo,
+      location: selectedLocation,
+      paymentMethod: selectedPaymentMethod,
+      subtotal,
+      deliveryFee: selectedLocation.fee,
+      total: subtotal + selectedLocation.fee,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      paymentStatus: "pending"
+    };
+    
+    // Adicionar o pedido à lista de pedidos
+    setOrders(prev => [...prev, newOrder]);
+    
+    toast({
+      title: "Pedido recebido",
+      description: "Seu pedido foi registrado e está aguardando confirmação.",
+    });
+    
+    console.log("Novo pedido criado:", newOrder);
+    
+    return orderId;
+  };
+  
+  // Obter pedido por ID
+  const getOrderById = (id: string): Order | undefined => {
+    return orders.find(order => order.id === id);
+  };
+  
+  // Atualizar status do pedido
+  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, status } : order
+      )
+    );
+    
+    toast({
+      title: "Status atualizado",
+      description: `O pedido ${orderId} foi atualizado para "${status}".`,
+    });
+  };
+  
+  // Atualizar status de pagamento
+  const updateOrderPaymentStatus = (orderId: string, paymentStatus: "pending" | "completed") => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, paymentStatus } : order
+      )
+    );
+    
+    toast({
+      title: "Pagamento atualizado",
+      description: `O pagamento do pedido ${orderId} foi marcado como "${paymentStatus}".`,
     });
   };
 
@@ -205,7 +289,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         paymentMethods,
         selectedPaymentMethod,
         setSelectedPaymentMethod,
-        processPayment
+        submitOrder,
+        orders,
+        getOrderById,
+        updateOrderStatus,
+        updateOrderPaymentStatus
       }}
     >
       {children}

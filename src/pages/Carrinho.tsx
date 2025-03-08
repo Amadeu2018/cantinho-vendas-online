@@ -8,6 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 import CheckoutForm from "@/components/cart/CheckoutForm";
+import OrderStatus from "@/components/cart/OrderStatus";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat("pt-AO", {
@@ -27,12 +28,20 @@ const Carrinho = () => {
     selectedLocation
   } = useCart();
   
-  // Estado para gerenciar o passo do checkout (1: carrinho, 2: checkout, 3: confirmação)
+  // Estado para gerenciar o passo do checkout (1: carrinho, 2: checkout, 3: rastreamento de pedido)
   const [checkoutStep, setCheckoutStep] = useState(1);
+  // Estado para armazenar o ID do pedido após o envio bem-sucedido
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
 
-  const handleCheckoutSuccess = () => {
+  const handleCheckoutSuccess = (orderId: string) => {
+    setCurrentOrderId(orderId);
     setCheckoutStep(3);
     clearCart();
+  };
+  
+  const handleBackToShopping = () => {
+    setCheckoutStep(1);
+    setCurrentOrderId(null);
   };
 
   // Calcula a taxa de entrega baseada na localização selecionada
@@ -46,31 +55,17 @@ const Carrinho = () => {
       <Navbar />
       <main className="flex-grow py-10">
         <div className="container mx-auto px-4">
-          {checkoutStep === 3 ? (
-            // Tela de confirmação de pedido
-            <div className="text-center py-20 bg-muted/30 rounded-lg">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-8 w-8 text-green-600" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Pedido Confirmado!</h2>
-              <p className="text-lg mb-6">
-                Obrigado pela sua compra. Seu pedido foi recebido e está sendo preparado.
-              </p>
-              <Button asChild className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 mx-2">
-                <Link to="/">Voltar para Início</Link>
-              </Button>
-              <Button asChild variant="outline" className="mx-2">
-                <Link to="/menu">Continuar Comprando</Link>
-              </Button>
-            </div>
+          {checkoutStep === 3 && currentOrderId ? (
+            // Tela de rastreamento de pedido
+            <>
+              <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">
+                Acompanhar Pedido
+              </h1>
+              <OrderStatus 
+                orderId={currentOrderId} 
+                onBackToShopping={handleBackToShopping} 
+              />
+            </>
           ) : (
             <>
               <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">
@@ -168,7 +163,9 @@ const Carrinho = () => {
                       // Mostrar formulário de checkout
                       <div className="bg-white shadow-md rounded-lg overflow-hidden">
                         <div className="p-6">
-                          <CheckoutForm onSuccess={handleCheckoutSuccess} />
+                          <CheckoutForm 
+                            onSuccess={(orderId) => handleCheckoutSuccess(orderId)} 
+                          />
                         </div>
                       </div>
                     )}

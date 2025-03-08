@@ -21,7 +21,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
     paymentMethods,
     selectedPaymentMethod,
     setSelectedPaymentMethod,
-    processPayment
+    submitOrder
   } = useCart();
   
   const [loading, setLoading] = useState(false);
@@ -75,14 +75,17 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
     
     setLoading(true);
     try {
-      const success = await processPayment(customerInfo);
-      if (success) {
-        onSuccess();
-      }
+      // Submit order and get order ID
+      const orderId = await submitOrder(customerInfo);
+      toast({
+        title: "Pedido enviado com sucesso!",
+        description: `Seu pedido #${orderId.substring(0, 8)} foi registrado. Aguarde a confirmação.`,
+      });
+      onSuccess();
     } catch (error) {
       toast({
         title: "Erro no processamento",
-        description: "Ocorreu um erro ao processar o pagamento",
+        description: "Ocorreu um erro ao processar o pedido",
         variant: "destructive"
       });
     } finally {
@@ -204,6 +207,11 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
             </div>
           ))}
         </div>
+        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm">
+          <p className="text-yellow-800">
+            Para sua comodidade, o pagamento será processado conforme o método selecionado após a confirmação do pedido.
+          </p>
+        </div>
       </div>
       
       <Button
@@ -218,7 +226,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
             Processando...
           </span>
         ) : (
-          "Finalizar Pedido"
+          "Enviar Pedido"
         )}
       </Button>
     </form>

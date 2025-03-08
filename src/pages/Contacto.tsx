@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -77,7 +76,7 @@ const Contacto = () => {
                     <div>
                       <h3 className="font-medium text-lg">Localização</h3>
                       <p className="text-muted-foreground mt-1">
-                        Luanda, Bar Azul
+                        Luanda, Bairro Azul
                       </p>
                     </div>
                   </div>
@@ -221,7 +220,7 @@ const Contacto = () => {
                 <div className="text-center p-4">
                   <MapPin className="h-12 w-12 text-cantinho-terracotta mx-auto mb-4" />
                   <p className="text-lg font-medium">Cantinho Algarvio</p>
-                  <p className="text-muted-foreground">Luanda, Bar Azul</p>
+                  <p className="text-muted-foreground">Luanda, Bairro Azul</p>
                   <p className="mt-4 text-sm">
                     Coordenadas: Latitude/Longitude viriam aqui
                   </p>

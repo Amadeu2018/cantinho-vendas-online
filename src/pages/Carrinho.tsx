@@ -1,12 +1,13 @@
 
+import { useState } from "react";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import CheckoutForm from "@/components/cart/CheckoutForm";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat("pt-AO", {
@@ -17,140 +18,215 @@ const formatPrice = (price: number): string => {
 };
 
 const Carrinho = () => {
-  const { items, updateQuantity, removeItem, clearCart, subtotal } = useCart();
-  const { toast } = useToast();
-  const taxaEntrega = 1500; // 1500 AOA como taxa fixa de entrega
+  const { 
+    items, 
+    updateQuantity, 
+    removeItem, 
+    clearCart, 
+    subtotal,
+    selectedLocation
+  } = useCart();
+  
+  // Estado para gerenciar o passo do checkout (1: carrinho, 2: checkout, 3: confirmação)
+  const [checkoutStep, setCheckoutStep] = useState(1);
 
-  const handleCheckout = () => {
-    toast({
-      title: "Pedido recebido",
-      description: "Seu pedido foi recebido e será processado em breve.",
-    });
+  const handleCheckoutSuccess = () => {
+    setCheckoutStep(3);
     clearCart();
   };
+
+  // Calcula a taxa de entrega baseada na localização selecionada
+  const deliveryFee = selectedLocation ? selectedLocation.fee : 0;
+  
+  // Calcula o total (subtotal + taxa de entrega)
+  const total = subtotal + deliveryFee;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow py-10">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">Seu Carrinho</h1>
-
-          {items.length === 0 ? (
-            <div className="text-center py-16 bg-muted/30 rounded-lg">
-              <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-medium mb-2">Seu carrinho está vazio</h2>
-              <p className="text-muted-foreground mb-6">
-                Parece que você ainda não adicionou nenhum prato ao seu carrinho.
+          {checkoutStep === 3 ? (
+            // Tela de confirmação de pedido
+            <div className="text-center py-20 bg-muted/30 rounded-lg">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-8 w-8 text-green-600" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Pedido Confirmado!</h2>
+              <p className="text-lg mb-6">
+                Obrigado pela sua compra. Seu pedido foi recebido e está sendo preparado.
               </p>
-              <Button asChild className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90">
-                <Link to="/menu">Explorar Nosso Menu</Link>
+              <Button asChild className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 mx-2">
+                <Link to="/">Voltar para Início</Link>
+              </Button>
+              <Button asChild variant="outline" className="mx-2">
+                <Link to="/menu">Continuar Comprando</Link>
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2">
-                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold mb-4">Itens do Carrinho</h2>
-                    {items.map((item) => (
-                      <div key={item.id} className="flex flex-col sm:flex-row border-b py-4 last:border-b-0 last:pb-0">
-                        <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden mb-4 sm:mb-0">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 sm:ml-4 flex flex-col">
-                          <div className="flex justify-between mb-2">
-                            <h3 className="font-medium">{item.name}</h3>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-gray-500 hover:text-red-500"
-                              onClick={() => removeItem(item.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div className="text-cantinho-navy font-medium">
-                            {formatPrice(item.price)}
-                          </div>
-                          <div className="flex items-center mt-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 rounded-full"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="mx-3 font-medium">{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 rounded-full"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                            <div className="ml-auto font-semibold">
-                              {formatPrice(item.price * item.quantity)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-6 bg-muted/20">
-                    <Button
-                      variant="outline"
-                      className="w-full sm:w-auto"
-                      onClick={clearCart}
-                    >
-                      Limpar Carrinho
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <>
+              <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">
+                {checkoutStep === 1 ? "Seu Carrinho" : "Finalizar Pedido"}
+              </h1>
 
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold mb-4">Resumo do Pedido</h2>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>{formatPrice(subtotal)}</span>
+              {items.length === 0 ? (
+                <div className="text-center py-16 bg-muted/30 rounded-lg">
+                  <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+                  <h2 className="text-2xl font-medium mb-2">Seu carrinho está vazio</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Parece que você ainda não adicionou nenhum prato ao seu carrinho.
+                  </p>
+                  <Button asChild className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90">
+                    <Link to="/menu">Explorar Nosso Menu</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Items do Carrinho ou Formulário de Checkout */}
+                  <div className="lg:col-span-2">
+                    {checkoutStep === 1 ? (
+                      // Mostrar itens do carrinho
+                      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <div className="p-6">
+                          <h2 className="text-xl font-semibold mb-4">Itens do Carrinho</h2>
+                          {items.map((item) => (
+                            <div key={item.id} className="flex flex-col sm:flex-row border-b py-4 last:border-b-0 last:pb-0">
+                              <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden mb-4 sm:mb-0">
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 sm:ml-4 flex flex-col">
+                                <div className="flex justify-between mb-2">
+                                  <h3 className="font-medium">{item.name}</h3>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-gray-500 hover:text-red-500"
+                                    onClick={() => removeItem(item.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="text-cantinho-navy font-medium">
+                                  {formatPrice(item.price)}
+                                </div>
+                                <div className="flex items-center mt-2">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full"
+                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="mx-3 font-medium">{item.quantity}</span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full"
+                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                  <div className="ml-auto font-semibold">
+                                    {formatPrice(item.price * item.quantity)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-6 bg-muted/20">
+                          <div className="flex flex-wrap gap-3">
+                            <Button
+                              variant="outline"
+                              onClick={clearCart}
+                            >
+                              Limpar Carrinho
+                            </Button>
+                            <Button
+                              asChild
+                              variant="outline"
+                            >
+                              <Link to="/menu">Continuar Comprando</Link>
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Taxa de Entrega</span>
-                        <span>{formatPrice(taxaEntrega)}</span>
+                    ) : (
+                      // Mostrar formulário de checkout
+                      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <div className="p-6">
+                          <CheckoutForm onSuccess={handleCheckoutSuccess} />
+                        </div>
                       </div>
-                      <Separator />
-                      <div className="flex justify-between font-semibold text-lg">
-                        <span>Total</span>
-                        <span>{formatPrice(subtotal + taxaEntrega)}</span>
+                    )}
+                  </div>
+
+                  {/* Resumo do Pedido */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                      <div className="p-6">
+                        <h2 className="text-xl font-semibold mb-4">Resumo do Pedido</h2>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>{formatPrice(subtotal)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Taxa de Entrega</span>
+                            {selectedLocation ? (
+                              <span>{formatPrice(deliveryFee)}</span>
+                            ) : (
+                              <span className="text-gray-500 text-sm">Selecione localização</span>
+                            )}
+                          </div>
+                          <Separator />
+                          <div className="flex justify-between font-semibold text-lg">
+                            <span>Total</span>
+                            <span>{formatPrice(total)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-6 bg-muted/20">
+                        {checkoutStep === 1 ? (
+                          <Button
+                            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+                            onClick={() => setCheckoutStep(2)}
+                          >
+                            Prosseguir para Pagamento
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setCheckoutStep(1)}
+                          >
+                            Voltar ao Carrinho
+                          </Button>
+                        )}
+                        <p className="text-xs text-center text-muted-foreground mt-3">
+                          {checkoutStep === 1 
+                            ? "Os impostos estão incluídos no preço. Taxa de entrega baseada na localização."
+                            : "Seus dados estão seguros e não serão compartilhados com terceiros."}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6 bg-muted/20">
-                    <Button
-                      className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-                      onClick={handleCheckout}
-                    >
-                      Finalizar Pedido
-                    </Button>
-                    <p className="text-xs text-center text-muted-foreground mt-3">
-                      Os impostos serão calculados no checkout. Tempo de entrega estimado: 45-60 minutos.
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>

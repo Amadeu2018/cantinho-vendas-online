@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/contexts/CartContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -28,20 +30,24 @@ const Navbar = () => {
             <Link to="/eventos" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Eventos</Link>
             <Link to="/sobre" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Sobre Nós</Link>
             <Link to="/contacto" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Contacto</Link>
-            <Link to="/cart">
+            <Link to="/carrinho">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
               </Button>
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <Link to="/cart" className="mr-4">
+            <Link to="/carrinho" className="mr-4">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
               </Button>
             </Link>
             <Button variant="ghost" size="icon" onClick={toggleMenu}>
@@ -91,6 +97,13 @@ const Navbar = () => {
             onClick={() => setIsMenuOpen(false)}
           >
             Contacto
+          </Link>
+          <Link 
+            to="/carrinho" 
+            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Carrinho
           </Link>
         </div>
       </div>

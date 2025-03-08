@@ -40,7 +40,7 @@ const Footer = () => {
                 <Link to="/contacto" className="hover:text-cantinho-sand transition duration-200">Contacto</Link>
               </li>
               <li>
-                <Link to="/politica-privacidade" className="hover:text-cantinho-sand transition duration-200">Política de Privacidade</Link>
+                <Link to="/carrinho" className="hover:text-cantinho-sand transition duration-200">Carrinho</Link>
               </li>
             </ul>
           </div>
@@ -51,11 +51,11 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
                 <MapPin size={20} className="mt-1 flex-shrink-0" />
-                <p>Rua Principal, 123, Talatona, Luanda, Angola</p>
+                <p>Luanda, Bairro Azul</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone size={20} />
-                <p>+244 923 456 789</p>
+                <p>+244 949 645 654</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail size={20} />

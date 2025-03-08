@@ -1,20 +1,9 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
-type Dish = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: "appetizer" | "main" | "dessert";
-};
+import MenuCard, { Dish } from "@/components/menu/MenuCard";
 
 const MENU_ITEMS: Dish[] = [
   // Appetizers
@@ -110,33 +99,7 @@ const MENU_ITEMS: Dish[] = [
   }
 ];
 
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('pt-AO', {
-    style: 'currency',
-    currency: 'AOA',
-    minimumFractionDigits: 0
-  }).format(price);
-};
-
 const Menu = () => {
-  const [cartItems, setCartItems] = useState<{ dishId: number, quantity: number }[]>([]);
-
-  const addToCart = (dishId: number) => {
-    const existingItem = cartItems.find(item => item.dishId === dishId);
-    
-    if (existingItem) {
-      setCartItems(cartItems.map(item => 
-        item.dishId === dishId 
-          ? { ...item, quantity: item.quantity + 1 } 
-          : item
-      ));
-    } else {
-      setCartItems([...cartItems, { dishId, quantity: 1 }]);
-    }
-    
-    console.log(`Added dish #${dishId} to cart`);
-  };
-
   const appetizers = MENU_ITEMS.filter(dish => dish.category === "appetizer");
   const mains = MENU_ITEMS.filter(dish => dish.category === "main");
   const desserts = MENU_ITEMS.filter(dish => dish.category === "dessert");
@@ -163,7 +126,7 @@ const Menu = () => {
             <TabsContent value="appetizer">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {appetizers.map(dish => (
-                  <MenuCard key={dish.id} dish={dish} onAddToCart={addToCart} />
+                  <MenuCard key={dish.id} dish={dish} />
                 ))}
               </div>
             </TabsContent>
@@ -171,7 +134,7 @@ const Menu = () => {
             <TabsContent value="main">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mains.map(dish => (
-                  <MenuCard key={dish.id} dish={dish} onAddToCart={addToCart} />
+                  <MenuCard key={dish.id} dish={dish} />
                 ))}
               </div>
             </TabsContent>
@@ -179,7 +142,7 @@ const Menu = () => {
             <TabsContent value="dessert">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {desserts.map(dish => (
-                  <MenuCard key={dish.id} dish={dish} onAddToCart={addToCart} />
+                  <MenuCard key={dish.id} dish={dish} />
                 ))}
               </div>
             </TabsContent>
@@ -188,40 +151,6 @@ const Menu = () => {
       </main>
       <Footer />
     </div>
-  );
-};
-
-type MenuCardProps = {
-  dish: Dish;
-  onAddToCart: (id: number) => void;
-};
-
-const MenuCard = ({ dish, onAddToCart }: MenuCardProps) => {
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 overflow-hidden">
-        <img 
-          src={dish.image} 
-          alt={dish.name} 
-          className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-        />
-      </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
-        <p className="text-gray-600 text-sm mb-4 min-h-[40px]">{dish.description}</p>
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => onAddToCart(dish.id)}
-            className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
-          >
-            <PlusCircle className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 

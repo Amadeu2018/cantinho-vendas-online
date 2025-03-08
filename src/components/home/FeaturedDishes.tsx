@@ -1,8 +1,9 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { Link } from "react-router-dom";
 
 type Dish = {
   id: number;
@@ -57,22 +58,15 @@ const formatPrice = (price: number): string => {
 };
 
 const FeaturedDishes = () => {
-  const [cartItems, setCartItems] = useState<{ dishId: number, quantity: number }[]>([]);
+  const { addItem } = useCart();
 
-  const addToCart = (dishId: number) => {
-    const existingItem = cartItems.find(item => item.dishId === dishId);
-    
-    if (existingItem) {
-      setCartItems(cartItems.map(item => 
-        item.dishId === dishId 
-          ? { ...item, quantity: item.quantity + 1 } 
-          : item
-      ));
-    } else {
-      setCartItems([...cartItems, { dishId, quantity: 1 }]);
-    }
-    
-    console.log(`Added dish #${dishId} to cart`);
+  const handleAddToCart = (dish: Dish) => {
+    addItem({
+      id: dish.id,
+      name: dish.name,
+      price: dish.price,
+      image: dish.image
+    });
   };
 
   return (
@@ -101,7 +95,7 @@ const FeaturedDishes = () => {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => addToCart(dish.id)}
+                    onClick={() => handleAddToCart(dish)}
                     className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
                   >
                     <PlusCircle className="h-5 w-5" />
@@ -114,7 +108,7 @@ const FeaturedDishes = () => {
         
         <div className="text-center mt-10">
           <Button asChild className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90">
-            <a href="/menu">Ver Menu Completo</a>
+            <Link to="/menu">Ver Menu Completo</Link>
           </Button>
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useCart, Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CircleCheck, Clock, Truck, ChefHat, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 
 type OrderStatusProps = {
   orderId: string;
@@ -26,7 +26,6 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Refresh order data every 10 seconds
     const intervalId = setInterval(() => {
       const updatedOrder = getOrderById(orderId);
       setOrder(updatedOrder);
@@ -154,7 +153,6 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
           ) : (
             <div className="mb-8">
               <div className="relative">
-                {/* Progress bar */}
                 <div className="h-2 bg-gray-200 rounded-full mb-6">
                   <div 
                     className="h-2 bg-cantinho-terracotta rounded-full transition-all" 
@@ -168,7 +166,6 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
                   />
                 </div>
                 
-                {/* Steps */}
                 <div className="grid grid-cols-5 gap-2 text-xs text-center">
                   <div className={stepStatuses.pending ? "text-cantinho-terracotta" : "text-gray-500"}>
                     Recebido
@@ -190,7 +187,6 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
             </div>
           )}
           
-          {/* Order Summary */}
           <div className="bg-muted/10 p-4 rounded-md mb-6">
             <div className="flex justify-between mb-2">
               <span className="font-medium">Número do Pedido:</span>
@@ -202,7 +198,6 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
             </div>
           </div>
           
-          {/* Payment Status */}
           {order.status !== "cancelled" && order.paymentStatus === "pending" && (
             <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4 mb-6">
               <h3 className="font-medium mb-2">Pagamento Pendente</h3>

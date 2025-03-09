@@ -43,6 +43,7 @@ export type Order = {
   createdAt: string;
   notes?: string;
   paymentStatus: "pending" | "completed";
+  isProforma?: boolean;
 };
 
 type CartContextType = {
@@ -81,7 +82,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   
-  // Dados de localização disponíveis para entrega
   const deliveryLocations: DeliveryLocation[] = [
     { id: 1, name: "Bairro Azul", fee: 1000, estimatedTime: "20-30 min" },
     { id: 2, name: "Maculusso", fee: 1500, estimatedTime: "25-35 min" },
@@ -91,14 +91,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     { id: 6, name: "Kilamba", fee: 3000, estimatedTime: "40-60 min" }
   ];
   
-  // Métodos de pagamento disponíveis
   const paymentMethods: PaymentMethod[] = [
     { id: "cash", name: "Dinheiro na Entrega", icon: "banknote" },
     { id: "multicaixa", name: "Multicaixa Express", icon: "credit-card" },
     { id: "transfer", name: "Transferência Bancária", icon: "landmark" }
   ];
   
-  // Carregar dados do carrinho do localStorage ao iniciar
   useEffect(() => {
     const savedCart = localStorage.getItem("cantinho-cart");
     if (savedCart) {
@@ -109,7 +107,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     
-    // Carregar pedidos do localStorage
     const savedOrders = localStorage.getItem("cantinho-orders");
     if (savedOrders) {
       try {
@@ -120,23 +117,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Salvar dados do carrinho no localStorage quando mudar
   useEffect(() => {
     localStorage.setItem("cantinho-cart", JSON.stringify(items));
   }, [items]);
   
-  // Salvar pedidos no localStorage quando mudarem
   useEffect(() => {
     localStorage.setItem("cantinho-orders", JSON.stringify(orders));
   }, [orders]);
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setItems(currentItems => {
-      // Verificar se o item já existe no carrinho
       const existingItemIndex = currentItems.findIndex(i => i.id === item.id);
       
       if (existingItemIndex > -1) {
-        // Atualizar a quantidade se já existir
         const updatedItems = [...currentItems];
         updatedItems[existingItemIndex].quantity += 1;
         toast({
@@ -145,7 +138,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return updatedItems;
       } else {
-        // Adicionar novo item se não existir
         toast({
           title: "Item adicionado",
           description: `${item.name} foi adicionado ao carrinho`,
@@ -191,7 +183,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  // Novo método para enviar pedido
   const submitOrder = async (customerInfo: CustomerInfo): Promise<string> => {
     if (!selectedLocation || !selectedPaymentMethod) {
       toast({
@@ -202,10 +193,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Localização ou método de pagamento não selecionado");
     }
 
-    // Gerar um ID único para o pedido
     const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
-    // Criar o novo pedido
     const newOrder: Order = {
       id: orderId,
       items: [...items],
@@ -220,7 +209,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       paymentStatus: "pending"
     };
     
-    // Adicionar o pedido à lista de pedidos
     setOrders(prev => [...prev, newOrder]);
     
     toast({
@@ -233,12 +221,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return orderId;
   };
   
-  // Obter pedido por ID
   const getOrderById = (id: string): Order | undefined => {
     return orders.find(order => order.id === id);
   };
   
-  // Atualizar status do pedido
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
     setOrders(prevOrders => 
       prevOrders.map(order => 
@@ -252,7 +238,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
   
-  // Atualizar status de pagamento
   const updateOrderPaymentStatus = (orderId: string, paymentStatus: "pending" | "completed") => {
     setOrders(prevOrders => 
       prevOrders.map(order => 

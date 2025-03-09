@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,14 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 import CheckoutForm from "@/components/cart/CheckoutForm";
 import OrderStatus from "@/components/cart/OrderStatus";
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("pt-AO", {
-    style: "currency",
-    currency: "AOA",
-    minimumFractionDigits: 0,
-  }).format(price);
-};
+import { formatCurrency } from "@/lib/utils";
 
 const Carrinho = () => {
   const { 
@@ -114,7 +106,7 @@ const Carrinho = () => {
                                   </Button>
                                 </div>
                                 <div className="text-cantinho-navy font-medium">
-                                  {formatPrice(item.price)}
+                                  {formatCurrency(item.price)}
                                 </div>
                                 <div className="flex items-center mt-2">
                                   <Button
@@ -135,7 +127,7 @@ const Carrinho = () => {
                                     <Plus className="h-3 w-3" />
                                   </Button>
                                   <div className="ml-auto font-semibold">
-                                    {formatPrice(item.price * item.quantity)}
+                                    {formatCurrency(item.price * item.quantity)}
                                   </div>
                                 </div>
                               </div>
@@ -179,12 +171,12 @@ const Carrinho = () => {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>{formatPrice(subtotal)}</span>
+                            <span>{formatCurrency(subtotal)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>Taxa de Entrega</span>
                             {selectedLocation ? (
-                              <span>{formatPrice(deliveryFee)}</span>
+                              <span>{formatCurrency(deliveryFee)}</span>
                             ) : (
                               <span className="text-gray-500 text-sm">Selecione localização</span>
                             )}
@@ -192,7 +184,7 @@ const Carrinho = () => {
                           <Separator />
                           <div className="flex justify-between font-semibold text-lg">
                             <span>Total</span>
-                            <span>{formatPrice(total)}</span>
+                            <span>{formatCurrency(total)}</span>
                           </div>
                         </div>
                       </div>

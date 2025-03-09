@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const Carrinho = () => {
     clearCart();
   };
   
+  // Fixed function to not accept any parameters
   const handleBackToShopping = () => {
     setCheckoutStep(1);
     setCurrentOrderId(null);

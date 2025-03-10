@@ -30,7 +30,7 @@ const Carrinho = () => {
     clearCart();
   };
   
-  // Fixed function to not accept any parameters
+  // Function doesn't accept any parameters
   const handleBackToShopping = () => {
     setCheckoutStep(1);
     setCurrentOrderId(null);

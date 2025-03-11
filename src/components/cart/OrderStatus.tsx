@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useCart, Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
@@ -8,16 +9,18 @@ import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
 type OrderStatusProps = {
-  orderId: string;
-  onBackToShopping: () => void;  // Changed: No parameters in this function type
+  orderId: string | null;
+  onBackToShopping: () => void;  // Sem parâmetros
 };
 
 const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
   const { getOrderById } = useCart();
-  const [order, setOrder] = useState<Order | undefined>(getOrderById(orderId));
+  const [order, setOrder] = useState<Order | undefined>(orderId ? getOrderById(orderId) : undefined);
   const { toast } = useToast();
   
   useEffect(() => {
+    if (!orderId) return;
+    
     const intervalId = setInterval(() => {
       const updatedOrder = getOrderById(orderId);
       setOrder(updatedOrder);
@@ -35,7 +38,7 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
           Não conseguimos encontrar o pedido com o ID especificado.
         </p>
         <Button 
-          onClick={onBackToShopping}  // Fixed: Removed passing any arguments
+          onClick={onBackToShopping}  // Sem argumentos
           className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
         >
           Voltar para as Compras
@@ -214,7 +217,7 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
           
           <div className="flex flex-wrap justify-center gap-3">
             <Button 
-              onClick={onBackToShopping}  // Fixed: No arguments passed here
+              onClick={onBackToShopping}  // Sem argumentos
               className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
             >
               Voltar às Compras

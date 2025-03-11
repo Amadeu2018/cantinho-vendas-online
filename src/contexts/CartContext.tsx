@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 
@@ -69,6 +70,7 @@ type CartContextType = {
   addToFavorites: (dishId: number) => void;
   removeFromFavorites: (dishId: number) => void;
   isFavorite: (dishId: number) => boolean;
+  orderStatus?: OrderStatus; // Adicionado orderStatus como opcional
 };
 
 export type CustomerInfo = {

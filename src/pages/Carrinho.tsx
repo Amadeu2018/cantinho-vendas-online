@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,8 +18,7 @@ const Carrinho = () => {
     items, 
     clearCart, 
     subtotal,
-    selectedLocation,
-    orderStatus
+    selectedLocation
   } = useCart();
   
   const navigate = useNavigate();
@@ -53,9 +53,8 @@ const Carrinho = () => {
       <Navbar />
       <main className="flex-grow py-10">
         <div className="container mx-auto px-4">
-          {orderStatus ? (
+          {checkoutStep === 3 && currentOrderId ? (
             <OrderStatus 
-              status={orderStatus} 
               orderId={currentOrderId} 
               onBackToShopping={handleBackToShopping} 
             />

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
@@ -10,12 +10,11 @@ import { Link } from "react-router-dom";
 import CheckoutForm from "@/components/cart/CheckoutForm";
 import OrderStatus from "@/components/cart/OrderStatus";
 import { formatCurrency } from "@/lib/utils";
+import CartItem from "@/components/cart/CartItem";
 
 const Carrinho = () => {
   const { 
     items, 
-    updateQuantity, 
-    removeItem, 
     clearCart, 
     subtotal,
     selectedLocation
@@ -23,6 +22,7 @@ const Carrinho = () => {
   
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
 
   const handleCheckoutSuccess = (orderId: string) => {
     setCurrentOrderId(orderId);
@@ -30,10 +30,17 @@ const Carrinho = () => {
     clearCart();
   };
   
-  // Function doesn't accept any parameters
   const handleBackToShopping = () => {
     setCheckoutStep(1);
     setCurrentOrderId(null);
+  };
+
+  const handleClearCart = () => {
+    setIsClearing(true);
+    setTimeout(() => {
+      clearCart();
+      setIsClearing(false);
+    }, 300);
   };
 
   const deliveryFee = selectedLocation ? selectedLocation.fee : 0;
@@ -78,67 +85,33 @@ const Carrinho = () => {
                       <div className="bg-white shadow-md rounded-lg overflow-hidden">
                         <div className="p-6">
                           <h2 className="text-xl font-semibold mb-4">Itens do Carrinho</h2>
-                          {items.map((item) => (
-                            <div key={item.id} className="flex flex-col sm:flex-row border-b py-4 last:border-b-0 last:pb-0">
-                              <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden mb-4 sm:mb-0">
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="flex-1 sm:ml-4 flex flex-col">
-                                <div className="flex justify-between mb-2">
-                                  <h3 className="font-medium">{item.name}</h3>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-gray-500 hover:text-red-500"
-                                    onClick={() => removeItem(item.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <div className="text-cantinho-navy font-medium">
-                                  {formatCurrency(item.price)}
-                                </div>
-                                <div className="flex items-center mt-2">
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-full"
-                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                  >
-                                    <Minus className="h-3 w-3" />
-                                  </Button>
-                                  <span className="mx-3 font-medium">{item.quantity}</span>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-full"
-                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
-                                  <div className="ml-auto font-semibold">
-                                    {formatCurrency(item.price * item.quantity)}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                          <div className={`transition-opacity duration-300 ${isClearing ? 'opacity-50' : 'opacity-100'}`}>
+                            {items.map((item) => (
+                              <CartItem 
+                                key={item.id}
+                                id={item.id}
+                                name={item.name}
+                                price={item.price}
+                                quantity={item.quantity}
+                                image={item.image}
+                              />
+                            ))}
+                          </div>
                         </div>
                         <div className="p-6 bg-muted/20">
                           <div className="flex flex-wrap gap-3">
                             <Button
                               variant="outline"
-                              onClick={clearCart}
+                              onClick={handleClearCart}
+                              disabled={isClearing}
+                              className="transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                             >
                               Limpar Carrinho
                             </Button>
                             <Button
                               asChild
                               variant="outline"
+                              className="transition-all hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
                             >
                               <Link to="/menu">Continuar Comprando</Link>
                             </Button>
@@ -149,7 +122,7 @@ const Carrinho = () => {
                       <div className="bg-white shadow-md rounded-lg overflow-hidden">
                         <div className="p-6">
                           <CheckoutForm 
-                            onSuccess={(orderId) => handleCheckoutSuccess(orderId)} 
+                            onSuccess={handleCheckoutSuccess} 
                           />
                         </div>
                       </div>
@@ -183,7 +156,7 @@ const Carrinho = () => {
                       <div className="p-6 bg-muted/20">
                         {checkoutStep === 1 ? (
                           <Button
-                            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+                            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 transition-all"
                             onClick={() => setCheckoutStep(2)}
                           >
                             Prosseguir para Pagamento
@@ -191,7 +164,7 @@ const Carrinho = () => {
                         ) : (
                           <Button
                             variant="outline"
-                            className="w-full"
+                            className="w-full transition-all hover:bg-muted"
                             onClick={() => setCheckoutStep(1)}
                           >
                             Voltar ao Carrinho

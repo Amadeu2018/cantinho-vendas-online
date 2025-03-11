@@ -65,6 +65,10 @@ type CartContextType = {
   getOrderById: (id: string) => Order | undefined;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   updateOrderPaymentStatus: (orderId: string, status: "pending" | "completed") => void;
+  favorites: number[];
+  addToFavorites: (dishId: number) => void;
+  removeFromFavorites: (dishId: number) => void;
+  isFavorite: (dishId: number) => boolean;
 };
 
 export type CustomerInfo = {
@@ -81,6 +85,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
   
   const deliveryLocations: DeliveryLocation[] = [
     { id: 1, name: "Bairro Azul", fee: 1000, estimatedTime: "20-30 min" },
@@ -115,6 +120,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Erro ao carregar pedidos:", error);
       }
     }
+    
+    const savedFavorites = localStorage.getItem("cantinho-favorites");
+    if (savedFavorites) {
+      try {
+        setFavorites(JSON.parse(savedFavorites));
+      } catch (error) {
+        console.error("Erro ao carregar favoritos:", error);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -124,6 +138,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem("cantinho-orders", JSON.stringify(orders));
   }, [orders]);
+  
+  useEffect(() => {
+    localStorage.setItem("cantinho-favorites", JSON.stringify(favorites));
+  }, [favorites]);
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setItems(currentItems => {
@@ -251,6 +269,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const addToFavorites = (dishId: number) => {
+    if (!favorites.includes(dishId)) {
+      setFavorites(prev => [...prev, dishId]);
+      toast({
+        title: "Adicionado aos favoritos",
+        description: "Prato adicionado à sua lista de favoritos"
+      });
+    }
+  };
+
+  const removeFromFavorites = (dishId: number) => {
+    setFavorites(prev => prev.filter(id => id !== dishId));
+    toast({
+      title: "Removido dos favoritos",
+      description: "Prato removido da sua lista de favoritos"
+    });
+  };
+
+  const isFavorite = (dishId: number) => favorites.includes(dishId);
+
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
   const subtotal = items.reduce(
@@ -278,7 +316,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         orders,
         getOrderById,
         updateOrderStatus,
-        updateOrderPaymentStatus
+        updateOrderPaymentStatus,
+        favorites,
+        addToFavorites,
+        removeFromFavorites,
+        isFavorite
       }}
     >
       {children}

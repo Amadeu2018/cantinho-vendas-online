@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Heart } from "lucide-react";
+import { PlusCircle, Heart, Tag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type Dish = {
   id: number;
@@ -12,6 +13,10 @@ type Dish = {
   price: number;
   image: string;
   category: "appetizer" | "main" | "dessert";
+  promotion?: {
+    discount: number;
+    label?: string;
+  };
 };
 
 const formatPrice = (price: number): string => {
@@ -36,13 +41,19 @@ const MenuCard = ({ dish }: MenuCardProps) => {
       price: dish.price,
       image: dish.image
     });
+    
+    toast.success(`${dish.name} adicionado ao carrinho!`, {
+      duration: 2000,
+    });
   };
 
   const handleToggleFavorite = () => {
     if (isFavorite(dish.id)) {
       removeFromFavorites(dish.id);
+      toast.info(`${dish.name} removido dos favoritos`);
     } else {
       addToFavorites(dish.id);
+      toast.success(`${dish.name} adicionado aos favoritos!`);
     }
   };
 
@@ -64,12 +75,34 @@ const MenuCard = ({ dish }: MenuCardProps) => {
         >
           <Heart className={cn("h-5 w-5", favorite ? "fill-red-500 text-red-500" : "")} />
         </Button>
+        
+        {dish.promotion && (
+          <div className="absolute top-2 left-2">
+            <span className="bg-cantinho-terracotta text-white text-xs font-bold px-2 py-1 rounded-md flex items-center">
+              <Tag className="h-3 w-3 mr-1" />
+              {dish.promotion.label || `${dish.promotion.discount}% OFF`}
+            </span>
+          </div>
+        )}
       </div>
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
         <p className="text-gray-600 text-sm mb-4 min-h-[40px]">{dish.description}</p>
         <div className="flex justify-between items-center">
-          <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
+          <div>
+            {dish.promotion ? (
+              <div className="flex flex-col">
+                <span className="text-sm line-through text-gray-400">
+                  {formatPrice(dish.price)}
+                </span>
+                <span className="font-bold text-cantinho-navy">
+                  {formatPrice(Math.round(dish.price * (100 - dish.promotion.discount) / 100))}
+                </span>
+              </div>
+            ) : (
+              <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
+            )}
+          </div>
           <Button 
             variant="ghost" 
             size="icon" 

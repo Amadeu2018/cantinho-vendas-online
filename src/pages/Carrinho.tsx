@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,14 +10,18 @@ import CheckoutForm from "@/components/cart/CheckoutForm";
 import OrderStatus from "@/components/cart/OrderStatus";
 import { formatCurrency } from "@/lib/utils";
 import CartItem from "@/components/cart/CartItem";
+import { useNavigate } from "react-router-dom";
 
 const Carrinho = () => {
   const { 
     items, 
     clearCart, 
     subtotal,
-    selectedLocation
+    selectedLocation,
+    orderStatus
   } = useCart();
+  
+  const navigate = useNavigate();
   
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
@@ -31,8 +34,7 @@ const Carrinho = () => {
   };
   
   const handleBackToShopping = () => {
-    setCheckoutStep(1);
-    setCurrentOrderId(null);
+    navigate('/menu');
   };
 
   const handleClearCart = () => {
@@ -51,16 +53,12 @@ const Carrinho = () => {
       <Navbar />
       <main className="flex-grow py-10">
         <div className="container mx-auto px-4">
-          {checkoutStep === 3 && currentOrderId ? (
-            <>
-              <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">
-                Acompanhar Pedido
-              </h1>
-              <OrderStatus 
-                orderId={currentOrderId} 
-                onBackToShopping={handleBackToShopping} 
-              />
-            </>
+          {orderStatus ? (
+            <OrderStatus 
+              status={orderStatus} 
+              orderId={currentOrderId} 
+              onBackToShopping={handleBackToShopping} 
+            />
           ) : (
             <>
               <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">

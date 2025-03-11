@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useCart, Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
@@ -10,15 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 
 type OrderStatusProps = {
   orderId: string;
-  onBackToShopping: () => void;  // Update: removed parameter from callback type
-};
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("pt-AO", {
-    style: "currency",
-    currency: "AOA",
-    minimumFractionDigits: 0,
-  }).format(price);
+  onBackToShopping: () => void;  // Changed: No parameters in this function type
 };
 
 const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
@@ -44,7 +35,7 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
           Não conseguimos encontrar o pedido com o ID especificado.
         </p>
         <Button 
-          onClick={onBackToShopping}  // Changed: No arguments passed here
+          onClick={onBackToShopping}  // Fixed: Removed passing any arguments
           className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
         >
           Voltar para as Compras
@@ -195,7 +186,7 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Total:</span>
-              <span className="font-bold">{formatPrice(order.total)}</span>
+              <span className="font-bold">{formatCurrency(order.total)}</span>
             </div>
           </div>
           
@@ -223,7 +214,7 @@ const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
           
           <div className="flex flex-wrap justify-center gap-3">
             <Button 
-              onClick={onBackToShopping}  // Changed: No arguments passed here
+              onClick={onBackToShopping}  // Fixed: No arguments passed here
               className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
             >
               Voltar às Compras

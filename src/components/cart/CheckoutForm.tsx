@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useCart, CustomerInfo } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
   Loader2
 } from "lucide-react";
 
-const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
+const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) => {
   const { toast } = useToast();
   const { 
     deliveryLocations, 
@@ -81,7 +80,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: () => void }) => {
         title: "Pedido enviado com sucesso!",
         description: `Seu pedido #${orderId.substring(0, 8)} foi registrado. Aguarde a confirmação.`,
       });
-      onSuccess();
+      onSuccess(orderId);
     } catch (error) {
       toast({
         title: "Erro no processamento",

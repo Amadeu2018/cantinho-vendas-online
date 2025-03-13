@@ -27,7 +27,7 @@ const Carrinho = () => {
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);
 
-  // Corrigida a assinatura da função para corresponder ao tipo esperado
+  // Function that will be passed to CheckoutForm
   const handleCheckoutSuccess = (orderId: string) => {
     setCurrentOrderId(orderId);
     setCheckoutStep(3);

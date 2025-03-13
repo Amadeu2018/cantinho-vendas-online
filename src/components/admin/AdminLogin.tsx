@@ -4,27 +4,56 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AdminLoginProps = {
-  onLogin: (username: string, password: string) => boolean;
+  onLogin: (isAdmin: boolean) => void;
 };
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    const success = onLogin(username, password);
-    
-    if (!success) {
+    try {
+      await signIn(email, password);
+      
+      // Verificar se o usuário é admin
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.role === 'admin') {
+        onLogin(true);
+      } else {
+        toast({
+          title: "Acesso negado",
+          description: "Você não tem permissões de administrador.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
       toast({
         title: "Falha no login",
         description: "Nome de usuário ou senha incorretos. Tente novamente.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,13 +73,14 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block mb-1 text-sm font-medium">
-                Nome de Usuário
+              <label htmlFor="email" className="block mb-1 text-sm font-medium">
+                Email
               </label>
               <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -71,15 +101,16 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <Button 
               type="submit" 
               className="w-full bg-cantinho-navy hover:bg-cantinho-navy/90"
+              disabled={isLoading}
             >
-              Entrar
+              {isLoading ? "Processando..." : "Entrar"}
             </Button>
           </form>
           
           <div className="mt-4 text-center text-sm text-gray-500">
             <p className="text-muted-foreground">
               Para fins de demonstração:<br />
-              Usuário: admin<br />
+              Usuário: admin@exemplo.com<br />
               Senha: password
             </p>
           </div>

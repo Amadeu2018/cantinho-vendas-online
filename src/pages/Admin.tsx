@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useCart, Order, OrderStatus } from "@/contexts/CartContext";
 import Navbar from "@/components/layout/Navbar";
@@ -19,14 +18,9 @@ const Admin = () => {
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
   const { orders, getOrderById, updateOrderStatus, updateOrderPaymentStatus } = useCart();
   
-  // Admin credentials (in a real application, this would be handled securely on a backend)
-  const handleLogin = (username: string, password: string) => {
-    // Simple check - in a real application this should be a secure authentication process
-    if (username === "admin" && password === "password") {
-      setIsAuthenticated(true);
-      return true;
-    }
-    return false;
+  const handleLogin = (isAdmin: boolean) => {
+    setIsAuthenticated(isAdmin);
+    return isAdmin;
   };
   
   const handleLogout = () => {
@@ -53,7 +47,6 @@ const Admin = () => {
     setActiveTab("invoice");
   };
   
-  // Get the selected order details
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
 
   return (

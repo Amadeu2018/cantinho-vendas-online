@@ -5,6 +5,7 @@ import { PlusCircle, Heart, Tag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import DishReviews from "@/components/reviews/DishReviews";
 
 type Dish = {
   id: number;
@@ -88,6 +89,9 @@ const MenuCard = ({ dish }: MenuCardProps) => {
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
         <p className="text-gray-600 text-sm mb-4 min-h-[40px]">{dish.description}</p>
+        <div className="border-t border-gray-100 pt-3 mb-3">
+          <DishReviews dishId={dish.id} dishName={dish.name} />
+        </div>
         <div className="flex justify-between items-center">
           <div>
             {dish.promotion ? (

@@ -2,16 +2,33 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
   };
 
   return (
@@ -38,6 +55,43 @@ const Navbar = () => {
                 </span>
               </Button>
             </Link>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="flex items-center justify-start p-2">
+                    <div className="ml-2">
+                      <p className="text-sm font-medium">{user.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/perfil" className="cursor-pointer w-full">Meu Perfil</Link>
+                  </DropdownMenuItem>
+                  {user && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="cursor-pointer w-full">Admin</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/carrinho" className="cursor-pointer w-full">Meu Carrinho</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 hover:text-red-600">
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth/login">
+                <Button variant="outline">Entrar</Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -105,6 +159,35 @@ const Navbar = () => {
           >
             Carrinho
           </Link>
+          
+          {user ? (
+            <>
+              <Link 
+                to="/perfil" 
+                className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Meu Perfil
+              </Link>
+              <button 
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="text-red-500 hover:text-red-600 transition duration-200 py-2 text-lg text-left"
+              >
+                Sair
+              </button>
+            </>
+          ) : (
+            <Link 
+              to="/auth/login" 
+              className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Entrar
+            </Link>
+          )}
         </div>
       </div>
     </nav>

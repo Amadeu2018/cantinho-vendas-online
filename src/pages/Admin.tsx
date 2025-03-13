@@ -1,5 +1,7 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useCart, Order, OrderStatus } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AdminOrders from "@/components/admin/AdminOrders";
@@ -8,15 +10,65 @@ import AdminFinance from "@/components/admin/AdminFinance";
 import AdminInventory from "@/components/admin/AdminInventory";
 import AdminReports from "@/components/admin/AdminReports";
 import AdminInvoice from "@/components/admin/AdminInvoice";
+import AdminProducts from "@/components/admin/AdminProducts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminOrderDetail from "@/components/admin/AdminOrderDetail";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("orders");
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { orders, getOrderById, updateOrderStatus, updateOrderPaymentStatus } = useCart();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data.role === 'admin') {
+          setIsAuthenticated(true);
+        } else {
+          toast({
+            title: "Acesso negado",
+            description: "Você não tem permissões de administrador.",
+            variant: "destructive"
+          });
+          navigate('/');
+        }
+      } catch (error) {
+        console.error("Erro ao verificar perfil:", error);
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao verificar suas permissões.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkAdminStatus();
+  }, [user, navigate, toast]);
   
   const handleLogin = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
@@ -48,6 +100,20 @@ const Admin = () => {
   };
   
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-10">
+          <div className="container mx-auto px-4 flex justify-center items-center h-64">
+            <p>Carregando...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -101,8 +167,9 @@ const Admin = () => {
                   </div>
                 ) : (
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="w-full mb-6 grid grid-cols-4 md:flex md:flex-wrap">
+                    <TabsList className="w-full mb-6 grid grid-cols-5 md:flex md:flex-wrap">
                       <TabsTrigger value="orders">Pedidos</TabsTrigger>
+                      <TabsTrigger value="products">Produtos</TabsTrigger>
                       <TabsTrigger value="finance">Finanças</TabsTrigger>
                       <TabsTrigger value="inventory">Estoque</TabsTrigger>
                       <TabsTrigger value="reports">Relatórios</TabsTrigger>
@@ -169,6 +236,10 @@ const Admin = () => {
                           />
                         </TabsContent>
                       </Tabs>
+                    </TabsContent>
+                    
+                    <TabsContent value="products">
+                      <AdminProducts />
                     </TabsContent>
                     
                     <TabsContent value="finance">

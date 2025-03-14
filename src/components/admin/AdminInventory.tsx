@@ -49,23 +49,32 @@ const AdminInventory = () => {
           price, 
           min_stock_quantity,
           category_id,
-          categories(name)
+          categories:category_id(name)
         `)
         .order("name");
       
       if (error) throw error;
       
       // Format the data to match our InventoryItem type
-      const formattedData = data?.map(item => ({
-        id: item.id,
-        name: item.name,
-        category_name: item.categories?.name || "Sem categoria",
-        stock_quantity: item.stock_quantity || 0,
-        unit: item.unit || "unidade",
-        price: item.price || 0,
-        min_stock_quantity: item.min_stock_quantity || 5,
-        category_id: item.category_id
-      })) || [];
+      const formattedData = data?.map(item => {
+        let categoryName = "Sem categoria";
+        
+        // Safely extract the category name
+        if (item.categories && typeof item.categories === 'object' && item.categories !== null) {
+          categoryName = (item.categories as any).name || "Sem categoria";
+        }
+        
+        return {
+          id: item.id,
+          name: item.name,
+          category_name: categoryName,
+          stock_quantity: item.stock_quantity || 0,
+          unit: item.unit || "unidade",
+          price: item.price || 0,
+          min_stock_quantity: item.min_stock_quantity || 5,
+          category_id: item.category_id
+        };
+      }) || [];
       
       setInventory(formattedData);
     } catch (error: any) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
@@ -82,7 +81,6 @@ const Admin = () => {
       
       if (error) throw error;
       
-      // Format orders to match the expected structure in the app
       const formattedOrders = data.map(order => {
         let customerInfo = { name: 'Cliente' };
         let paymentMethod = { name: 'Desconhecido' };
@@ -96,8 +94,10 @@ const Admin = () => {
           
           if (typeof order.payment_method === 'string') {
             paymentMethod = { name: order.payment_method };
-          } else if (order.payment_method) {
+          } else if (order.payment_method && typeof order.payment_method === 'object') {
             paymentMethod = order.payment_method;
+          } else {
+            paymentMethod = { name: String(order.payment_method || 'Desconhecido') };
           }
         } catch (e) {
           console.error("Error parsing order data:", e);
@@ -159,7 +159,6 @@ const Admin = () => {
       
       if (error) throw error;
       
-      // Update local state
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status } : order
       ));
@@ -188,7 +187,6 @@ const Admin = () => {
       
       if (error) throw error;
       
-      // Update local state
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, paymentStatus: status } : order
       ));

@@ -30,9 +30,13 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      // Use a more explicit join query to avoid ambiguity
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name)")
+        .select(`
+          *,
+          categories:category_id(id, name)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -103,7 +107,9 @@ const AdminProducts = () => {
   };
 
   const getCategoryName = (product: any) => {
-    if (product.categories) return product.categories.name;
+    if (product.categories && product.categories.name) {
+      return product.categories.name;
+    }
     const category = categories.find(c => c.id === product.category_id);
     return category ? category.name : "Sem categoria";
   };

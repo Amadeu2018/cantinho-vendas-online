@@ -57,11 +57,14 @@ const AdminInventory = () => {
       
       // Format the data to match our InventoryItem type
       const formattedData = data?.map(item => {
+        // Default category name
         let categoryName = "Sem categoria";
         
-        // Safely extract the category name
+        // Check if categories exists and has a name property
         if (item.categories && typeof item.categories === 'object' && item.categories !== null) {
-          categoryName = (item.categories as any).name || "Sem categoria";
+          // Make TypeScript happy by asserting to any first
+          const categoryData = item.categories as any;
+          categoryName = categoryData.name || "Sem categoria";
         }
         
         return {

@@ -14,6 +14,7 @@ import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -23,6 +24,7 @@ const AdminProducts = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -30,7 +32,7 @@ const AdminProducts = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, categories(name)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -44,6 +46,20 @@ const AdminProducts = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar categorias:", error);
     }
   };
 
@@ -84,6 +100,12 @@ const AdminProducts = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const getCategoryName = (product: any) => {
+    if (product.categories) return product.categories.name;
+    const category = categories.find(c => c.id === product.category_id);
+    return category ? category.name : "Sem categoria";
   };
 
   const filteredProducts = products.filter(product => 
@@ -176,7 +198,7 @@ const AdminProducts = () => {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>{product.category_id || "Sem categoria"}</TableCell>
+                          <TableCell>{getCategoryName(product)}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                               <Eye className="h-4 w-4" />

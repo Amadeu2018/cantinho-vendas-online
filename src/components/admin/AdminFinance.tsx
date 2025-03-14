@@ -1,12 +1,13 @@
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Order } from "@/contexts/CartContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
+import { format, subDays, subMonths } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
-import { CalendarIcon, TrendingUpIcon, CircleDollarSignIcon, ActivityIcon } from "lucide-react";
+import { CalendarIcon, TrendingUpIcon, CircleDollarSignIcon, ActivityIcon, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart,
   Bar,
@@ -25,14 +26,37 @@ type AdminFinanceProps = {
   orders: Order[];
 };
 
-const COLORS = ["#3D405B", "#E07A5F", "#81B29A", "#F2CC8F"];
+const COLORS = ["#3D405B", "#E07A5F", "#81B29A", "#F2CC8F", "#6C7086", "#D3AB9E"];
 
-const AdminFinance = ({ orders }: AdminFinanceProps) => {
+const AdminFinance = ({ orders: contextOrders }: AdminFinanceProps) => {
   const [period, setPeriod] = useState<"day" | "week" | "month" | "year">("month");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar pedidos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const totalRevenue = useMemo(() => {
     return orders
-      .filter(order => order.status !== "cancelled" && order.paymentStatus === "completed")
+      .filter(order => order.status !== "cancelled" && order.payment_status === "completed")
       .reduce((total, order) => total + order.total, 0);
   }, [orders]);
   
@@ -40,7 +64,7 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
     return orders
       .filter(order => 
         order.status !== "cancelled" && 
-        order.paymentStatus === "pending" && 
+        order.payment_status === "pending" && 
         order.status !== "completed"
       )
       .reduce((total, order) => total + order.total, 0);
@@ -64,9 +88,19 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
     const data: Record<string, number> = {};
     
     orders
-      .filter(order => order.status !== "cancelled" && order.paymentStatus === "completed")
+      .filter(order => order.status !== "cancelled" && order.payment_status === "completed")
       .forEach(order => {
-        const methodName = order.paymentMethod.name;
+        let methodName = "Desconhecido";
+        try {
+          if (typeof order.payment_method === 'string') {
+            methodName = order.payment_method;
+          } else if (order.payment_method?.name) {
+            methodName = order.payment_method.name;
+          }
+        } catch (e) {
+          console.error("Error parsing payment method:", e);
+        }
+        
         if (!data[methodName]) {
           data[methodName] = 0;
         }
@@ -85,9 +119,9 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
     const now = new Date();
     
     orders
-      .filter(order => order.status !== "cancelled" && order.paymentStatus === "completed")
+      .filter(order => order.status !== "cancelled" && order.payment_status === "completed")
       .forEach(order => {
-        const date = new Date(order.createdAt);
+        const date = new Date(order.created_at);
         let key = "";
         
         if (period === "day") {
@@ -111,6 +145,23 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
       value
     }));
   }, [orders, period]);
+  
+  // Get recent transactions
+  const recentTransactions = useMemo(() => {
+    return orders
+      .filter(order => order.status !== "cancelled")
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10);
+  }, [orders]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Carregando dados financeiros...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,28 +299,54 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders
-                .filter(order => order.status !== "cancelled")
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .slice(0, 10)
-                .map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id.slice(4, 12)}</TableCell>
-                    <TableCell>{format(new Date(order.createdAt), "dd/MM/yy HH:mm")}</TableCell>
-                    <TableCell>{order.customerInfo.name}</TableCell>
-                    <TableCell>{order.paymentMethod.name}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        order.paymentStatus === "completed" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                        {order.paymentStatus === "completed" ? "Pago" : "Pendente"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
-                  </TableRow>
-                ))}
+              {recentTransactions.length > 0 ? (
+                recentTransactions.map((order) => {
+                  let customerName = "Cliente";
+                  let paymentMethod = "Desconhecido";
+                  
+                  try {
+                    if (typeof order.customer_info === 'string') {
+                      const info = JSON.parse(order.customer_info);
+                      customerName = info.name || "Cliente";
+                    } else if (order.customer_info?.name) {
+                      customerName = order.customer_info.name;
+                    }
+                    
+                    if (typeof order.payment_method === 'string') {
+                      paymentMethod = order.payment_method;
+                    } else if (order.payment_method?.name) {
+                      paymentMethod = order.payment_method.name;
+                    }
+                  } catch (e) {
+                    console.error("Error parsing order data:", e);
+                  }
+                  
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
+                      <TableCell>{format(new Date(order.created_at), "dd/MM/yy HH:mm")}</TableCell>
+                      <TableCell>{customerName}</TableCell>
+                      <TableCell>{paymentMethod}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          order.payment_status === "completed" 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}>
+                          {order.payment_status === "completed" ? "Pago" : "Pendente"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    Nenhuma transação disponível
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

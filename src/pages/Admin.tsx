@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
@@ -83,7 +84,7 @@ const Admin = () => {
       
       const formattedOrders = data.map(order => {
         let customerInfo = { name: 'Cliente' };
-        let paymentMethod = { name: 'Desconhecido' };
+        let paymentMethod: { name: string } = { name: 'Desconhecido' };
         
         try {
           if (typeof order.customer_info === 'string') {
@@ -92,11 +93,30 @@ const Admin = () => {
             customerInfo = order.customer_info;
           }
           
+          // Handle payment_method with strict typing to ensure it's always { name: string }
           if (typeof order.payment_method === 'string') {
+            // If it's a string, create an object with that string as the name
             paymentMethod = { name: order.payment_method };
           } else if (order.payment_method && typeof order.payment_method === 'object') {
-            paymentMethod = order.payment_method;
+            // If it's an object that has a name property, use it
+            const paymentObj = order.payment_method as any;
+            if (paymentObj.name && typeof paymentObj.name === 'string') {
+              paymentMethod = { name: paymentObj.name };
+            } else {
+              // If it's an object without a name property or name is not a string
+              paymentMethod = { name: 'Desconhecido' };
+            }
+          } else if (typeof order.payment_method === 'number') {
+            // If it's a number, convert to string
+            paymentMethod = { name: order.payment_method.toString() };
+          } else if (order.payment_method === true) {
+            // If it's a boolean true
+            paymentMethod = { name: 'Confirmado' };
+          } else if (order.payment_method === null || order.payment_method === undefined) {
+            // If it's null or undefined
+            paymentMethod = { name: 'Desconhecido' };
           } else {
+            // For any other case
             paymentMethod = { name: String(order.payment_method || 'Desconhecido') };
           }
         } catch (e) {

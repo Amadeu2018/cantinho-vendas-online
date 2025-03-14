@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,11 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ImagePlus, Save } from "lucide-react";
+import { Loader2, ImagePlus, Save, Image, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 
-const AddProduct = () => {
+interface AddProductProps {
+  onSuccess?: () => void;
+}
+
+const AddProduct = ({ onSuccess }: AddProductProps) => {
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,7 +28,26 @@ const AddProduct = () => {
     unit: "unidade",
     image_url: "",
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar categorias:", error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -31,6 +56,71 @@ const AddProduct = () => {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // Validar tipo de arquivo
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Tipo de arquivo inválido",
+        description: "Por favor, selecione uma imagem válida",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Criar URL de preview
+    setImagePreview(URL.createObjectURL(file));
+
+    // Upload para o Supabase Storage
+    try {
+      setImageUploading(true);
+      
+      // Criar nome de arquivo único
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+      
+      // Upload do arquivo
+      const { error: uploadError, data } = await supabase.storage
+        .from("products")
+        .upload(filePath, file);
+      
+      if (uploadError) throw uploadError;
+      
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from("products")
+        .getPublicUrl(filePath);
+      
+      // Atualizar form data
+      setFormData(prev => ({ ...prev, image_url: publicUrl }));
+      
+      toast({
+        title: "Imagem carregada",
+        description: "A imagem foi carregada com sucesso",
+      });
+    } catch (error: any) {
+      console.error("Erro ao fazer upload da imagem:", error);
+      toast({
+        title: "Erro ao fazer upload",
+        description: error.message || "Ocorreu um erro ao tentar fazer upload da imagem",
+        variant: "destructive",
+      });
+      setImagePreview(null);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, image_url: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +173,10 @@ const AddProduct = () => {
         unit: "unidade",
         image_url: "",
       });
+      setImagePreview(null);
+      
+      // Callback de sucesso
+      if (onSuccess) onSuccess();
       
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
@@ -182,15 +276,52 @@ const AddProduct = () => {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="image_url">URL da Imagem</Label>
-              <Input
-                id="image_url"
-                name="image_url"
-                value={formData.image_url}
-                onChange={handleChange}
-                placeholder="URL da imagem do produto"
-              />
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="image">Imagem do Produto</Label>
+              {imagePreview ? (
+                <div className="relative w-40 h-40 border rounded-md overflow-hidden">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                    onClick={removeImage}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <Label
+                    htmlFor="image-upload"
+                    className="flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
+                  >
+                    {imageUploading ? (
+                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                    ) : (
+                      <>
+                        <ImagePlus className="h-8 w-8 text-gray-400" />
+                        <span className="mt-2 text-sm text-gray-500">
+                          Clique para selecionar
+                        </span>
+                      </>
+                    )}
+                    <Input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={imageUploading}
+                    />
+                  </Label>
+                </div>
+              )}
             </div>
           </div>
           
@@ -208,7 +339,7 @@ const AddProduct = () => {
           
           <Button 
             type="submit"
-            disabled={loading}
+            disabled={loading || imageUploading}
             className="w-full md:w-auto"
           >
             {loading ? (

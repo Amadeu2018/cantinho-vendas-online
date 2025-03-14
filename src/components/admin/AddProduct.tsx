@@ -239,7 +239,8 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
                       {category.name}
                     </SelectItem>
                   ))}
-                  <SelectItem value="">Sem categoria</SelectItem>
+                  {/* FIX: Providing a valid non-empty value for the "no category" option */}
+                  <SelectItem value="null">Sem categoria</SelectItem>
                 </SelectContent>
               </Select>
             </div>

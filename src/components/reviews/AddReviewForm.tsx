@@ -5,21 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Review } from "@/types/review";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AddReviewFormProps = {
-  dishId: number;
-  onAddReview: (review: Review) => void;
+  dishId: string | number;
+  onAddReview: (review: { userName: string; rating: number; comment: string }) => void;
 };
 
 const AddReviewForm = ({ dishId, onAddReview }: AddReviewFormProps) => {
+  const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState(user?.email?.split('@')[0] || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (rating === 0) {
@@ -39,26 +40,21 @@ const AddReviewForm = ({ dishId, onAddReview }: AddReviewFormProps) => {
     
     setIsSubmitting(true);
     
-    // In a real application, this would be an API call
-    setTimeout(() => {
-      const newReview: Review = {
-        id: Date.now().toString(),
-        dishId,
+    try {
+      await onAddReview({
         userName,
         rating,
-        comment,
-        date: new Date().toISOString(),
-      };
+        comment
+      });
       
-      onAddReview(newReview);
-      
+      // Limpar formulário apenas se bem-sucedido
       setRating(0);
       setComment("");
-      setUserName("");
+    } catch (error) {
+      console.error("Erro ao adicionar avaliação:", error);
+    } finally {
       setIsSubmitting(false);
-      
-      toast.success("Avaliação adicionada com sucesso!");
-    }, 500);
+    }
   };
 
   return (

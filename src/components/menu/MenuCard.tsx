@@ -6,19 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import DishReviews from "@/components/reviews/DishReviews";
-
-type Dish = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: "appetizer" | "main" | "dessert";
-  promotion?: {
-    discount: number;
-    label?: string;
-  };
-};
+import { Dish } from "@/hooks/use-dishes";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {
@@ -30,17 +18,19 @@ const formatPrice = (price: number): string => {
 
 type MenuCardProps = {
   dish: Dish;
+  onToggleFavorite?: (dishId: string) => void;
+  isFavorite?: boolean;
 };
 
-const MenuCard = ({ dish }: MenuCardProps) => {
-  const { addItem, isFavorite, addToFavorites, removeFromFavorites } = useCart();
+const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps) => {
+  const { addItem } = useCart();
 
   const handleAddToCart = () => {
     addItem({
-      id: dish.id,
+      id: parseInt(dish.id), // Convert UUID to number for compatibility with existing cart
       name: dish.name,
       price: dish.price,
-      image: dish.image
+      image: dish.image_url
     });
     
     toast.success(`${dish.name} adicionado ao carrinho!`, {
@@ -49,33 +39,29 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   };
 
   const handleToggleFavorite = () => {
-    if (isFavorite(dish.id)) {
-      removeFromFavorites(dish.id);
-      toast.info(`${dish.name} removido dos favoritos`);
-    } else {
-      addToFavorites(dish.id);
-      toast.success(`${dish.name} adicionado aos favoritos!`);
+    if (onToggleFavorite) {
+      onToggleFavorite(dish.id);
     }
   };
-
-  const favorite = isFavorite(dish.id);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="h-48 overflow-hidden relative">
         <img 
-          src={dish.image} 
+          src={dish.image_url} 
           alt={dish.name} 
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
-          onClick={handleToggleFavorite}
-        >
-          <Heart className={cn("h-5 w-5", favorite ? "fill-red-500 text-red-500" : "")} />
-        </Button>
+        {onToggleFavorite && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
+            onClick={handleToggleFavorite}
+          >
+            <Heart className={cn("h-5 w-5", isFavorite ? "fill-red-500 text-red-500" : "")} />
+          </Button>
+        )}
         
         {dish.promotion && (
           <div className="absolute top-2 left-2">
@@ -122,5 +108,3 @@ const MenuCard = ({ dish }: MenuCardProps) => {
 };
 
 export default MenuCard;
-
-export type { Dish };

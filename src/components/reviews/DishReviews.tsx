@@ -5,66 +5,22 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Star } from "lucide-react";
 import ReviewsList from "./ReviewsList";
 import AddReviewForm from "./AddReviewForm";
-import { Review } from "@/types/review";
+import { useReviews } from "@/hooks/use-reviews";
 
 type DishReviewsProps = {
-  dishId: number;
+  dishId: string | number;
   dishName: string;
 };
 
-// Dados fictícios para demonstração
-const MOCK_REVIEWS: Record<number, Review[]> = {
-  1: [
-    {
-      id: "1",
-      dishId: 1,
-      userName: "António Ferreira",
-      rating: 5,
-      comment: "Os pastéis de bacalhau são os melhores que já provei em Angola! Muito bem temperados e com um sabor que me faz lembrar Portugal.",
-      date: "2023-10-15T14:30:00Z"
-    },
-    {
-      id: "2",
-      dishId: 1,
-      userName: "Maria Sousa",
-      rating: 4,
-      comment: "Deliciosos e autênticos! Poderiam ser um pouco maiores.",
-      date: "2023-11-20T09:15:00Z"
-    }
-  ],
-  4: [
-    {
-      id: "3",
-      dishId: 4,
-      userName: "Pedro Costa",
-      rating: 5,
-      comment: "O melhor Bacalhau à Brás que já comi fora de Portugal! Recomendo a todos!",
-      date: "2023-09-05T18:45:00Z"
-    }
-  ],
-  9: [
-    {
-      id: "4",
-      dishId: 9,
-      userName: "Carla Santos",
-      rating: 5,
-      comment: "Pastéis de nata incríveis! Sabor autêntico e massa folhada perfeita.",
-      date: "2023-12-01T16:20:00Z"
-    }
-  ]
-};
-
 const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
-  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS[dishId] || []);
   const [isAddingReview, setIsAddingReview] = useState(false);
+  const { reviews, loading, averageRating, addReview } = useReviews(dishId);
   
-  const averageRating = reviews.length 
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : "0.0";
-  
-  const handleAddReview = (newReview: Review) => {
-    setReviews(prev => [newReview, ...prev]);
-    setIsAddingReview(false);
+  const handleAddReview = async (reviewData: any) => {
+    const result = await addReview(reviewData);
+    if (result) {
+      setIsAddingReview(false);
+    }
   };
   
   return (
@@ -80,7 +36,7 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
             {reviews.length > 0 && (
               <div className="flex items-center ml-2">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm ml-1">{averageRating}</span>
+                <span className="text-sm ml-1">{averageRating.toFixed(1)}</span>
               </div>
             )}
           </div>
@@ -114,7 +70,7 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
                     <>
                       <div className="flex items-center">
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xl font-bold ml-1">{averageRating}</span>
+                        <span className="text-xl font-bold ml-1">{averageRating.toFixed(1)}</span>
                       </div>
                       <span className="text-gray-500 ml-2">
                         ({reviews.length} {reviews.length === 1 ? "avaliação" : "avaliações"})
@@ -130,7 +86,13 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
                 </Button>
               </div>
               
-              <ReviewsList reviews={reviews} dishId={dishId} />
+              {loading ? (
+                <div className="text-center py-8">
+                  <p>Carregando avaliações...</p>
+                </div>
+              ) : (
+                <ReviewsList reviews={reviews} dishId={dishId} />
+              )}
             </>
           )}
         </div>

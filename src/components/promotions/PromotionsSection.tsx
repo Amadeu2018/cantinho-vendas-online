@@ -4,87 +4,54 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TicketPercent, ArrowRight, BadgePercent, Clock } from "lucide-react";
+import { usePromotions } from "@/hooks/use-promotions";
 import { useCart } from "@/contexts/CartContext";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 
-// Define the promotion type
-type Promotion = {
-  id: number;
-  title: string;
-  description: string;
-  discountPercentage: number;
-  validUntil: string;
-  image: string;
-  dishIds: number[];
-};
-
-// Sample promotions data
-const PROMOTIONS: Promotion[] = [
-  {
-    id: 1,
-    title: "Combo Português",
-    description: "Desconto especial em dois pratos tradicionais portugueses",
-    discountPercentage: 15,
-    validUntil: "2023-12-31",
-    image: "https://source.unsplash.com/random/400x200/?portuguese,food",
-    dishIds: [4, 5] // Bacalhau à Brás and Cataplana de Marisco
-  },
-  {
-    id: 2,
-    title: "Sobremesa Especial",
-    description: "Experimente nossos doces tradicionais com desconto",
-    discountPercentage: 20,
-    validUntil: "2023-12-15",
-    image: "https://source.unsplash.com/random/400x200/?dessert",
-    dishIds: [9, 10] // Pastéis de Nata and Pudim Flan
-  },
-  {
-    id: 3,
-    title: "Entradas com Desconto",
-    description: "Entradas selecionadas com preço especial",
-    discountPercentage: 10,
-    validUntil: "2023-12-20",
-    image: "https://source.unsplash.com/random/400x200/?appetizer",
-    dishIds: [1, 2, 3] // All appetizers
-  }
-];
-
-// Get menu items from MENU_ITEMS in Menu.tsx
-const getPromotionDishes = (dishIds: number[]) => {
-  // This is just a placeholder, as we don't have direct access to MENU_ITEMS here
-  // In a real app, you'd fetch this data from a shared source or prop
-  return dishIds.map(id => ({
-    id,
-    name: `Prato #${id}`,
-    price: 1000 + (id * 500)
-  }));
-};
-
 const PromotionsSection = () => {
-  const [activePromotion, setActivePromotion] = useState<Promotion | null>(null);
+  const { promotions, loading } = usePromotions();
+  const [activePromotion, setActivePromotion] = useState<string | null>(null);
   const { addItem } = useCart();
 
-  const handleAddPromotionToCart = (promotion: Promotion) => {
-    // Get the dishes for this promotion
-    const dishes = getPromotionDishes(promotion.dishIds);
+  const handleAddPromotionToCart = (promotionId: string) => {
+    const promotion = promotions.find(p => p.id === promotionId);
+    if (!promotion) return;
     
     // Add each dish to cart with applied discount
-    dishes.forEach(dish => {
+    promotion.dishes.forEach(dish => {
       const discountedPrice = Math.round(dish.price * (100 - promotion.discountPercentage) / 100);
       addItem({
-        id: dish.id,
+        id: parseInt(dish.id), // Convert UUID to number for cart compatibility
         name: dish.name,
         price: discountedPrice,
-        image: `https://source.unsplash.com/random/300x200/?dish-${dish.id}` // Placeholder image
+        image: dish.image_url
       });
     });
 
     // Show success toast
     toast.success("Promoção adicionada ao carrinho!", {
-      description: `${dishes.length} itens adicionados com ${promotion.discountPercentage}% de desconto`
+      description: `${promotion.dishes.length} itens adicionados com ${promotion.discountPercentage}% de desconto`
     });
   };
+
+  if (loading) {
+    return (
+      <section className="mb-10 bg-cantinho-cream/30 rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <TicketPercent className="h-6 w-6 text-cantinho-terracotta" />
+          <h2 className="text-2xl font-bold text-cantinho-navy">Promoções Especiais</h2>
+        </div>
+        <div className="text-center py-8">
+          <p>Carregando promoções...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (promotions.length === 0) {
+    return null; // Não mostrar a seção se não houver promoções ativas
+  }
 
   return (
     <section className="mb-10 bg-cantinho-cream/30 rounded-xl p-6">
@@ -94,11 +61,11 @@ const PromotionsSection = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {PROMOTIONS.map((promo) => (
+        {promotions.map((promo) => (
           <Card key={promo.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="h-40 overflow-hidden relative">
               <img 
-                src={promo.image} 
+                src={promo.image_url} 
                 alt={promo.title} 
                 className="w-full h-full object-cover"
               />
@@ -119,25 +86,25 @@ const PromotionsSection = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setActivePromotion(activePromotion?.id === promo.id ? null : promo)}
+                  onClick={() => setActivePromotion(activePromotion === promo.id ? null : promo.id)}
                   className="text-xs"
                 >
                   Detalhes
                 </Button>
                 <Button 
                   size="sm"
-                  onClick={() => handleAddPromotionToCart(promo)}
+                  onClick={() => handleAddPromotionToCart(promo.id)}
                   className="text-xs bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
                 >
                   Adicionar ao Carrinho
                 </Button>
               </div>
               
-              {activePromotion?.id === promo.id && (
+              {activePromotion === promo.id && (
                 <div className="mt-4 pt-4 border-t text-sm">
                   <p className="font-medium mb-2">Itens incluídos:</p>
                   <ul className="space-y-2">
-                    {getPromotionDishes(promo.dishIds).map((dish) => (
+                    {promo.dishes.map((dish) => (
                       <li key={dish.id} className="flex justify-between">
                         <span>{dish.name}</span>
                         <div>

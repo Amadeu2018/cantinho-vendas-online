@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import MenuCard, { Dish } from "@/components/menu/MenuCard";
+import MenuCard from "@/components/menu/MenuCard";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Tag, SlidersHorizontal } from "lucide-react";
@@ -14,102 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PromotionsSection from "@/components/promotions/PromotionsSection";
-
-const MENU_ITEMS: Dish[] = [
-  // Appetizers
-  {
-    id: 1,
-    name: "Pastéis de Bacalhau",
-    description: "Bolinhos de bacalhau desfiado, batata, cebola e salsa.",
-    price: 1800,
-    image: "https://source.unsplash.com/random/300x200/?codfish",
-    category: "appetizer"
-  },
-  {
-    id: 2,
-    name: "Chouriço Assado",
-    description: "Chouriço português assado na tradicional assadeira de barro.",
-    price: 2000,
-    image: "https://source.unsplash.com/random/300x200/?chorizo",
-    category: "appetizer"
-  },
-  {
-    id: 3,
-    name: "Camarão ao Alho",
-    description: "Camarão salteado em azeite, alho e piri-piri.",
-    price: 2500,
-    image: "https://source.unsplash.com/random/300x200/?garlic,shrimp",
-    category: "appetizer"
-  },
-  // Main Dishes
-  {
-    id: 4,
-    name: "Bacalhau à Brás",
-    description: "Bacalhau desfiado, batata palha, cebola, ovos e azeitonas.",
-    price: 3500,
-    image: "https://source.unsplash.com/random/300x200/?codfish,dish",
-    category: "main"
-  },
-  {
-    id: 5,
-    name: "Cataplana de Marisco",
-    description: "Camarões, amêijoas, mexilhões e peixe fresco em molho de tomate aromático.",
-    price: 4200,
-    image: "https://source.unsplash.com/random/300x200/?seafood,stew",
-    category: "main"
-  },
-  {
-    id: 6,
-    name: "Arroz de Marisco",
-    description: "Arroz cremoso com diversos frutos do mar e especiarias.",
-    price: 3800,
-    image: "https://source.unsplash.com/random/300x200/?seafood,rice",
-    category: "main"
-  },
-  {
-    id: 7,
-    name: "Feijoada à Transmontana",
-    description: "Feijão, carne de porco, chouriço e carnes fumadas.",
-    price: 3800,
-    image: "https://source.unsplash.com/random/300x200/?stew,beans",
-    category: "main"
-  },
-  {
-    id: 8,
-    name: "Francesinha",
-    description: "Sanduíche com carnes variadas, queijo, molho de tomate e cerveja.",
-    price: 3200,
-    image: "https://source.unsplash.com/random/300x200/?sandwich",
-    category: "main"
-  },
-  // Desserts
-  {
-    id: 9,
-    name: "Pastéis de Nata",
-    description: "Doce tradicional português com massa folhada e creme de leite.",
-    price: 800,
-    image: "https://source.unsplash.com/random/300x200/?custard,tart",
-    category: "dessert"
-  },
-  {
-    id: 10,
-    name: "Pudim Flan",
-    description: "Pudim de leite condensado com calda de caramelo.",
-    price: 1000,
-    image: "https://source.unsplash.com/random/300x200/?pudding,caramel",
-    category: "dessert"
-  },
-  {
-    id: 11,
-    name: "Arroz Doce",
-    description: "Arroz cozido com leite, açúcar, limão e canela.",
-    price: 1200,
-    image: "https://source.unsplash.com/random/300x200/?rice,pudding",
-    category: "dessert"
-  }
-];
+import { useDishes, Dish } from "@/hooks/use-dishes";
 
 const Menu = () => {
+  const { dishes, loading, isFavorite, toggleFavorite } = useDishes();
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
   const [filteredItems, setFilteredItems] = useState<{
@@ -126,17 +35,17 @@ const Menu = () => {
     // Filter menu items based on search term and price filter
     const filterItems = () => {
       const filtered = {
-        appetizer: MENU_ITEMS.filter(dish => 
+        appetizer: dishes.filter(dish => 
           dish.category === "appetizer" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
           (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
         ),
-        main: MENU_ITEMS.filter(dish => 
+        main: dishes.filter(dish => 
           dish.category === "main" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
           (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
         ),
-        dessert: MENU_ITEMS.filter(dish => 
+        dessert: dishes.filter(dish => 
           dish.category === "dessert" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
           (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
@@ -146,7 +55,7 @@ const Menu = () => {
     };
 
     filterItems();
-  }, [searchTerm, priceFilter]);
+  }, [dishes, searchTerm, priceFilter]);
 
   const applyPriceFilter = (price: number, filter: string): boolean => {
     switch (filter) {
@@ -201,7 +110,7 @@ const Menu = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos os preços</SelectItem>
+                    <SelectItem value="">Todos os preços</SelectItem>
                     <SelectItem value="low">Econômico (&lt; 2.000 AOA)</SelectItem>
                     <SelectItem value="medium">Médio (2.000 - 3.500 AOA)</SelectItem>
                     <SelectItem value="high">Premium (&gt; 3.500 AOA)</SelectItem>
@@ -232,61 +141,82 @@ const Menu = () => {
             )}
           </div>
 
-          <Tabs defaultValue="main" className="w-full">
-            <TabsList className="w-full flex justify-center mb-8">
-              <TabsTrigger value="appetizer" className="px-6">Entradas</TabsTrigger>
-              <TabsTrigger value="main" className="px-6">Pratos Principais</TabsTrigger>
-              <TabsTrigger value="dessert" className="px-6">Sobremesas</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="appetizer">
-              {filteredItems.appetizer.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredItems.appetizer.map(dish => (
-                    <MenuCard key={dish.id} dish={dish} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
-                  <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="main">
-              {filteredItems.main.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredItems.main.map(dish => (
-                    <MenuCard key={dish.id} dish={dish} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
-                  <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="dessert">
-              {filteredItems.dessert.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredItems.dessert.map(dish => (
-                    <MenuCard key={dish.id} dish={dish} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
-                  <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          {loading ? (
+            <div className="text-center py-16">
+              <p>Carregando menu...</p>
+            </div>
+          ) : (
+            <Tabs defaultValue="main" className="w-full">
+              <TabsList className="w-full flex justify-center mb-8">
+                <TabsTrigger value="appetizer" className="px-6">Entradas</TabsTrigger>
+                <TabsTrigger value="main" className="px-6">Pratos Principais</TabsTrigger>
+                <TabsTrigger value="dessert" className="px-6">Sobremesas</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="appetizer">
+                {filteredItems.appetizer.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredItems.appetizer.map(dish => (
+                      <MenuCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        onToggleFavorite={toggleFavorite}
+                        isFavorite={isFavorite(dish.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
+                    <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="main">
+                {filteredItems.main.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredItems.main.map(dish => (
+                      <MenuCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        onToggleFavorite={toggleFavorite}
+                        isFavorite={isFavorite(dish.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
+                    <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="dessert">
+                {filteredItems.dessert.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredItems.dessert.map(dish => (
+                      <MenuCard 
+                        key={dish.id} 
+                        dish={dish} 
+                        onToggleFavorite={toggleFavorite}
+                        isFavorite={isFavorite(dish.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-medium text-gray-700">Nenhum prato encontrado</h3>
+                    <p className="text-gray-500 mt-2">Tente alterar seus filtros de busca</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </main>
       <Footer />

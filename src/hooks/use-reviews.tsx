@@ -24,7 +24,7 @@ export const useReviews = (dishId: string | number) => {
       if (error) throw error;
       
       // Transform the data to match our Review type
-      const formattedReviews: Review[] = data.map(review => ({
+      const formattedReviews: Review[] = data.map((review: any) => ({
         id: review.id,
         dishId: review.dish_id,
         userName: review.user_name,

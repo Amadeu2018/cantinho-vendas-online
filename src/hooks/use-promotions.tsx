@@ -31,14 +31,18 @@ export const usePromotions = () => {
         .select(`
           *
         `)
-        .lte('start_date', now)
         .gte('valid_until', now);
         
       if (promotionsError) throw promotionsError;
       
+      if (!promotionsData || promotionsData.length === 0) {
+        setPromotions([]);
+        return;
+      }
+      
       // For each promotion, fetch the associated dishes
       const promotionsWithDishes = await Promise.all(
-        promotionsData?.map(async (promotion) => {
+        promotionsData.map(async (promotion: any) => {
           // Get dishes associated with this promotion
           const { data: promotionDishes, error: pdError } = await supabase
             .from('promotion_dishes')
@@ -50,7 +54,7 @@ export const usePromotions = () => {
           if (pdError) throw pdError;
           
           // Get the actual dish data
-          const dishIds = promotionDishes?.map(pd => pd.dish_id) || [];
+          const dishIds = promotionDishes?.map((pd: any) => pd.dish_id) || [];
           
           if (dishIds.length === 0) {
             return null; // Skip promotions with no dishes
@@ -72,12 +76,13 @@ export const usePromotions = () => {
             validUntil: promotion.valid_until,
             image_url: promotion.image_url,
             dishes: dishes || []
-          };
+          } as Promotion;
         }) || []
       );
       
       // Filter out null values (promotions with no dishes)
-      setPromotions(promotionsWithDishes.filter(Boolean) as Promotion[]);
+      const filteredPromotions = promotionsWithDishes.filter(Boolean) as Promotion[];
+      setPromotions(filteredPromotions);
     } catch (error: any) {
       console.error('Error fetching promotions:', error);
       toast({

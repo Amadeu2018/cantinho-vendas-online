@@ -91,7 +91,7 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
                   <p>Carregando avaliações...</p>
                 </div>
               ) : (
-                <ReviewsList reviews={reviews} dishId={dishId} />
+                <ReviewsList reviews={reviews} dishId={dishId.toString()} />
               )}
             </>
           )}

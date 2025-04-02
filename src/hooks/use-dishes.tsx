@@ -41,7 +41,9 @@ export const useDishes = () => {
         .select(`
           id, 
           title, 
+          description,
           discount_percentage,
+          valid_until,
           promotion_dishes(dish_id)
         `)
         .lte('start_date', now)
@@ -61,12 +63,17 @@ export const useDishes = () => {
       });
       
       // Apply promotions to dishes
-      const dishesWithPromotions = dishesData?.map(dish => {
+      const dishesWithPromotions = dishesData?.map((dish: any) => {
         const promotion = promotionMap.get(dish.id);
         return {
-          ...dish,
+          id: dish.id,
+          name: dish.name,
+          description: dish.description,
+          price: dish.price,
+          image_url: dish.image_url,
+          category: dish.category,
           promotion: promotion || undefined
-        };
+        } as Dish;
       }) || [];
       
       setDishes(dishesWithPromotions);
@@ -96,7 +103,7 @@ export const useDishes = () => {
         
       if (error) throw error;
       
-      setFavorites(data?.map(fav => fav.dish_id) || []);
+      setFavorites(data?.map((fav: any) => fav.dish_id) || []);
     } catch (error: any) {
       console.error('Error fetching favorites:', error);
     }

@@ -110,7 +110,7 @@ const Menu = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os preços</SelectItem>
+                    <SelectItem value="all">Todos os preços</SelectItem>
                     <SelectItem value="low">Econômico (&lt; 2.000 AOA)</SelectItem>
                     <SelectItem value="medium">Médio (2.000 - 3.500 AOA)</SelectItem>
                     <SelectItem value="high">Premium (&gt; 3.500 AOA)</SelectItem>
@@ -128,7 +128,7 @@ const Menu = () => {
                 )}
                 {priceFilter && (
                   <Badge variant="outline" className="bg-cantinho-cream">
-                    Preço: {priceFilter === "low" ? "Econômico" : priceFilter === "medium" ? "Médio" : "Premium"}
+                    Preço: {priceFilter === "low" ? "Econômico" : priceFilter === "medium" ? "Médio" : priceFilter === "high" ? "Premium" : "Todos"}
                   </Badge>
                 )}
                 <button

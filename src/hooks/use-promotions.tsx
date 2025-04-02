@@ -2,17 +2,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Dish } from '@/hooks/use-dishes';
-
-export type Promotion = {
-  id: string;
-  title: string;
-  description: string;
-  discountPercentage: number;
-  validUntil: string;
-  image_url: string;
-  dishes: Dish[];
-};
+import { Promotion } from '@/types/promotion';
+import { Dish } from '@/types/dish';
 
 export const usePromotions = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -28,10 +19,8 @@ export const usePromotions = () => {
       // Fetch active promotions
       const { data: promotionsData, error: promotionsError } = await supabase
         .from('promotions')
-        .select(`
-          *
-        `)
-        .gte('valid_until', now);
+        .select('*')
+        .gte('end_date', now);
         
       if (promotionsError) throw promotionsError;
       
@@ -40,44 +29,41 @@ export const usePromotions = () => {
         return;
       }
       
-      // For each promotion, fetch the associated dishes
+      // For each promotion, fetch the associated product
       const promotionsWithDishes = await Promise.all(
         promotionsData.map(async (promotion: any) => {
-          // Get dishes associated with this promotion
-          const { data: promotionDishes, error: pdError } = await supabase
-            .from('promotion_dishes')
-            .select(`
-              dish_id
-            `)
-            .eq('promotion_id', promotion.id);
-            
-          if (pdError) throw pdError;
+          if (!promotion.product_id) return null;
           
-          // Get the actual dish data
-          const dishIds = promotionDishes?.map((pd: any) => pd.dish_id) || [];
-          
-          if (dishIds.length === 0) {
-            return null; // Skip promotions with no dishes
-          }
-          
-          const { data: dishes, error: dishesError } = await supabase
-            .from('dishes')
+          // Get the actual product data
+          const { data: product, error: productError } = await supabase
+            .from('products')
             .select('*')
-            .in('id', dishIds);
+            .eq('id', promotion.product_id)
+            .single();
             
-          if (dishesError) throw dishesError;
+          if (productError) return null;
+          
+          // Convert product to dish format
+          const dish: Dish = {
+            id: product.id,
+            name: product.name,
+            description: product.description || '',
+            price: product.price,
+            image_url: product.image_url || 'https://source.unsplash.com/random/300x200/?food',
+            category: 'main' // Default category
+          };
           
           // Map to the expected Promotion type
           return {
             id: promotion.id,
-            title: promotion.title,
-            description: promotion.description,
+            title: promotion.title || `${product.name} em promoção!`,
+            description: promotion.description || `Aproveite ${promotion.discount_percentage}% de desconto`,
             discountPercentage: promotion.discount_percentage,
-            validUntil: promotion.valid_until,
-            image_url: promotion.image_url,
-            dishes: dishes || []
+            validUntil: promotion.end_date,
+            image_url: promotion.image_url || product.image_url || 'https://source.unsplash.com/random/400x200/?promotion',
+            dishes: [dish]
           } as Promotion;
-        }) || []
+        })
       );
       
       // Filter out null values (promotions with no dishes)

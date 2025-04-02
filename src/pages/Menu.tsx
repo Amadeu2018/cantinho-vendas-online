@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/Navbar";
@@ -38,17 +37,17 @@ const Menu = () => {
         appetizer: dishes.filter(dish => 
           dish.category === "appetizer" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
+          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
         ),
         main: dishes.filter(dish => 
           dish.category === "main" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
+          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
         ),
         dessert: dishes.filter(dish => 
           dish.category === "dessert" && 
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || applyPriceFilter(dish.price, priceFilter))
+          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
         )
       };
       setFilteredItems(filtered);

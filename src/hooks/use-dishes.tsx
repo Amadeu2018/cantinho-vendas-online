@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Dish } from '@/types/dish';
 
+export { Dish };
+
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,12 +17,12 @@ export const useDishes = () => {
     try {
       setLoading(true);
       
-      // Fetch all dishes
-      const { data: dishesData, error: dishesError } = await supabase
+      // Fetch all dishes (products in our database)
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*');
       
-      if (dishesError) throw dishesError;
+      if (productsError) throw productsError;
       
       // Fetch active promotions
       const now = new Date().toISOString();
@@ -43,7 +45,7 @@ export const useDishes = () => {
       });
       
       // Transform products to dishes format
-      const dishesWithPromotions = dishesData?.map((product: any) => {
+      const dishesWithPromotions = productsData?.map((product: any) => {
         const promotion = promotionMap.get(product.id);
         return {
           id: product.id,
@@ -72,11 +74,10 @@ export const useDishes = () => {
   // Helper function to map product categories
   const mapCategoryFromProduct = (product: any): 'appetizer' | 'main' | 'dessert' => {
     // Default to 'main' if category is missing
-    if (!product.category) return 'main';
+    if (!product.category_id) return 'main';
     
-    const category = product.category.toLowerCase();
-    if (category.includes('entrada') || category.includes('appetizer')) return 'appetizer';
-    if (category.includes('sobremesa') || category.includes('dessert')) return 'dessert';
+    // For now, simplify by returning a default category
+    // In a real implementation, you would fetch category information
     return 'main';
   };
 
@@ -87,12 +88,11 @@ export const useDishes = () => {
     }
     
     try {
-      // Since favorites table might not exist yet, we handle the error silently
-      const { data } = await supabase.rpc('get_user_favorites', { user_id: user.id });
-      setFavorites(data?.map((fav: any) => fav.product_id) || []);
+      // Since we don't have a favorites table yet, this is a placeholder
+      // In a real implementation, you would fetch from a favorites table
+      setFavorites([]);
     } catch (error: any) {
       console.error('Error fetching favorites:', error);
-      // Quietly handle this error as the favorites table might not exist yet
     }
   };
 
@@ -109,7 +109,6 @@ export const useDishes = () => {
     const isFavorite = favorites.includes(dishId);
     
     // For now we'll just update the UI without trying to store in database
-    // as the favorites table might not be set up yet
     if (isFavorite) {
       setFavorites(favorites.filter(id => id !== dishId));
       toast({

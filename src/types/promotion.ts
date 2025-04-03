@@ -1,4 +1,6 @@
 
+import { Dish } from './dish';
+
 export type Promotion = {
   id: string;
   title: string;

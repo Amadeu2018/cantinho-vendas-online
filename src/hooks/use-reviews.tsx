@@ -1,125 +1,84 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { Review } from '@/types/review';
 
-export const useReviews = (dishId: string | number) => {
+export const useReviews = (dishId: string) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [averageRating, setAverageRating] = useState<number>(0);
-  const { user } = useAuth();
+  const [averageRating, setAverageRating] = useState(0);
 
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      
-      // For now, creating a mock setup since reviews table might have issues
-      const mockReviews: Review[] = [];
-      setReviews(mockReviews);
-      setAverageRating(0);
-      
-      // Once the database is properly set up, uncomment this code
-      /*
+      // Fetch reviews from the reviews table
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('product_id', dishId)
-        .order('created_at', { ascending: false });
-        
+        .eq('product_id', dishId);
+      
       if (error) throw error;
       
-      // Transform the data to match our Review type
-      const formattedReviews: Review[] = data.map((review: any) => ({
+      // Convert to our Review type
+      const convertedReviews: Review[] = data?.map((review: any) => ({
         id: review.id,
         dishId: review.product_id,
-        userName: review.user_name || 'Usuário',
+        userName: review.user_id || 'Anonymous', // We'll need to fetch actual user names in a real app
         rating: review.rating,
         comment: review.comment || '',
-        date: review.created_at
-      }));
+        date: new Date(review.created_at).toISOString()
+      })) || [];
       
-      setReviews(formattedReviews);
+      setReviews(convertedReviews);
       
       // Calculate average rating
-      if (formattedReviews.length > 0) {
-        const sum = formattedReviews.reduce((acc, review) => acc + review.rating, 0);
-        setAverageRating(sum / formattedReviews.length);
+      if (convertedReviews.length > 0) {
+        const total = convertedReviews.reduce((sum, review) => sum + review.rating, 0);
+        setAverageRating(Math.round((total / convertedReviews.length) * 10) / 10);
+      } else {
+        setAverageRating(0);
       }
-      */
     } catch (error: any) {
       console.error('Error fetching reviews:', error);
+      toast({
+        title: 'Erro ao carregar avaliações',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const addReview = async (review: Omit<Review, 'id' | 'date' | 'dishId'>) => {
-    if (!user) {
-      toast.error('Você precisa estar logado para enviar uma avaliação');
-      return null;
-    }
-    
+  const addReview = async (rating: number, comment: string, userName: string) => {
     try {
-      // For now we'll just show a success message without trying to store in database
-      // as the reviews table might not be properly set up
-      
-      const newReview: Review = {
-        id: Math.random().toString(),
-        dishId: dishId.toString(),
-        userName: review.userName,
-        rating: review.rating,
-        comment: review.comment,
-        date: new Date().toISOString()
-      };
-      
-      setReviews([newReview, ...reviews]);
-      
-      // Update average rating
-      const sum = reviews.reduce((acc, r) => acc + r.rating, 0) + newReview.rating;
-      setAverageRating(sum / (reviews.length + 1));
-      
-      toast.success('Avaliação adicionada com sucesso!');
-      return newReview;
-      
-      /*
-      const { data, error } = await supabase
+      // Add review to the reviews table
+      const { error } = await supabase
         .from('reviews')
         .insert({
           product_id: dishId,
-          user_id: user.id,
-          user_name: review.userName,
-          rating: review.rating,
-          comment: review.comment
-        })
-        .select()
-        .single();
-        
+          rating: rating,
+          comment: comment,
+          user_id: userName // In a real app, this would be the authenticated user's ID
+        });
+      
       if (error) throw error;
       
-      const newReview: Review = {
-        id: data.id,
-        dishId: data.product_id,
-        userName: data.user_name,
-        rating: data.rating,
-        comment: data.comment || '',
-        date: data.created_at
-      };
+      // After adding the review, refresh the list
+      fetchReviews();
       
-      setReviews([newReview, ...reviews]);
-      
-      // Update average rating
-      const sum = reviews.reduce((acc, r) => acc + r.rating, 0) + newReview.rating;
-      setAverageRating(sum / (reviews.length + 1));
-      
-      toast.success('Avaliação adicionada com sucesso!');
-      return newReview;
-      */
+      toast({
+        title: 'Avaliação adicionada',
+        description: 'Obrigado pela sua avaliação!',
+      });
     } catch (error: any) {
       console.error('Error adding review:', error);
-      toast.error(error.message);
-      return null;
+      toast({
+        title: 'Erro ao adicionar avaliação',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -134,6 +93,6 @@ export const useReviews = (dishId: string | number) => {
     loading,
     averageRating,
     addReview,
-    fetchReviews
+    fetchReviews,
   };
 };

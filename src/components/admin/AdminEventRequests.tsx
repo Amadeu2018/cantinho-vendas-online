@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import EventRequestDetail from "./EventRequestDetail";
 
-type EventRequest = {
+export type EventRequest = {
   id: string;
   nome: string;
   email: string;
@@ -45,13 +45,13 @@ const AdminEventRequests = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("event_requests")
+        .from('event_requests')
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      setEventRequests(data || []);
+      setEventRequests(data as EventRequest[] || []);
     } catch (error: any) {
       console.error("Erro ao buscar solicitações:", error);
       toast({
@@ -66,7 +66,7 @@ const AdminEventRequests = () => {
 
   const handleStatusChange = async (requestId: string, newStatus: string) => {
     try {
-      const updates = {
+      const updates: any = {
         status: newStatus,
       };
       
@@ -76,7 +76,7 @@ const AdminEventRequests = () => {
       }
       
       const { error } = await supabase
-        .from("event_requests")
+        .from('event_requests')
         .update(updates)
         .eq("id", requestId);
 

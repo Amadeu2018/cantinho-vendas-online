@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";

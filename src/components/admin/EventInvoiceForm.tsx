@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,20 +8,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-
-interface EventRequest {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  tipo_evento: string;
-  data_evento: string;
-  num_convidados: number;
-  localizacao: string;
-  mensagem?: string;
-  status: string;
-  created_at: string;
-}
+import type { EventRequest } from "./AdminEventRequests";
 
 interface EventInvoiceFormProps {
   eventRequest: EventRequest;
@@ -76,7 +62,7 @@ const EventInvoiceForm = ({ eventRequest, onClose }: EventInvoiceFormProps) => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.from("event_invoices").insert({
+      const { error } = await supabase.from('event_invoices').insert({
         event_request_id: eventRequest.id,
         tipo: invoiceType,
         numero: invoiceData.numero,

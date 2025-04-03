@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,22 +9,7 @@ import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EventInvoiceForm from "./EventInvoiceForm";
-
-interface EventRequest {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  tipo_evento: string;
-  data_evento: string;
-  num_convidados: number;
-  localizacao: string;
-  mensagem?: string;
-  status: string;
-  created_at: string;
-  atendido_em?: string;
-  atendido_por?: string;
-}
+import type { EventRequest } from "./AdminEventRequests";
 
 interface EventRequestDetailProps {
   request: EventRequest;
@@ -33,7 +17,7 @@ interface EventRequestDetailProps {
   onStatusChange: (requestId: string, status: string) => Promise<void>;
 }
 
-interface Invoice {
+export interface Invoice {
   id: string;
   tipo: string;
   numero: string;
@@ -41,6 +25,7 @@ interface Invoice {
   status: string;
   created_at: string;
   data_pagamento?: string;
+  descricao?: string;
 }
 
 const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDetailProps) => {
@@ -57,14 +42,14 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
     try {
       setLoadingInvoices(true);
       const { data, error } = await supabase
-        .from("event_invoices")
+        .from('event_invoices')
         .select("*")
         .eq("event_request_id", request.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       
-      setInvoices(data || []);
+      setInvoices(data as Invoice[] || []);
     } catch (error: any) {
       console.error("Erro ao buscar faturas:", error);
       toast({
@@ -106,7 +91,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const handleMarkPaid = async (invoiceId: string) => {
     try {
       const { error } = await supabase
-        .from("event_invoices")
+        .from('event_invoices')
         .update({
           status: "pago",
           data_pagamento: new Date().toISOString(),
@@ -141,7 +126,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const handleDeleteInvoice = async (invoiceId: string) => {
     try {
       const { error } = await supabase
-        .from("event_invoices")
+        .from('event_invoices')
         .delete()
         .eq("id", invoiceId);
 

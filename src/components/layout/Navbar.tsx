@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +12,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import NavEventButton from "../admin/NavEventButton";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,10 +73,19 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/perfil" className="cursor-pointer w-full">Meu Perfil</Link>
                   </DropdownMenuItem>
-                  {user && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="cursor-pointer w-full">Admin</Link>
-                    </DropdownMenuItem>
+                  {user?.role === "admin" && (
+                    <div className="flex ml-2">
+                      <Button
+                        variant="outline"
+                        asChild
+                      >
+                        <Link to="/admin">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Administração
+                        </Link>
+                      </Button>
+                      <NavEventButton />
+                    </div>
                   )}
                   <DropdownMenuItem asChild>
                     <Link to="/carrinho" className="cursor-pointer w-full">Meu Carrinho</Link>

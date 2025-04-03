@@ -1,11 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Dish } from '@/types/dish';
-
-export { Dish };
 
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);

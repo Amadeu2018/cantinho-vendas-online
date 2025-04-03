@@ -1,15 +1,21 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import EventConfirmation from "./EventConfirmation";
 
 const EventForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -28,17 +34,34 @@ const EventForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulando envio de formulário
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Solicitação enviada",
-        description: "Entraremos em contato em breve para discutir os detalhes do seu evento. Obrigado!",
-      });
+    try {
+      // Enviar dados para o Supabase
+      const { data, error } = await supabase
+        .from('event_requests')
+        .insert({
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          tipo_evento: formData.tipoEvento,
+          data_evento: formData.dataEvento,
+          num_convidados: Number(formData.numConvidados),
+          localizacao: formData.localizacao,
+          mensagem: formData.mensagem,
+          status: 'pendente'
+        })
+        .select('id')
+        .single();
+      
+      if (error) throw error;
+      
+      setRequestId(data.id);
+      setShowConfirmation(true);
+      
+      // Limpar o formulário
       setFormData({
         nome: "",
         email: "",
@@ -49,12 +72,37 @@ const EventForm = () => {
         localizacao: "",
         mensagem: "",
       });
-    }, 1500);
+      
+      toast({
+        title: "Solicitação enviada",
+        description: "Entraremos em contato em breve para discutir os detalhes do seu evento. Obrigado!",
+      });
+    } catch (error: any) {
+      console.error("Erro ao enviar solicitação:", error);
+      toast({
+        title: "Erro ao enviar solicitação",
+        description: error.message || "Ocorreu um erro ao enviar sua solicitação. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Se estiver mostrando a confirmação, renderiza o componente de confirmação
+  if (showConfirmation && requestId) {
+    return (
+      <EventConfirmation 
+        requestId={requestId}
+        formData={formData}
+        onClose={() => setShowConfirmation(false)}
+      />
+    );
+  }
 
   return (
     <Card className="p-6 shadow-lg">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="nome" className="block mb-2 font-medium">

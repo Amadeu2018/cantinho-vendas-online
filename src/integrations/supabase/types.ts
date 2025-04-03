@@ -77,6 +77,104 @@ export type Database = {
           },
         ]
       }
+      event_invoices: {
+        Row: {
+          created_at: string | null
+          data_pagamento: string | null
+          descricao: string | null
+          event_request_id: string
+          id: string
+          numero: string
+          status: string | null
+          tipo: string
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          descricao?: string | null
+          event_request_id: string
+          id?: string
+          numero: string
+          status?: string | null
+          tipo: string
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          descricao?: string | null
+          event_request_id?: string
+          id?: string
+          numero?: string
+          status?: string | null
+          tipo?: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invoices_event_request_id_fkey"
+            columns: ["event_request_id"]
+            isOneToOne: false
+            referencedRelation: "event_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_requests: {
+        Row: {
+          atendido_em: string | null
+          atendido_por: string | null
+          created_at: string | null
+          data_evento: string
+          email: string
+          id: string
+          localizacao: string
+          mensagem: string | null
+          nome: string
+          num_convidados: number
+          status: string | null
+          telefone: string
+          tipo_evento: string
+          updated_at: string | null
+        }
+        Insert: {
+          atendido_em?: string | null
+          atendido_por?: string | null
+          created_at?: string | null
+          data_evento: string
+          email: string
+          id?: string
+          localizacao: string
+          mensagem?: string | null
+          nome: string
+          num_convidados: number
+          status?: string | null
+          telefone: string
+          tipo_evento: string
+          updated_at?: string | null
+        }
+        Update: {
+          atendido_em?: string | null
+          atendido_por?: string | null
+          created_at?: string | null
+          data_evento?: string
+          email?: string
+          id?: string
+          localizacao?: string
+          mensagem?: string | null
+          nome?: string
+          num_convidados?: number
+          status?: string | null
+          telefone?: string
+          tipo_evento?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
@@ -15,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import NavEventButton from "@/components/admin/NavEventButton";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -258,12 +260,15 @@ const Admin = () => {
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
               <div className="p-4 bg-cantinho-navy text-white flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Painel de Administração</h2>
-                <button 
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-md text-sm"
-                >
-                  Sair
-                </button>
+                <div className="flex items-center gap-2">
+                  <NavEventButton />
+                  <button 
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-md text-sm"
+                  >
+                    Sair
+                  </button>
+                </div>
               </div>
               
               <div className="p-6">

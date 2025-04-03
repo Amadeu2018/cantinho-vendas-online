@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Edit, Trash2, Eye, ArrowUp, ArrowDown } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AddProduct from "./AddProduct";
@@ -14,7 +11,6 @@ import EditProduct from "./EditProduct";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductsList from "./ProductsList";
-import ProductFilters from "./ProductFilters";
 import ProductActions from "./ProductActions";
 
 const AdminProducts = () => {
@@ -40,16 +36,16 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // Fix the query to properly handle the categories relationship
       const { data, error } = await supabase
         .from("products")
         .select(`
           *,
-          categories:category_id(id, name)
+          categories:categories!products_category_id_fkey(id, name)
         `)
         .order(sortField, { ascending: sortDirection === "asc" });
 
       if (error) throw error;
+      console.log("Fetched products:", data);
       setProducts(data || []);
     } catch (error: any) {
       console.error("Erro ao buscar produtos:", error);
@@ -103,7 +99,6 @@ const AdminProducts = () => {
         description: "O produto foi excluído com sucesso",
       });
 
-      // Update product list
       setProducts(products.filter(product => product.id !== productToDelete));
       closeDeleteDialog();
     } catch (error: any) {
@@ -149,7 +144,6 @@ const AdminProducts = () => {
         
       if (error) throw error;
       
-      // Update local products state
       setProducts(products.map(p => 
         p.id === product.id ? {...p, stock_quantity: newStock} : p
       ));
@@ -182,19 +176,16 @@ const AdminProducts = () => {
   };
 
   const filteredProducts = products.filter(product => {
-    // Filter by search term
     const matchesSearch = 
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filter by tab/category
     let matchesTab = true;
     if (activeTab === "low-stock") {
       matchesTab = (product.stock_quantity || 0) <= (product.min_stock_quantity || 5);
     } else if (activeTab === "out-of-stock") {
       matchesTab = (product.stock_quantity || 0) <= 0;
     } else if (activeTab !== "all") {
-      // If the tab is a category ID
       matchesTab = product.category_id === activeTab;
     }
     
@@ -242,10 +233,7 @@ const AdminProducts = () => {
           />
         </div>
         
-        <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Adicionar Produto
-        </Button>
+        <ProductActions onAddProduct={() => setShowAddForm(true)} />
       </div>
       
       <Card>

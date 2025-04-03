@@ -46,11 +46,13 @@ const AdminInventory = () => {
           price, 
           min_stock_quantity,
           category_id,
-          categories:category_id(name)
+          categories:categories!products_category_id_fkey(name)
         `)
         .order("name");
       
       if (error) throw error;
+      
+      console.log("Inventory data:", data);
       
       // Format the data to match our InventoryItem type
       const formattedData = data?.map(item => {

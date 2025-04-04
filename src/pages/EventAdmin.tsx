@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import EventRequestStats from "@/components/admin/EventRequestStats";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const EventAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +80,16 @@ const EventAdmin = () => {
       <Navbar />
       <main className="flex-grow py-10">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8 text-cantinho-navy">Administração de Eventos</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold text-cantinho-navy">Administração de Eventos</h1>
+            <Button variant="outline" asChild>
+              <Link to="/admin">
+                Voltar para Admin Principal
+              </Link>
+            </Button>
+          </div>
+          
+          <EventRequestStats />
           
           <div className="space-y-6">
             <AdminEventRequests />

@@ -83,7 +83,7 @@ const Admin = () => {
       
       const formattedOrders = data.map(order => {
         let customerInfo = { name: 'Cliente' };
-        let paymentMethod = { name: 'Desconhecido' };
+        let paymentMethod: { name: string } = { name: 'Desconhecido' };
         
         try {
           if (typeof order.customer_info === 'string') {

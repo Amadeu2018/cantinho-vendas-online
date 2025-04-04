@@ -7,7 +7,7 @@ import { Review } from "@/types/review";
 
 type ReviewsListProps = {
   reviews: Review[];
-  dishId: number;
+  dishId: string;  // Changed from number to string to match DishReviews props
 };
 
 const ReviewsList = ({ reviews, dishId }: ReviewsListProps) => {

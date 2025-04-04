@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 type AddReviewFormProps = {
-  dishId: string | number;
+  dishId: string;
   onAddReview: (review: { userName: string; rating: number; comment: string }) => void;
   onCancel: () => void;
 };

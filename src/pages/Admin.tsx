@@ -93,26 +93,28 @@ const Admin = () => {
             customerInfo = order.customer_info;
           }
           
-          // Handle different payment_method formats
-          if (typeof order.payment_method === 'string') {
-            paymentMethodName = order.payment_method;
-          } else if (typeof order.payment_method === 'number') {
-            paymentMethodName = String(order.payment_method);
-          } else if (order.payment_method === true) {
-            paymentMethodName = 'Confirmado';
-          } else if (order.payment_method === false) {
-            paymentMethodName = 'Não Confirmado';
-          } else if (order.payment_method === null || order.payment_method === undefined) {
-            paymentMethodName = 'Desconhecido';
-          } else if (order.payment_method && typeof order.payment_method === 'object') {
-            const pm = order.payment_method as Record<string, any>;
-            if (pm.name && typeof pm.name === 'string') {
-              paymentMethodName = pm.name;
-            } else {
-              paymentMethodName = 'Objeto';
+          // Handle all possible payment_method types
+          if (order.payment_method !== null && order.payment_method !== undefined) {
+            if (typeof order.payment_method === 'string') {
+              paymentMethodName = order.payment_method;
+            } else if (typeof order.payment_method === 'number') {
+              paymentMethodName = String(order.payment_method);
+            } else if (typeof order.payment_method === 'boolean') {
+              paymentMethodName = order.payment_method ? 'Confirmado' : 'Não Confirmado';
+            } else if (typeof order.payment_method === 'object') {
+              // Handle object or array case
+              if (Array.isArray(order.payment_method)) {
+                paymentMethodName = 'Lista de Métodos';
+              } else {
+                // It's an object
+                const pm = order.payment_method as Record<string, any>;
+                if (pm.name && typeof pm.name === 'string') {
+                  paymentMethodName = pm.name;
+                } else {
+                  paymentMethodName = 'Objeto';
+                }
+              }
             }
-          } else {
-            paymentMethodName = 'Desconhecido';
           }
         } catch (e) {
           console.error("Error parsing order data:", e);

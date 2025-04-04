@@ -9,14 +9,15 @@ import { Star } from 'lucide-react';
 
 interface DishReviewsProps {
   dishId: string;
+  dishName?: string;
 }
 
-const DishReviews = ({ dishId }: DishReviewsProps) => {
+const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
   const { reviews, loading, averageRating, addReview } = useReviews(dishId);
   const [showAddReview, setShowAddReview] = useState(false);
 
-  const handleAddReview = (rating: number, comment: string, name: string) => {
-    addReview(rating, comment, name);
+  const handleAddReview = (reviewData: { userName: string; rating: number; comment: string }) => {
+    addReview(reviewData.rating, reviewData.comment, reviewData.userName);
     setShowAddReview(false);
   };
 
@@ -44,7 +45,7 @@ const DishReviews = ({ dishId }: DishReviewsProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         {reviews.length > 0 ? (
-          <ReviewsList reviews={reviews} />
+          <ReviewsList reviews={reviews} dishId={dishId} />
         ) : (
           <p className="text-center py-4 text-gray-500">
             Ainda não há avaliações para este prato.
@@ -54,7 +55,8 @@ const DishReviews = ({ dishId }: DishReviewsProps) => {
         {showAddReview ? (
           <div className="mt-6">
             <AddReviewForm 
-              onSubmit={handleAddReview}
+              dishId={dishId}
+              onAddReview={handleAddReview}
               onCancel={() => setShowAddReview(false)} 
             />
           </div>

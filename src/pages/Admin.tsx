@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
@@ -20,6 +19,7 @@ import NavEventButton from "@/components/admin/NavEventButton";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("orders");
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any | null>(null);
@@ -47,9 +47,9 @@ const Admin = () => {
         
         if (error) throw error;
         
-        if (data.role === 'admin') {
-          setIsAuthenticated(true);
-          fetchOrders();
+        if (data && data.role === 'admin') {
+          setIsAdmin(true);
+          setIsLoading(false);
         } else {
           toast({
             title: "Acesso negado",
@@ -65,8 +65,6 @@ const Admin = () => {
           description: "Ocorreu um erro ao verificar suas permissões.",
           variant: "destructive"
         });
-      } finally {
-        setIsLoading(false);
       }
     };
     

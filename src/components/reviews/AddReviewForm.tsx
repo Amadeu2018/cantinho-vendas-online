@@ -10,9 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 type AddReviewFormProps = {
   dishId: string | number;
   onAddReview: (review: { userName: string; rating: number; comment: string }) => void;
+  onCancel: () => void;
 };
 
-const AddReviewForm = ({ dishId, onAddReview }: AddReviewFormProps) => {
+const AddReviewForm = ({ dishId, onAddReview, onCancel }: AddReviewFormProps) => {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -50,6 +51,7 @@ const AddReviewForm = ({ dishId, onAddReview }: AddReviewFormProps) => {
       // Limpar formulário apenas se bem-sucedido
       setRating(0);
       setComment("");
+      // Não resetamos o userName para conveniência do usuário
     } catch (error) {
       console.error("Erro ao adicionar avaliação:", error);
     } finally {
@@ -111,13 +113,22 @@ const AddReviewForm = ({ dishId, onAddReview }: AddReviewFormProps) => {
         />
       </div>
       
-      <Button 
-        type="submit" 
-        disabled={isSubmitting}
-        className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-      >
-        {isSubmitting ? "Enviando..." : "Enviar avaliação"}
-      </Button>
+      <div className="flex justify-between">
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+        >
+          {isSubmitting ? "Enviando..." : "Enviar avaliação"}
+        </Button>
+      </div>
     </form>
   );
 };

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
@@ -83,7 +84,7 @@ const Admin = () => {
       
       const formattedOrders = data.map(order => {
         let customerInfo = { name: 'Cliente' };
-        let paymentMethod: { name: string } = { name: 'Desconhecido' };
+        let paymentMethodName = 'Desconhecido';
         
         try {
           if (typeof order.customer_info === 'string') {
@@ -92,25 +93,26 @@ const Admin = () => {
             customerInfo = order.customer_info;
           }
           
+          // Handle different payment_method formats
           if (typeof order.payment_method === 'string') {
-            paymentMethod = { name: order.payment_method };
+            paymentMethodName = order.payment_method;
           } else if (typeof order.payment_method === 'number') {
-            paymentMethod = { name: String(order.payment_method) };
+            paymentMethodName = String(order.payment_method);
           } else if (order.payment_method === true) {
-            paymentMethod = { name: 'Confirmado' };
+            paymentMethodName = 'Confirmado';
           } else if (order.payment_method === false) {
-            paymentMethod = { name: 'Não Confirmado' };
+            paymentMethodName = 'Não Confirmado';
           } else if (order.payment_method === null || order.payment_method === undefined) {
-            paymentMethod = { name: 'Desconhecido' };
+            paymentMethodName = 'Desconhecido';
           } else if (order.payment_method && typeof order.payment_method === 'object') {
             const pm = order.payment_method as Record<string, any>;
             if (pm.name && typeof pm.name === 'string') {
-              paymentMethod = { name: pm.name };
+              paymentMethodName = pm.name;
             } else {
-              paymentMethod = { name: 'Objeto' };
+              paymentMethodName = 'Objeto';
             }
           } else {
-            paymentMethod = { name: 'Desconhecido' };
+            paymentMethodName = 'Desconhecido';
           }
         } catch (e) {
           console.error("Error parsing order data:", e);
@@ -120,7 +122,7 @@ const Admin = () => {
           ...order,
           id: order.id,
           customerInfo,
-          paymentMethod,
+          paymentMethod: { name: paymentMethodName },
           total: order.total,
           createdAt: order.created_at,
           updatedAt: order.updated_at,

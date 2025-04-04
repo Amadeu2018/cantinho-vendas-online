@@ -29,7 +29,7 @@ export function useAdminOrders() {
             customerInfo = order.customer_info;
           }
           
-          // Handle all possible payment_method types and create a consistent object
+          // Improved payment_method handling to ensure it always results in a string
           if (order.payment_method !== null && order.payment_method !== undefined) {
             if (typeof order.payment_method === 'string') {
               paymentMethodName = order.payment_method;
@@ -44,11 +44,9 @@ export function useAdminOrders() {
               } else {
                 // It's an object
                 const pm = order.payment_method as Record<string, any>;
-                if (pm.name && typeof pm.name === 'string') {
-                  paymentMethodName = pm.name;
-                } else {
-                  paymentMethodName = 'Objeto';
-                }
+                paymentMethodName = pm.name && typeof pm.name === 'string' 
+                  ? pm.name 
+                  : 'Objeto';
               }
             }
           }
@@ -60,7 +58,7 @@ export function useAdminOrders() {
           ...order,
           id: order.id,
           customerInfo,
-          // FIX: Create a consistent object structure for payment method
+          // Ensure paymentMethod is always an object with a name property
           paymentMethod: { name: paymentMethodName },
           total: order.total,
           createdAt: order.created_at,

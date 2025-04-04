@@ -29,7 +29,7 @@ export function useAdminOrders() {
             customerInfo = order.customer_info;
           }
           
-          // Improved payment_method handling to ensure it always results in a string
+          // Handle payment_method to ensure it always results in a string
           if (order.payment_method !== null && order.payment_method !== undefined) {
             if (typeof order.payment_method === 'string') {
               paymentMethodName = order.payment_method;
@@ -58,7 +58,7 @@ export function useAdminOrders() {
           ...order,
           id: order.id,
           customerInfo,
-          // Ensure paymentMethod is always an object with a name property
+          // Create a proper paymentMethod object with name property to match expected type
           paymentMethod: { name: paymentMethodName },
           total: order.total,
           createdAt: order.created_at,

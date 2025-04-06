@@ -20,7 +20,6 @@ export function useAdminOrders() {
       
       const formattedOrders = data.map(order => {
         let customerInfo = { name: 'Cliente' };
-        let paymentMethodName = 'Desconhecido';
         
         try {
           if (typeof order.customer_info === 'string') {
@@ -28,37 +27,17 @@ export function useAdminOrders() {
           } else if (order.customer_info) {
             customerInfo = order.customer_info;
           }
-          
-          // Handle payment method to ensure it always results in a valid object with a name property
-          if (order.payment_method !== null && order.payment_method !== undefined) {
-            if (typeof order.payment_method === 'string') {
-              paymentMethodName = order.payment_method;
-            } else if (typeof order.payment_method === 'number') {
-              paymentMethodName = String(order.payment_method);
-            } else if (typeof order.payment_method === 'boolean') {
-              paymentMethodName = order.payment_method ? 'Confirmado' : 'Não Confirmado';
-            } else if (typeof order.payment_method === 'object') {
-              // Handle object or array case
-              if (Array.isArray(order.payment_method)) {
-                paymentMethodName = 'Lista de Métodos';
-              } else {
-                // It's an object
-                const pm = order.payment_method as Record<string, any>;
-                paymentMethodName = pm.name && typeof pm.name === 'string' 
-                  ? pm.name 
-                  : 'Objeto';
-              }
-            }
-          }
         } catch (e) {
-          console.error("Error parsing order data:", e);
+          console.error("Error parsing customer info:", e);
         }
+        
+        // Extract payment method name - always returns a string
+        const paymentMethodName = extractPaymentMethodName(order.payment_method);
         
         return {
           ...order,
           id: order.id,
           customerInfo,
-          // Always ensure paymentMethod is an object with a name property
           paymentMethod: { name: paymentMethodName },
           total: order.total,
           createdAt: order.created_at,
@@ -81,6 +60,40 @@ export function useAdminOrders() {
     } finally {
       setFetchingOrders(false);
     }
+  };
+
+  // Helper function to extract payment method name from any type
+  const extractPaymentMethodName = (paymentMethod: any): string => {
+    if (paymentMethod === null || paymentMethod === undefined) {
+      return 'Desconhecido';
+    }
+    
+    if (typeof paymentMethod === 'string') {
+      return paymentMethod;
+    }
+    
+    if (typeof paymentMethod === 'number') {
+      return String(paymentMethod);
+    }
+    
+    if (typeof paymentMethod === 'boolean') {
+      return paymentMethod ? 'Confirmado' : 'Não Confirmado';
+    }
+    
+    if (typeof paymentMethod === 'object') {
+      if (Array.isArray(paymentMethod)) {
+        return 'Lista de Métodos';
+      }
+      
+      // It's an object - safely extract name property if it exists
+      if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
+        return paymentMethod.name;
+      }
+      
+      return 'Objeto';
+    }
+    
+    return 'Desconhecido';
   };
 
   const handleStatusChange = async (orderId: string, status: string) => {

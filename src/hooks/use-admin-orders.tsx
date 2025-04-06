@@ -3,6 +3,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+// Define a JSON type for handling Supabase JSON data
+type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
+interface PaymentMethod {
+  name: string;
+}
+
 export function useAdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [fetchingOrders, setFetchingOrders] = useState(false);
@@ -32,7 +39,8 @@ export function useAdminOrders() {
         }
         
         // Before using the payment method, convert it to the expected format
-        const paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
+        // Use a typed function to ensure correct conversion
+        const paymentMethodObj: PaymentMethod = convertToPaymentMethodObject(order.payment_method);
         
         return {
           ...order,
@@ -63,7 +71,8 @@ export function useAdminOrders() {
   };
 
   // Helper function to convert any payment method type to the expected object format
-  const convertToPaymentMethodObject = (paymentMethod: any): { name: string } => {
+  // Adding explicit return type to ensure we always return the correct type
+  const convertToPaymentMethodObject = (paymentMethod: any): PaymentMethod => {
     if (paymentMethod === null || paymentMethod === undefined) {
       return { name: 'Desconhecido' };
     }

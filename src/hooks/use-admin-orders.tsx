@@ -38,7 +38,7 @@ export function useAdminOrders() {
           ...order,
           id: order.id,
           customerInfo,
-          paymentMethod: { name: paymentMethodName },
+          paymentMethod: { name: paymentMethodName }, // Ensuring it's always { name: string }
           total: order.total,
           createdAt: order.created_at,
           updatedAt: order.updated_at,

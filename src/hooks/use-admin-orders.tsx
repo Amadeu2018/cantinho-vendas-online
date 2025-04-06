@@ -31,14 +31,14 @@ export function useAdminOrders() {
           console.error("Error parsing customer info:", e);
         }
         
-        // Extract payment method name - always returns a string
-        const paymentMethodName = extractPaymentMethodName(order.payment_method);
+        // Before using the payment method, convert it to the expected format
+        const paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
         
         return {
           ...order,
           id: order.id,
           customerInfo,
-          paymentMethod: { name: paymentMethodName }, // Ensuring it's always { name: string }
+          paymentMethod: paymentMethodObj,
           total: order.total,
           createdAt: order.created_at,
           updatedAt: order.updated_at,
@@ -62,38 +62,38 @@ export function useAdminOrders() {
     }
   };
 
-  // Helper function to extract payment method name from any type
-  const extractPaymentMethodName = (paymentMethod: any): string => {
+  // Helper function to convert any payment method type to the expected object format
+  const convertToPaymentMethodObject = (paymentMethod: any): { name: string } => {
     if (paymentMethod === null || paymentMethod === undefined) {
-      return 'Desconhecido';
+      return { name: 'Desconhecido' };
     }
     
     if (typeof paymentMethod === 'string') {
-      return paymentMethod;
+      return { name: paymentMethod };
     }
     
     if (typeof paymentMethod === 'number') {
-      return String(paymentMethod);
+      return { name: String(paymentMethod) };
     }
     
     if (typeof paymentMethod === 'boolean') {
-      return paymentMethod ? 'Confirmado' : 'Não Confirmado';
+      return { name: paymentMethod ? 'Confirmado' : 'Não Confirmado' };
     }
     
     if (typeof paymentMethod === 'object') {
       if (Array.isArray(paymentMethod)) {
-        return 'Lista de Métodos';
+        return { name: 'Lista de Métodos' };
       }
       
-      // It's an object - safely extract name property if it exists
+      // It's an object
       if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
-        return paymentMethod.name;
+        return { name: paymentMethod.name };
       }
       
-      return 'Objeto';
+      return { name: 'Objeto' };
     }
     
-    return 'Desconhecido';
+    return { name: 'Desconhecido' };
   };
 
   const handleStatusChange = async (orderId: string, status: string) => {

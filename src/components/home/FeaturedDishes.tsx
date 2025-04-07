@@ -1,16 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PlusCircle, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useDishes } from "@/hooks/use-dishes";
-import { useState, useEffect } from "react";
-import { Dish } from "@/hooks/use-dishes";
+import { useDishes, Dish } from "@/hooks/use-dishes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {
@@ -22,65 +20,14 @@ const formatPrice = (price: number): string => {
 
 const FeaturedDishes = () => {
   const { addItem } = useCart();
-  const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [featuredDishes, setFeaturedDishes] = useState<Dish[]>([]);
-
-  // Fetch products from Supabase
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .limit(8);
-        
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          // Map products to Dish format
-          const dishes: Dish[] = data.map(product => ({
-            id: product.id,
-            name: product.name,
-            description: product.description || '',
-            price: Number(product.price) || 0,
-            image: product.image_url || '/placeholder.svg',
-            image_url: product.image_url || '/placeholder.svg',
-            category: product.category_id || 'main',
-            popular: true
-          }));
-          
-          setFeaturedDishes(dishes);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProducts();
-  }, []);
-  
-  const isFavorite = (dishId: string) => favorites.includes(dishId);
-  
-  const toggleFavorite = (dishId: string) => {
-    if (favorites.includes(dishId)) {
-      setFavorites(favorites.filter(id => id !== dishId));
-    } else {
-      setFavorites([...favorites, dishId]);
-    }
-  };
+  const { featuredDishes, loading, isFavorite, toggleFavorite } = useDishes();
 
   const handleAddToCart = (dish: Dish) => {
     addItem({
-      id: dish.id, // Use UUID directly
+      id: dish.id,
       name: dish.name,
       price: dish.price,
-      image: dish.image_url
+      image: dish.image_url || '/placeholder.svg'
     });
   };
 
@@ -110,44 +57,47 @@ const FeaturedDishes = () => {
             ))}
           </div>
         ) : (
-          <ScrollArea className="w-full pb-4">
-            <div className="flex space-x-4 pb-4">
-              {featuredDishes.map((dish) => (
-                <Card key={dish.id} className="overflow-hidden hover:shadow-lg transition-shadow min-w-[280px] max-w-[320px]">
-                  <div className="h-48 overflow-hidden relative">
-                    <img 
-                      src={dish.image_url || '/placeholder.svg'} 
-                      alt={dish.name} 
-                      className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
-                      onClick={() => toggleFavorite(dish.id)}
-                    >
-                      <Heart className={cn("h-5 w-5", isFavorite(dish.id) ? "fill-red-500 text-red-500" : "")} />
-                    </Button>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleAddToCart(dish)}
-                        className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
+          <div className="relative">
+            <ScrollArea className="w-full pb-4">
+              <div className="flex space-x-4 pb-4">
+                {featuredDishes.map((dish) => (
+                  <Card key={dish.id} className="overflow-hidden hover:shadow-lg transition-shadow min-w-[280px] max-w-[320px]">
+                    <div className="h-48 overflow-hidden relative">
+                      <img 
+                        src={dish.image_url || '/placeholder.svg'} 
+                        alt={dish.name} 
+                        className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
+                        onClick={() => toggleFavorite(dish.id)}
                       >
-                        <PlusCircle className="h-5 w-5" />
+                        <Heart className={cn("h-5 w-5", isFavorite(dish.id) ? "fill-red-500 text-red-500" : "")} />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleAddToCart(dish)}
+                          className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
+                        >
+                          <PlusCircle className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
         )}
         
         <div className="text-center mt-10">

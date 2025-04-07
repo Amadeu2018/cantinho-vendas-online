@@ -31,10 +31,10 @@ export const useDishes = () => {
     try {
       setLoading(true);
       
-      // Fetch products from Supabase
+      // Fetch products from Supabase with the correct query
       const { data, error } = await supabase
         .from('products')
-        .select('*, categories(name)');
+        .select('*, categories(id, name)');
       
       if (error) {
         throw error;
@@ -45,8 +45,10 @@ export const useDishes = () => {
         const mappedDishes: Dish[] = data.map(product => {
           // Determine category from categories relation or fallback
           let category = 'main';
-          if (product.categories && product.categories.name) {
-            const categoryName = product.categories.name.toLowerCase();
+          
+          if (product.categories && typeof product.categories === 'object') {
+            // Safely access the name property
+            const categoryName = (product.categories as any)?.name?.toLowerCase() || '';
             if (categoryName.includes('entrada')) {
               category = 'appetizer';
             } else if (categoryName.includes('sobremesa') || categoryName.includes('doce')) {

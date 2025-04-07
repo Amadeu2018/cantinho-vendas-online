@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,58 +68,12 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
 
     const file = files[0];
     
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Tipo de arquivo inválido",
-        description: "Por favor, selecione uma imagem válida",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Create preview URL
     setImagePreview(URL.createObjectURL(file));
 
-    // Upload to Supabase Storage
-    try {
-      setImageUploading(true);
-      
-      // Create unique filename
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-      
-      // Upload file
-      const { error: uploadError, data } = await supabase.storage
-        .from("products")
-        .upload(filePath, file);
-      
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from("products")
-        .getPublicUrl(filePath);
-      
-      // Update form data
-      setFormData(prev => ({ ...prev, image_url: publicUrl }));
-      
-      toast({
-        title: "Imagem carregada",
-        description: "A imagem foi carregada com sucesso",
-      });
-    } catch (error: any) {
-      console.error("Erro ao fazer upload da imagem:", error);
-      toast({
-        title: "Erro ao fazer upload",
-        description: error.message || "Ocorreu um erro ao tentar fazer upload da imagem",
-        variant: "destructive",
-      });
-      setImagePreview(product.image_url || null);
-    } finally {
-      setImageUploading(false);
-    }
+    // For demo purposes use placeholder
+    setFormData(prev => ({ ...prev, image_url: '/placeholder.svg' }));
+    setImageUploading(false);
   };
 
   const removeImage = () => {
@@ -148,16 +101,18 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
       const productData = {
         name: formData.name,
         description: formData.description,
-        price: parseFloat(formData.price),
-        category_id: formData.category_id || null,
-        stock_quantity: parseInt(formData.stock_quantity),
-        min_stock_quantity: parseInt(formData.min_stock_quantity),
+        price: parseFloat(formData.price) || 0,
+        category_id: formData.category_id === "none" || formData.category_id === "" ? null : formData.category_id,
+        stock_quantity: parseInt(formData.stock_quantity) || 0,
+        min_stock_quantity: parseInt(formData.min_stock_quantity) || 5,
         unit: formData.unit,
         image_url: formData.image_url,
-        sku: formData.sku,
-        barcode: formData.barcode,
-        cost: parseFloat(formData.cost),
+        sku: formData.sku || null,
+        barcode: formData.barcode || null,
+        cost: parseFloat(formData.cost) || 0,
       };
+      
+      console.log("Updating product with data:", productData);
       
       // Send to Supabase
       const { error } = await supabase
@@ -165,7 +120,10 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         .update(productData)
         .eq("id", product.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
       
       toast({
         title: "Produto atualizado",
@@ -208,7 +166,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Preço (€) *</Label>
+              <Label htmlFor="price">Preço (AOA) *</Label>
               <Input
                 id="price"
                 name="price"
@@ -222,7 +180,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cost">Custo (€)</Label>
+              <Label htmlFor="cost">Custo (AOA)</Label>
               <Input
                 id="cost"
                 name="cost"

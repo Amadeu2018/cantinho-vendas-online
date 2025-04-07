@@ -38,9 +38,8 @@ export function useAdminOrders() {
           console.error("Error parsing customer info:", e);
         }
         
-        // Before using the payment method, convert it to the expected format
-        // Use a typed function to ensure correct conversion
-        const paymentMethodObj: PaymentMethod = convertToPaymentMethodObject(order.payment_method);
+        // Convert payment method to the expected PaymentMethod object format
+        const paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
         
         return {
           ...order,
@@ -71,7 +70,6 @@ export function useAdminOrders() {
   };
 
   // Helper function to convert any payment method type to the expected object format
-  // Adding explicit return type to ensure we always return the correct type
   const convertToPaymentMethodObject = (paymentMethod: any): PaymentMethod => {
     if (paymentMethod === null || paymentMethod === undefined) {
       return { name: 'Desconhecido' };

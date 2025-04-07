@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,29 +24,19 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     price: "",
     category_id: "",
     stock_quantity: "0",
+    min_stock_quantity: "5",
     unit: "unidade",
     image_url: "",
+    sku: "",
+    barcode: "",
+    cost: "0"
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCategories();
-    // Make sure storage bucket exists
-    createStorageBucketIfNeeded();
   }, []);
-
-  const createStorageBucketIfNeeded = async () => {
-    try {
-      // Check if 'products' bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      
-      // If we can't check buckets or products bucket doesn't exist, we'll handle errors in the upload
-      console.log("Available buckets:", buckets);
-    } catch (error) {
-      console.error("Error checking storage buckets:", error);
-    }
-  };
 
   const fetchCategories = async () => {
     try {
@@ -78,25 +67,11 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
 
     const file = files[0];
     
-    // Validar tipo de arquivo
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Tipo de arquivo inválido",
-        description: "Por favor, selecione uma imagem válida",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Criar URL de preview
+    // Create preview URL
     setImagePreview(URL.createObjectURL(file));
 
-    // Skip actual upload for now to avoid permissions issues
+    // For demo, use placeholder - in a real app you'd upload to storage
     setFormData(prev => ({ ...prev, image_url: '/placeholder.svg' }));
-    toast({
-      title: "Imagem carregada",
-      description: "A imagem foi carregada com sucesso (placeholder usada para demonstração)",
-    });
     setImageUploading(false);
   };
 
@@ -111,7 +86,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     try {
       setLoading(true);
       
-      // Validação básica
+      // Basic validation
       if (!formData.name || !formData.price) {
         toast({
           title: "Campos obrigatórios",
@@ -121,43 +96,58 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         return;
       }
       
-      // Preparar dados para envio
+      // Prepare data for submission
       const productData = {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price) || 0,
-        category_id: formData.category_id === "null" ? null : formData.category_id,
+        category_id: formData.category_id === "null" || formData.category_id === "" ? null : formData.category_id,
         stock_quantity: parseInt(formData.stock_quantity) || 0,
-        unit: formData.unit,
+        min_stock_quantity: parseInt(formData.min_stock_quantity) || 5,
+        unit: formData.unit || "unidade",
         image_url: formData.image_url || '/placeholder.svg',
+        sku: formData.sku || null,
+        barcode: formData.barcode || null,
+        cost: parseFloat(formData.cost) || 0
       };
       
-      // Enviar para o Supabase
+      console.log("Sending product data:", productData);
+      
+      // Send to Supabase
       const { data, error } = await supabase
         .from("products")
         .insert(productData)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      console.log("Product created:", data);
       
       toast({
         title: "Produto adicionado",
         description: "O produto foi adicionado com sucesso",
       });
       
-      // Limpar formulário
+      // Clear form
       setFormData({
         name: "",
         description: "",
         price: "",
         category_id: "",
         stock_quantity: "0",
+        min_stock_quantity: "5",
         unit: "unidade",
         image_url: "",
+        sku: "",
+        barcode: "",
+        cost: "0"
       });
       setImagePreview(null);
       
-      // Callback de sucesso
+      // Success callback
       if (onSuccess) onSuccess();
       
     } catch (error: any) {
@@ -193,7 +183,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Preço (€) *</Label>
+              <Label htmlFor="price">Preço (AOA) *</Label>
               <Input
                 id="price"
                 name="price"
@@ -203,6 +193,19 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
                 onChange={handleChange}
                 placeholder="Ex: 12.50"
                 required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="cost">Custo (AOA)</Label>
+              <Input
+                id="cost"
+                name="cost"
+                type="number"
+                step="0.01"
+                value={formData.cost}
+                onChange={handleChange}
+                placeholder="Ex: 5.00"
               />
             </div>
             
@@ -235,6 +238,40 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
                 value={formData.stock_quantity}
                 onChange={handleChange}
                 placeholder="Ex: 10"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="min_stock_quantity">Estoque Mínimo</Label>
+              <Input
+                id="min_stock_quantity"
+                name="min_stock_quantity"
+                type="number"
+                value={formData.min_stock_quantity}
+                onChange={handleChange}
+                placeholder="Ex: 5"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="sku">SKU</Label>
+              <Input
+                id="sku"
+                name="sku"
+                value={formData.sku}
+                onChange={handleChange}
+                placeholder="Ex: ABC-123"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="barcode">Código de Barras</Label>
+              <Input
+                id="barcode"
+                name="barcode"
+                value={formData.barcode}
+                onChange={handleChange}
+                placeholder="Ex: 1234567890123"
               />
             </div>
             

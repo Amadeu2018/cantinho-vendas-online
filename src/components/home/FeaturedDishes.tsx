@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useDishes, Dish } from "@/hooks/use-dishes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {

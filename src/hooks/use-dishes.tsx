@@ -31,10 +31,10 @@ export const useDishes = () => {
     try {
       setLoading(true);
       
-      // Fetch products from Supabase with the correct query
+      // Fetch products from Supabase with a specific relationship hint to resolve ambiguity
       const { data, error } = await supabase
         .from('products')
-        .select('*, categories(id, name)');
+        .select('*, categories!products_category_id_fkey(id, name)');
       
       if (error) {
         throw error;
@@ -58,11 +58,16 @@ export const useDishes = () => {
             }
           }
           
+          // Ensure price is a number
+          const price = typeof product.price === 'string' 
+            ? parseFloat(product.price) 
+            : (typeof product.price === 'number' ? product.price : 0);
+          
           return {
             id: product.id,
             name: product.name,
             description: product.description || '',
-            price: Number(product.price) || 0,
+            price: price,
             image: product.image_url || '/placeholder.svg',
             image_url: product.image_url || '/placeholder.svg',
             category,

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,15 @@ const EventForm = () => {
     setLoading(true);
     
     try {
+      // Validate date format
+      if (formData.dataEvento) {
+        // Ensure it's a valid date
+        const date = new Date(formData.dataEvento);
+        if (isNaN(date.getTime())) {
+          throw new Error("Data do evento inválida");
+        }
+      }
+      
       // Enviar dados para o Supabase
       const { data, error } = await supabase
         .from('event_requests')
@@ -46,7 +56,7 @@ const EventForm = () => {
           email: formData.email,
           telefone: formData.telefone,
           tipo_evento: formData.tipoEvento,
-          data_evento: formData.dataEvento,
+          data_evento: formData.dataEvento, // Ensure this is a valid date string (YYYY-MM-DD)
           num_convidados: Number(formData.numConvidados),
           localizacao: formData.localizacao,
           mensagem: formData.mensagem,

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ImagePlus, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AddProductProps {
   onSuccess?: () => void;
@@ -33,6 +33,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchCategories();
@@ -96,6 +97,16 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         return;
       }
       
+      // Get the current user information
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para adicionar produtos",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Prepare data for submission
       const productData = {
         name: formData.name,
@@ -108,7 +119,8 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         image_url: formData.image_url || '/placeholder.svg',
         sku: formData.sku || null,
         barcode: formData.barcode || null,
-        cost: parseFloat(formData.cost) || 0
+        cost: parseFloat(formData.cost) || 0,
+        seller_id: user.id // Set the seller_id to the current user's ID
       };
       
       console.log("Sending product data:", productData);

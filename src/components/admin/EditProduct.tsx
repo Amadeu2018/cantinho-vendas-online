@@ -6,9 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ImagePlus, Save, Image, Upload, X } from "lucide-react";
+import { Loader2, ImagePlus, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditProductProps {
   product: any;
@@ -34,6 +34,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
   });
   const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchCategories();
@@ -97,6 +98,16 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         return;
       }
       
+      // Check authentication
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para editar produtos",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Prepare data for submission
       const productData = {
         name: formData.name,
@@ -110,6 +121,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         sku: formData.sku || null,
         barcode: formData.barcode || null,
         cost: parseFloat(formData.cost) || 0,
+        seller_id: user.id // Add the current user's ID
       };
       
       console.log("Updating product with data:", productData);

@@ -6,7 +6,7 @@ export interface Dish {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | string;
   image: string;
   image_url?: string; 
   category?: string;
@@ -47,8 +47,10 @@ export const useDishes = () => {
           let category = 'main';
           
           if (product.categories && typeof product.categories === 'object') {
-            // Safely access the name property
-            const categoryName = (product.categories as any)?.name?.toLowerCase() || '';
+            // Safely access the name property with type checking
+            const categoryObj = product.categories as { name?: string } | null;
+            const categoryName = categoryObj?.name?.toLowerCase() || '';
+            
             if (categoryName.includes('entrada')) {
               category = 'appetizer';
             } else if (categoryName.includes('sobremesa') || categoryName.includes('doce')) {

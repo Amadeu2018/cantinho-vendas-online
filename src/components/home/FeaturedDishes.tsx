@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useDishes } from "@/hooks/use-dishes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dish } from "@/types/dish";
+import { toast } from "sonner";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {
@@ -28,6 +29,10 @@ const FeaturedDishes = () => {
       name: dish.name,
       price: dish.price,
       image: dish.image_url
+    });
+    
+    toast.success(`${dish.name} adicionado ao carrinho!`, {
+      duration: 2000,
     });
   };
 
@@ -76,14 +81,34 @@ const FeaturedDishes = () => {
                       >
                         <Heart className={cn("h-5 w-5", isFavorite(dish.id) ? "fill-red-500 text-red-500" : "")} />
                       </Button>
+                      
+                      {dish.promotion && (
+                        <div className="absolute top-2 left-2">
+                          <span className="bg-cantinho-terracotta text-white text-xs font-bold px-2 py-1 rounded-md flex items-center">
+                            <Heart className="h-3 w-3 mr-1" />
+                            {dish.promotion.label || `${dish.promotion.discount}% OFF`}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <CardContent className="p-4">
                       <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-cantinho-navy">
-                          {formatPrice(dish.price)}
-                        </span>
+                        {dish.promotion ? (
+                          <div className="flex flex-col">
+                            <span className="text-sm line-through text-gray-400">
+                              {formatPrice(dish.price)}
+                            </span>
+                            <span className="font-bold text-cantinho-navy">
+                              {formatPrice(dish.price * (100 - dish.promotion.discount) / 100)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-cantinho-navy">
+                            {formatPrice(dish.price)}
+                          </span>
+                        )}
                         <Button 
                           variant="ghost" 
                           size="icon" 

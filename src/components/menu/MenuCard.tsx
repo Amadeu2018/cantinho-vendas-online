@@ -26,7 +26,7 @@ const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps)
   const { addItem } = useCart();
 
   // Ensure price is a number
-  const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+  const price = dish.price;
 
   const handleAddToCart = () => {
     addItem({

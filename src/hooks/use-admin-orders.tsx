@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,26 +39,7 @@ export function useAdminOrders() {
         }
         
         // Convert payment method to the expected PaymentMethod object format
-        let paymentMethodObj: PaymentMethod = { name: 'Desconhecido' };
-        
-        if (order.payment_method !== null && order.payment_method !== undefined) {
-          if (typeof order.payment_method === 'string') {
-            paymentMethodObj = { name: order.payment_method };
-          } else if (typeof order.payment_method === 'number') {
-            paymentMethodObj = { name: String(order.payment_method) };
-          } else if (typeof order.payment_method === 'boolean') {
-            paymentMethodObj = { name: order.payment_method ? 'Confirmado' : 'Não Confirmado' };
-          } else if (typeof order.payment_method === 'object') {
-            if (Array.isArray(order.payment_method)) {
-              paymentMethodObj = { name: 'Lista de Métodos' };
-            } else if (order.payment_method && 'name' in order.payment_method && 
-                      typeof order.payment_method.name === 'string') {
-              paymentMethodObj = order.payment_method as PaymentMethod;
-            } else {
-              paymentMethodObj = { name: 'Objeto' };
-            }
-          }
-        }
+        const paymentMethodObj: PaymentMethod = convertToPaymentMethodObject(order.payment_method);
         
         return {
           ...order,

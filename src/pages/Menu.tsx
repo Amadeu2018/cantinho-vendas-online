@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/Navbar";
@@ -14,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PromotionsSection from "@/components/promotions/PromotionsSection";
-import { useDishes, Dish } from "@/hooks/use-dishes";
+import { useDishes } from "@/hooks/use-dishes";
+import { Dish } from "@/types/dish";
 
 const Menu = () => {
   const { dishes, loading, isFavorite, toggleFavorite } = useDishes();

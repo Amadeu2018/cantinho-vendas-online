@@ -3,22 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dish } from "@/types/dish";
 
-export interface Dish {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  image_url?: string; 
-  category?: string;
-  tags?: string[];
-  popular?: boolean;
-  promotion?: {
-    discount: number;
-    label?: string;
-  };
-}
-
+// Remove the duplicate interface since we're importing the type
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +30,7 @@ export const useDishes = () => {
         // Map to the Dish format
         const mappedDishes: Dish[] = data.map(product => {
           // Determine category from categories relation or fallback
-          let category = 'main';
+          let category: 'appetizer' | 'main' | 'dessert' = 'main';
           
           if (product.categories && typeof product.categories === 'object') {
             // Safely access the name property with type checking
@@ -71,7 +56,6 @@ export const useDishes = () => {
             name: product.name,
             description: product.description || '',
             price: price,
-            image: product.image_url || '/placeholder.svg',
             image_url: product.image_url || '/placeholder.svg',
             category,
             popular: Math.random() > 0.7, // Just for demo - some random items are popular
@@ -90,7 +74,6 @@ export const useDishes = () => {
           name: "Feijoada Completa",
           description: "Tradicional feijoada brasileira com todas as carnes e acompanhamentos",
           price: 15.9,
-          image: "/placeholder.svg",
           image_url: "/placeholder.svg",
           category: "main",
           tags: ["Brasileiro", "Tradicional"],
@@ -101,7 +84,6 @@ export const useDishes = () => {
           name: "Moqueca de Peixe",
           description: "Peixe fresco preparado com leite de coco, dendê, tomate e pimentão",
           price: 18.5,
-          image: "/placeholder.svg",
           image_url: "/placeholder.svg",
           category: "main",
           tags: ["Frutos do Mar", "Especialidade"],
@@ -112,7 +94,6 @@ export const useDishes = () => {
           name: "Picanha na Brasa",
           description: "Corte nobre de picanha grelhada, acompanhada de vinagrete e farofa",
           price: 24.9,
-          image: "/placeholder.svg",
           image_url: "/placeholder.svg",
           category: "main",
           tags: ["Churrasco"],
@@ -123,7 +104,6 @@ export const useDishes = () => {
           name: "Coxinha",
           description: "Tradicional salgado brasileiro recheado com frango desfiado",
           price: 3.5,
-          image: "/placeholder.svg",
           image_url: "/placeholder.svg",
           category: "appetizer",
           tags: ["Salgados"]
@@ -133,7 +113,6 @@ export const useDishes = () => {
           name: "Mousse de Maracujá",
           description: "Sobremesa cremosa de maracujá com calda fresca",
           price: 6.9,
-          image: "/placeholder.svg",
           image_url: "/placeholder.svg",
           category: "dessert",
           tags: ["Doces"]

@@ -6,8 +6,9 @@ import { PlusCircle, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useDishes, Dish } from "@/hooks/use-dishes";
+import { useDishes } from "@/hooks/use-dishes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dish } from "@/types/dish";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {
@@ -23,7 +24,7 @@ const FeaturedDishes = () => {
 
   const handleAddToCart = (dish: Dish) => {
     addItem({
-      id: dish.id,
+      id: parseInt(dish.id),
       name: dish.name,
       price: typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price,
       image: dish.image_url || '/placeholder.svg'

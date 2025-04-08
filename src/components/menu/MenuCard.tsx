@@ -89,7 +89,7 @@ const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps)
                   {formatPrice(price)}
                 </span>
                 <span className="font-bold text-cantinho-navy">
-                  {formatPrice(Math.round(price * (100 - dish.promotion.discount) / 100))}
+                  {formatPrice(price * (100 - dish.promotion.discount) / 100)}
                 </span>
               </div>
             ) : (

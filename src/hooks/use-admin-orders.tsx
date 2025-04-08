@@ -94,7 +94,7 @@ export function useAdminOrders() {
       
       // It's an object
       if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
-        return { name: paymentMethod.name };
+        return paymentMethod as PaymentMethod;
       }
       
       return { name: 'Objeto' };

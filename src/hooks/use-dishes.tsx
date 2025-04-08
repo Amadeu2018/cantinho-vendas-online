@@ -6,7 +6,7 @@ export interface Dish {
   id: string;
   name: string;
   description: string;
-  price: number | string;
+  price: number;
   image: string;
   image_url?: string; 
   category?: string;
@@ -34,7 +34,7 @@ export const useDishes = () => {
       // Fetch products from Supabase with a specific relationship hint to resolve ambiguity
       const { data, error } = await supabase
         .from('products')
-        .select('*, categories!products_category_id_fkey(id, name)');
+        .select('*, categories!inner(id, name)');
       
       if (error) {
         throw error;
@@ -60,7 +60,7 @@ export const useDishes = () => {
             }
           }
           
-          // Ensure price is a number
+          // Ensure price is always a number
           const price = typeof product.price === 'string' 
             ? parseFloat(product.price) 
             : (typeof product.price === 'number' ? product.price : 0);

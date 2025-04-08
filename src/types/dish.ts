@@ -8,6 +8,6 @@ export type Dish = {
   category: 'appetizer' | 'main' | 'dessert';
   promotion?: {
     discount: number;
-    label: string;
+    label?: string;
   };
 };

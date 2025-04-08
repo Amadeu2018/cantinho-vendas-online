@@ -34,21 +34,24 @@ const Menu = () => {
     // Filter menu items based on search term and price filter
     const filterItems = () => {
       const filtered = {
-        appetizer: dishes.filter(dish => 
-          dish.category === "appetizer" && 
-          dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
-        ),
-        main: dishes.filter(dish => 
-          dish.category === "main" && 
-          dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
-        ),
-        dessert: dishes.filter(dish => 
-          dish.category === "dessert" && 
-          dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (priceFilter === "" || priceFilter === "all" || applyPriceFilter(dish.price, priceFilter))
-        )
+        appetizer: dishes.filter(dish => {
+          const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+          return dish.category === "appetizer" && 
+            dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (priceFilter === "" || priceFilter === "all" || applyPriceFilter(price, priceFilter));
+        }),
+        main: dishes.filter(dish => {
+          const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+          return dish.category === "main" && 
+            dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (priceFilter === "" || priceFilter === "all" || applyPriceFilter(price, priceFilter));
+        }),
+        dessert: dishes.filter(dish => {
+          const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+          return dish.category === "dessert" && 
+            dish.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (priceFilter === "" || priceFilter === "all" || applyPriceFilter(price, priceFilter));
+        })
       };
       setFilteredItems(filtered);
     };

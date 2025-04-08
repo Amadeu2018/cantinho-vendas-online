@@ -59,42 +59,47 @@ const FeaturedDishes = () => {
           <div className="relative">
             <ScrollArea className="w-full pb-4">
               <div className="flex space-x-4 pb-4">
-                {featuredDishes.map((dish) => (
-                  <Card key={dish.id} className="overflow-hidden hover:shadow-lg transition-shadow min-w-[280px] max-w-[320px]">
-                    <div className="h-48 overflow-hidden relative">
-                      <img 
-                        src={dish.image_url || '/placeholder.svg'} 
-                        alt={dish.name} 
-                        className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
-                        onClick={() => toggleFavorite(dish.id)}
-                      >
-                        <Heart className={cn("h-5 w-5", isFavorite(dish.id) ? "fill-red-500 text-red-500" : "")} />
-                      </Button>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-cantinho-navy">
-                          {formatPrice(typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price)}
-                        </span>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleAddToCart(dish)}
-                          className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
+                {featuredDishes.map((dish) => {
+                  // Ensure price is a number
+                  const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+                  
+                  return (
+                    <Card key={dish.id} className="overflow-hidden hover:shadow-lg transition-shadow min-w-[280px] max-w-[320px]">
+                      <div className="h-48 overflow-hidden relative">
+                        <img 
+                          src={dish.image_url || '/placeholder.svg'} 
+                          alt={dish.name} 
+                          className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
+                          onClick={() => toggleFavorite(dish.id)}
                         >
-                          <PlusCircle className="h-5 w-5" />
+                          <Heart className={cn("h-5 w-5", isFavorite(dish.id) ? "fill-red-500 text-red-500" : "")} />
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-cantinho-navy">
+                            {formatPrice(price)}
+                          </span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleAddToCart(dish)}
+                            className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
+                          >
+                            <PlusCircle className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>

@@ -25,11 +25,14 @@ type MenuCardProps = {
 const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps) => {
   const { addItem } = useCart();
 
+  // Ensure price is a number
+  const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+
   const handleAddToCart = () => {
     addItem({
       id: parseInt(dish.id), // Convert UUID to number for compatibility with existing cart
       name: dish.name,
-      price: dish.price,
+      price: price,
       image: dish.image_url
     });
     
@@ -83,14 +86,14 @@ const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps)
             {dish.promotion ? (
               <div className="flex flex-col">
                 <span className="text-sm line-through text-gray-400">
-                  {formatPrice(dish.price)}
+                  {formatPrice(price)}
                 </span>
                 <span className="font-bold text-cantinho-navy">
-                  {formatPrice(Math.round(dish.price * (100 - dish.promotion.discount) / 100))}
+                  {formatPrice(Math.round(price * (100 - dish.promotion.discount) / 100))}
                 </span>
               </div>
             ) : (
-              <span className="font-bold text-cantinho-navy">{formatPrice(dish.price)}</span>
+              <span className="font-bold text-cantinho-navy">{formatPrice(price)}</span>
             )}
           </div>
           <Button 

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Dish } from "@/types/dish";
 
 export interface Dish {
   id: string;
@@ -34,7 +35,7 @@ export const useDishes = () => {
       // Fetch products from Supabase with a specific relationship hint to resolve ambiguity
       const { data, error } = await supabase
         .from('products')
-        .select('*, categories!inner(id, name)');
+        .select('*, categories:category_id(id, name)');
       
       if (error) {
         throw error;

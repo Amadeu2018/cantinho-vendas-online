@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import DishReviews from "@/components/reviews/DishReviews";
-import { Dish } from "@/hooks/use-dishes";
+import { Dish } from "@/types/dish";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('pt-AO', {

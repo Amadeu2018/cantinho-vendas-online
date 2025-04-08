@@ -39,7 +39,11 @@ export function useAdminOrders() {
         }
         
         // Convert payment method to the expected PaymentMethod object format
-        const paymentMethodObj: PaymentMethod = convertToPaymentMethodObject(order.payment_method);
+        let paymentMethodObj: PaymentMethod = { name: 'Desconhecido' };
+        
+        if (order.payment_method) {
+          paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
+        }
         
         return {
           ...order,

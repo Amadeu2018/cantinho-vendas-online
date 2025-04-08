@@ -10,24 +10,54 @@ export const useDishes = () => {
 
   useEffect(() => {
     fetchDishes();
+    // Load favorites from local storage if available
+    const savedFavorites = localStorage.getItem('dish_favorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
   }, []);
 
   const fetchDishes = async () => {
     try {
       setLoading(true);
       
-      // Fetch products from Supabase with a specific relationship hint to resolve ambiguity
-      const { data, error } = await supabase
+      // Fetch products from Supabase
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*, categories:category_id(id, name)');
       
-      if (error) {
-        throw error;
+      if (productsError) {
+        throw productsError;
       }
       
-      if (data) {
+      // Fetch active promotions
+      const { data: promotionsData, error: promotionsError } = await supabase
+        .from('promotions')
+        .select('*')
+        .lte('start_date', new Date().toISOString())
+        .gte('end_date', new Date().toISOString());
+      
+      if (promotionsError) {
+        console.error("Error fetching promotions:", promotionsError);
+        // Continue without promotions
+      }
+      
+      // Create a map of product_id to promotion
+      const promotionsMap: Record<string, { discount: number, label?: string }> = {};
+      if (promotionsData) {
+        promotionsData.forEach(promo => {
+          if (promo.product_id) {
+            promotionsMap[promo.product_id] = {
+              discount: promo.discount_percentage || 10,
+              label: `${promo.discount_percentage}% OFF`
+            };
+          }
+        });
+      }
+      
+      if (productsData) {
         // Map to the Dish format
-        const mappedDishes: Dish[] = data.map(product => {
+        const mappedDishes: Dish[] = productsData.map(product => {
           // Determine category from categories relation or fallback
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
           
@@ -50,6 +80,11 @@ export const useDishes = () => {
             ? parseFloat(product.price) 
             : (typeof product.price === 'number' ? product.price : 0);
           
+          // Check if the product has a promotion
+          const promotion = product.id && product.id in promotionsMap 
+            ? promotionsMap[product.id] 
+            : undefined;
+          
           return {
             id: product.id,
             name: product.name,
@@ -57,69 +92,79 @@ export const useDishes = () => {
             price: price,
             image_url: product.image_url || '/placeholder.svg',
             category,
-            popular: Math.random() > 0.7, // Just for demo - some random items are popular
-            tags: []
+            popular: Math.random() > 0.7, // Random for demo, ideally this would be a field in the database
+            tags: [],
+            promotion
           };
         });
         
         setDishes(mappedDishes);
+      } else {
+        // Fallback to static data if no products found
+        setDishes(getFallbackDishes());
       }
     } catch (error) {
       console.error("Error fetching dishes:", error);
       // Fallback to static data in case of error
-      setDishes([
-        {
-          id: "1",
-          name: "Feijoada Completa",
-          description: "Tradicional feijoada brasileira com todas as carnes e acompanhamentos",
-          price: 15.9,
-          image_url: "/placeholder.svg",
-          category: "main",
-          tags: ["Brasileiro", "Tradicional"],
-          popular: true
-        },
-        {
-          id: "2",
-          name: "Moqueca de Peixe",
-          description: "Peixe fresco preparado com leite de coco, dendê, tomate e pimentão",
-          price: 18.5,
-          image_url: "/placeholder.svg",
-          category: "main",
-          tags: ["Frutos do Mar", "Especialidade"],
-          popular: true
-        },
-        {
-          id: "3",
-          name: "Picanha na Brasa",
-          description: "Corte nobre de picanha grelhada, acompanhada de vinagrete e farofa",
-          price: 24.9,
-          image_url: "/placeholder.svg",
-          category: "main",
-          tags: ["Churrasco"],
-          popular: true
-        },
-        {
-          id: "4",
-          name: "Coxinha",
-          description: "Tradicional salgado brasileiro recheado com frango desfiado",
-          price: 3.5,
-          image_url: "/placeholder.svg",
-          category: "appetizer",
-          tags: ["Salgados"]
-        },
-        {
-          id: "5",
-          name: "Mousse de Maracujá",
-          description: "Sobremesa cremosa de maracujá com calda fresca",
-          price: 6.9,
-          image_url: "/placeholder.svg",
-          category: "dessert",
-          tags: ["Doces"]
-        }
-      ]);
+      setDishes(getFallbackDishes());
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Function to get fallback dishes in case of error
+  const getFallbackDishes = (): Dish[] => {
+    return [
+      {
+        id: "1",
+        name: "Feijoada Completa",
+        description: "Tradicional feijoada brasileira com todas as carnes e acompanhamentos",
+        price: 15.9,
+        image_url: "/placeholder.svg",
+        category: "main",
+        tags: ["Brasileiro", "Tradicional"],
+        popular: true,
+        promotion: { discount: 10 }
+      },
+      {
+        id: "2",
+        name: "Moqueca de Peixe",
+        description: "Peixe fresco preparado com leite de coco, dendê, tomate e pimentão",
+        price: 18.5,
+        image_url: "/placeholder.svg",
+        category: "main",
+        tags: ["Frutos do Mar", "Especialidade"],
+        popular: true
+      },
+      {
+        id: "3",
+        name: "Picanha na Brasa",
+        description: "Corte nobre de picanha grelhada, acompanhada de vinagrete e farofa",
+        price: 24.9,
+        image_url: "/placeholder.svg",
+        category: "main",
+        tags: ["Churrasco"],
+        popular: true
+      },
+      {
+        id: "4",
+        name: "Coxinha",
+        description: "Tradicional salgado brasileiro recheado com frango desfiado",
+        price: 3.5,
+        image_url: "/placeholder.svg",
+        category: "appetizer",
+        tags: ["Salgados"]
+      },
+      {
+        id: "5",
+        name: "Mousse de Maracujá",
+        description: "Sobremesa cremosa de maracujá com calda fresca",
+        price: 6.9,
+        image_url: "/placeholder.svg",
+        category: "dessert",
+        tags: ["Doces"]
+      }
+    ];
   };
   
   const featuredDishes = dishes.filter(dish => dish.popular);
@@ -127,11 +172,16 @@ export const useDishes = () => {
   const isFavorite = (dishId: string) => favorites.includes(dishId);
   
   const toggleFavorite = (dishId: string) => {
+    let newFavorites: string[];
     if (favorites.includes(dishId)) {
-      setFavorites(favorites.filter(id => id !== dishId));
+      newFavorites = favorites.filter(id => id !== dishId);
     } else {
-      setFavorites([...favorites, dishId]);
+      newFavorites = [...favorites, dishId];
     }
+    setFavorites(newFavorites);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('dish_favorites', JSON.stringify(newFavorites));
   };
 
   return { 
@@ -139,7 +189,8 @@ export const useDishes = () => {
     featuredDishes, 
     loading, 
     isFavorite, 
-    toggleFavorite 
+    toggleFavorite,
+    refetch: fetchDishes
   };
 };
 

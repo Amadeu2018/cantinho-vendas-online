@@ -24,7 +24,7 @@ export const useDishes = () => {
       // Fetch products from Supabase
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*, categories:category_id(id, name)');
+        .select('*, categories(id, name)');
       
       if (productsError) {
         throw productsError;

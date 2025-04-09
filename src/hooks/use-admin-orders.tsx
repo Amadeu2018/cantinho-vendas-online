@@ -41,7 +41,7 @@ export function useAdminOrders() {
         // Convert payment method to the expected PaymentMethod object format
         let paymentMethodObj: PaymentMethod = { name: 'Desconhecido' };
         
-        if (order.payment_method) {
+        if (order.payment_method !== null && order.payment_method !== undefined) {
           paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
         }
         
@@ -93,7 +93,7 @@ export function useAdminOrders() {
     
     if (typeof paymentMethod === 'object') {
       if (Array.isArray(paymentMethod)) {
-        return { name: 'Lista de Métodos' };
+        return { name: paymentMethod.join(', ') || 'Lista de Métodos' };
       }
       
       // It's an object
@@ -101,7 +101,8 @@ export function useAdminOrders() {
         return paymentMethod as PaymentMethod;
       }
       
-      return { name: 'Objeto' };
+      // Handle generic object by converting to a string representation
+      return { name: 'Método de Pagamento Personalizado' };
     }
     
     return { name: 'Desconhecido' };

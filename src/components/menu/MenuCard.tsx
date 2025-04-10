@@ -26,11 +26,11 @@ const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps)
   const { addItem } = useCart();
 
   // Ensure price is a number
-  const price = dish.price;
+  const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
 
   const handleAddToCart = () => {
     addItem({
-      id: parseInt(dish.id), // Convert UUID to number for compatibility with existing cart
+      id: dish.id,
       name: dish.name,
       price: price,
       image: dish.image_url

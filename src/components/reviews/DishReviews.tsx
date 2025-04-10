@@ -16,6 +16,9 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
   const { reviews, loading, averageRating, addReview } = useReviews(dishId);
   const [showAddReview, setShowAddReview] = useState(false);
 
+  // Check if dishId is a valid UUID format for database query
+  const isValidUuid = dishId && typeof dishId === 'string' && dishId.length >= 32;
+
   const handleAddReview = (reviewData: { userName: string; rating: number; comment: string }) => {
     addReview(reviewData.rating, reviewData.comment, reviewData.userName);
     setShowAddReview(false);
@@ -48,7 +51,9 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
           <ReviewsList reviews={reviews} dishId={dishId} />
         ) : (
           <p className="text-center py-4 text-gray-500">
-            Ainda não há avaliações para este prato.
+            {isValidUuid 
+              ? "Ainda não há avaliações para este prato."
+              : "Avaliações disponíveis após salvar o produto."}
           </p>
         )}
 
@@ -65,6 +70,7 @@ const DishReviews = ({ dishId, dishName }: DishReviewsProps) => {
             <Button 
               onClick={() => setShowAddReview(true)}
               variant="outline"
+              disabled={!isValidUuid}
             >
               Adicionar Avaliação
             </Button>

@@ -12,6 +12,16 @@ export const useReviews = (dishId: string) => {
   const fetchReviews = async () => {
     try {
       setLoading(true);
+      
+      // Handle potential non-UUID dishId (causing the error in console)
+      if (!dishId || typeof dishId !== 'string' || dishId.length < 32) {
+        console.log("Invalid dishId format for database query:", dishId);
+        setReviews([]);
+        setAverageRating(0);
+        setLoading(false);
+        return;
+      }
+      
       // Fetch reviews from the reviews table
       const { data, error } = await supabase
         .from('reviews')
@@ -41,11 +51,14 @@ export const useReviews = (dishId: string) => {
       }
     } catch (error: any) {
       console.error('Error fetching reviews:', error);
-      toast({
-        title: 'Erro ao carregar avaliações',
-        description: error.message,
-        variant: 'destructive',
-      });
+      // Don't show toast for expected errors with non-UUID dishIds
+      if (!error.message.includes("invalid input syntax for type uuid")) {
+        toast({
+          title: 'Erro ao carregar avaliações',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -53,6 +66,16 @@ export const useReviews = (dishId: string) => {
 
   const addReview = async (rating: number, comment: string, userName: string) => {
     try {
+      // Validate dishId format before trying to add review
+      if (!dishId || typeof dishId !== 'string' || dishId.length < 32) {
+        toast({
+          title: 'Erro ao adicionar avaliação',
+          description: 'ID do produto inválido',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
       // Add review to the reviews table
       const { error } = await supabase
         .from('reviews')

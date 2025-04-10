@@ -42,7 +42,10 @@ export function useAdminOrders() {
         let paymentMethodObj: PaymentMethod = { name: 'Desconhecido' };
         
         if (order.payment_method !== null && order.payment_method !== undefined) {
-          paymentMethodObj = convertToPaymentMethodObject(order.payment_method);
+          // The issue is here: we need to explicitly handle all possible types
+          paymentMethodObj = {
+            name: convertToPaymentMethodString(order.payment_method)
+          };
         }
         
         return {
@@ -73,7 +76,42 @@ export function useAdminOrders() {
     }
   };
 
-  // Helper function to convert any payment method type to the expected object format
+  // Helper function to convert any payment method type to a string representation
+  const convertToPaymentMethodString = (paymentMethod: any): string => {
+    if (paymentMethod === null || paymentMethod === undefined) {
+      return 'Desconhecido';
+    }
+    
+    if (typeof paymentMethod === 'string') {
+      return paymentMethod;
+    }
+    
+    if (typeof paymentMethod === 'number') {
+      return String(paymentMethod);
+    }
+    
+    if (typeof paymentMethod === 'boolean') {
+      return paymentMethod ? 'Confirmado' : 'Não Confirmado';
+    }
+    
+    if (typeof paymentMethod === 'object') {
+      if (Array.isArray(paymentMethod)) {
+        return paymentMethod.join(', ') || 'Lista de Métodos';
+      }
+      
+      // It's an object
+      if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
+        return paymentMethod.name;
+      }
+      
+      // Handle generic object by converting to a string representation
+      return 'Método de Pagamento Personalizado';
+    }
+    
+    return 'Desconhecido';
+  };
+
+  // Original helper function (now unused, but kept for reference)
   const convertToPaymentMethodObject = (paymentMethod: any): PaymentMethod => {
     if (paymentMethod === null || paymentMethod === undefined) {
       return { name: 'Desconhecido' };

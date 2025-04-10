@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dish } from "@/types/dish";
+import { useToast } from "@/hooks/use-toast";
 
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchDishes();
@@ -20,8 +22,9 @@ export const useDishes = () => {
   const fetchDishes = async () => {
     try {
       setLoading(true);
+      console.log("Fetching dishes from Supabase...");
       
-      // Fetch products from Supabase
+      // Fetch products from Supabase with their categories
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*, categories(id, name)');
@@ -30,17 +33,22 @@ export const useDishes = () => {
         throw productsError;
       }
       
+      console.log("Fetched products:", productsData);
+      
       // Fetch active promotions
+      const now = new Date().toISOString();
       const { data: promotionsData, error: promotionsError } = await supabase
         .from('promotions')
         .select('*')
-        .lte('start_date', new Date().toISOString())
-        .gte('end_date', new Date().toISOString());
+        .lte('start_date', now)
+        .gte('end_date', now);
       
       if (promotionsError) {
         console.error("Error fetching promotions:", promotionsError);
         // Continue without promotions
       }
+      
+      console.log("Fetched promotions:", promotionsData);
       
       // Create a map of product_id to promotion
       const promotionsMap: Record<string, { discount: number, label?: string }> = {};
@@ -55,7 +63,7 @@ export const useDishes = () => {
         });
       }
       
-      if (productsData) {
+      if (productsData && productsData.length > 0) {
         // Map to the Dish format
         const mappedDishes: Dish[] = productsData.map(product => {
           // Determine category from categories relation or fallback
@@ -98,15 +106,30 @@ export const useDishes = () => {
           };
         });
         
+        console.log("Mapped dishes:", mappedDishes);
         setDishes(mappedDishes);
       } else {
+        console.log("No products found, using fallback data");
         // Fallback to static data if no products found
         setDishes(getFallbackDishes());
+        
+        // Show a toast to inform the user
+        toast({
+          title: "Dados de demonstração",
+          description: "Usando dados de exemplo. Adicione produtos no painel de administração.",
+        });
       }
     } catch (error) {
       console.error("Error fetching dishes:", error);
       // Fallback to static data in case of error
       setDishes(getFallbackDishes());
+      
+      // Show a toast to inform the user
+      toast({
+        title: "Erro ao carregar produtos",
+        description: "Usando dados de exemplo. Verifique a conexão com o banco de dados.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

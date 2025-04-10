@@ -38,15 +38,9 @@ export function useAdminOrders() {
           console.error("Error parsing customer info:", e);
         }
         
-        // Convert payment method to the expected PaymentMethod object format
-        let paymentMethodObj: PaymentMethod = { name: 'Desconhecido' };
-        
-        if (order.payment_method !== null && order.payment_method !== undefined) {
-          // The issue is here: we need to explicitly handle all possible types
-          paymentMethodObj = {
-            name: convertToPaymentMethodString(order.payment_method)
-          };
-        }
+        // Convert payment method to string first, then create PaymentMethod object
+        const paymentMethodStr = convertToPaymentMethodString(order.payment_method);
+        const paymentMethodObj: PaymentMethod = { name: paymentMethodStr };
         
         return {
           ...order,
@@ -111,41 +105,7 @@ export function useAdminOrders() {
     return 'Desconhecido';
   };
 
-  // Original helper function (now unused, but kept for reference)
-  const convertToPaymentMethodObject = (paymentMethod: any): PaymentMethod => {
-    if (paymentMethod === null || paymentMethod === undefined) {
-      return { name: 'Desconhecido' };
-    }
-    
-    if (typeof paymentMethod === 'string') {
-      return { name: paymentMethod };
-    }
-    
-    if (typeof paymentMethod === 'number') {
-      return { name: String(paymentMethod) };
-    }
-    
-    if (typeof paymentMethod === 'boolean') {
-      return { name: paymentMethod ? 'Confirmado' : 'Não Confirmado' };
-    }
-    
-    if (typeof paymentMethod === 'object') {
-      if (Array.isArray(paymentMethod)) {
-        return { name: paymentMethod.join(', ') || 'Lista de Métodos' };
-      }
-      
-      // It's an object
-      if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
-        return paymentMethod as PaymentMethod;
-      }
-      
-      // Handle generic object by converting to a string representation
-      return { name: 'Método de Pagamento Personalizado' };
-    }
-    
-    return { name: 'Desconhecido' };
-  };
-
+  // Function to handle order status changes
   const handleStatusChange = async (orderId: string, status: string) => {
     try {
       const { error } = await supabase

@@ -53,7 +53,7 @@ export const useDishes = () => {
       // Create a map of product_id to promotion
       const promotionsMap: Record<string, { discount: number, label?: string }> = {};
       if (promotionsData) {
-        promotionsData.forEach(promo => {
+        promotionsData.forEach((promo: any) => {
           if (promo.product_id) {
             promotionsMap[promo.product_id] = {
               discount: promo.discount_percentage || 10,
@@ -65,7 +65,7 @@ export const useDishes = () => {
       
       if (productsData && productsData.length > 0) {
         // Map to the Dish format
-        const mappedDishes: Dish[] = productsData.map(product => {
+        const mappedDishes: Dish[] = productsData.map((product: any) => {
           // Determine category from categories relation or fallback
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
           

@@ -38,7 +38,7 @@ export function useAdminOrders() {
           console.error("Error parsing customer info:", e);
         }
         
-        // Convert payment method to string first, then create PaymentMethod object
+        // Convert payment method to a PaymentMethod object
         const paymentMethodStr = convertToPaymentMethodString(order.payment_method);
         const paymentMethodObj: PaymentMethod = { name: paymentMethodStr };
         

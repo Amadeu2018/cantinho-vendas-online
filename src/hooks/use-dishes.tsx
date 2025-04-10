@@ -24,10 +24,10 @@ export const useDishes = () => {
       setLoading(true);
       console.log("Fetching dishes from Supabase...");
       
-      // Fetch products from Supabase with their categories
+      // Fetch products from Supabase with specified relationship to fix the SQL error
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*, categories(id, name)');
+        .select('*, categories!fk_product_category(id, name)');
       
       if (productsError) {
         throw productsError;

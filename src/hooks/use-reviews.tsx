@@ -15,8 +15,10 @@ export const useReviews = (dishId: string) => {
     try {
       setLoading(true);
       
-      // Handle potential non-UUID dishId (causing the error in console)
-      if (!dishId || typeof dishId !== 'string' || dishId.length < 32) {
+      // Check if dishId is valid
+      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dishId);
+      
+      if (!dishId || !isValidUuid) {
         console.log("Invalid dishId format for database query:", dishId);
         setReviews([]);
         setAverageRating(0);
@@ -27,7 +29,7 @@ export const useReviews = (dishId: string) => {
       // Fetch reviews from the reviews table
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, profiles(email)')
         .eq('product_id', dishId);
       
       if (error) throw error;
@@ -35,14 +37,21 @@ export const useReviews = (dishId: string) => {
       console.log("Fetched reviews:", data);
       
       // Convert to our Review type
-      const convertedReviews: Review[] = data?.map((review: any) => ({
-        id: review.id,
-        dishId: review.product_id,
-        userName: review.user_id || 'Anônimo', // We'll update this to show actual usernames
-        rating: review.rating,
-        comment: review.comment || '',
-        date: new Date(review.created_at).toISOString()
-      })) || [];
+      const convertedReviews: Review[] = data?.map((review: any) => {
+        // Get username from profile email or fallback to user_id
+        const userName = review.profiles?.email 
+          ? review.profiles.email.split('@')[0] 
+          : (review.user_id || 'Anônimo');
+          
+        return {
+          id: review.id,
+          dishId: review.product_id,
+          userName: userName,
+          rating: review.rating,
+          comment: review.comment || '',
+          date: new Date(review.created_at).toISOString()
+        };
+      }) || [];
       
       setReviews(convertedReviews);
       
@@ -67,7 +76,9 @@ export const useReviews = (dishId: string) => {
   const addReview = async (rating: number, comment: string, userName: string) => {
     try {
       // Validate dishId format before trying to add review
-      if (!dishId || typeof dishId !== 'string' || dishId.length < 32) {
+      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dishId);
+      
+      if (!dishId || !isValidUuid) {
         toast.error('ID do produto inválido');
         return;
       }
@@ -79,7 +90,7 @@ export const useReviews = (dishId: string) => {
           product_id: dishId,
           rating: rating,
           comment: comment,
-          user_id: user?.id || userName // Use authenticated user ID if available, otherwise use the provided name
+          user_id: user?.id || 'anonymous' // Use authenticated user ID if available
         });
       
       if (error) throw error;

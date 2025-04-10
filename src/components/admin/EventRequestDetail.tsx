@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CalendarDays, Users, MapPin, Phone, Mail, Clock, ArrowLeft, FileText, ListTodo, Building, BanknoteIcon } from "lucide-react";
+import { CalendarDays, Users, MapPin, Phone, Mail, Clock, ArrowLeft, FileText, ListTodo, Building, BanknoteIcon, Download, Printer } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EventInvoiceForm from "./EventInvoiceForm";
+import { usePDF } from "react-to-pdf";
 import type { EventRequest } from "./AdminEventRequests";
 
 interface EventRequestDetailProps {
@@ -32,10 +33,33 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(true);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchInvoices();
+
+    const channel = supabase
+      .channel('event-request-changes')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'event_requests',
+        filter: `id=eq.${request.id}`
+      }, payload => {
+        if (payload.new) {
+          request.status = payload.new.status;
+          if (payload.new.atendido_em) {
+            request.atendido_em = payload.new.atendido_em;
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [request.id]);
 
   const fetchInvoices = async () => {
@@ -100,7 +124,6 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
       if (error) throw error;
 
-      // Atualizar o estado local
       setInvoices(
         invoices.map((invoice) =>
           invoice.id === invoiceId
@@ -132,7 +155,6 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
       if (error) throw error;
 
-      // Atualizar o estado local
       setInvoices(invoices.filter((invoice) => invoice.id !== invoiceId));
 
       toast({
@@ -149,6 +171,23 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
     }
   };
 
+  const handleExportInvoicePDF = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setTimeout(() => {
+      if (invoiceRef.current) {
+        const { toPDF } = usePDF({ filename: `fatura-${invoice.numero}.pdf` });
+        toPDF(invoiceRef.current);
+      }
+    }, 100);
+  };
+
+  const handlePrintInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
   if (showInvoiceForm) {
     return (
       <EventInvoiceForm
@@ -158,6 +197,117 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
           fetchInvoices();
         }}
       />
+    );
+  }
+
+  if (selectedInvoice) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center"
+            onClick={() => setSelectedInvoice(null)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <div className="flex gap-2 print:hidden">
+            <Button onClick={() => window.print()} className="flex items-center gap-2">
+              <Printer className="h-4 w-4" />
+              Imprimir
+            </Button>
+            <Button onClick={() => {
+              const { toPDF } = usePDF({ filename: `fatura-${selectedInvoice.numero}.pdf` });
+              if (invoiceRef.current) toPDF(invoiceRef.current);
+            }} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Baixar PDF
+            </Button>
+          </div>
+        </div>
+
+        <Card className="p-6" ref={invoiceRef}>
+          <div className="invoice-container">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-2xl font-bold text-cantinho-navy">Cantinho Algarvio</h2>
+                <p>Rua Principal, 123</p>
+                <p>Luanda, Angola</p>
+                <p>Telefone: +244 123 456 789</p>
+                <p>Email: info@cantinhoalgarvio.com</p>
+              </div>
+              <div className="text-right">
+                <h3 className="text-xl font-bold">
+                  {selectedInvoice.tipo === 'proforma' ? "FATURA PROFORMA" : "FATURA"}
+                </h3>
+                <p><strong>Nº:</strong> {selectedInvoice.numero}</p>
+                <p><strong>Data:</strong> {format(new Date(selectedInvoice.created_at), "dd/MM/yyyy")}</p>
+                <p><strong>Ref. Pedido:</strong> {request.id}</p>
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <h4 className="font-bold text-lg mb-2">Cliente</h4>
+              <p><strong>Nome:</strong> {request.nome}</p>
+              <p><strong>Email:</strong> {request.email}</p>
+              <p><strong>Telefone:</strong> {request.telefone}</p>
+              <p><strong>Endereço:</strong> {request.localizacao}</p>
+            </div>
+            
+            <div className="mb-8">
+              <h4 className="font-bold text-lg mb-2">Detalhes do Evento</h4>
+              <p><strong>Tipo de Evento:</strong> {request.tipo_evento}</p>
+              <p><strong>Data do Evento:</strong> {format(new Date(request.data_evento), "dd/MM/yyyy")}</p>
+              <p><strong>Número de Convidados:</strong> {request.num_convidados}</p>
+            </div>
+            
+            <div className="mb-8">
+              <h4 className="font-bold text-lg mb-2">Detalhes da Fatura</h4>
+              {selectedInvoice.descricao && (
+                <p className="mb-4">{selectedInvoice.descricao}</p>
+              )}
+              
+              <div className="flex justify-end mt-4">
+                <div className="w-64">
+                  <div className="flex justify-between py-2 border-t border-b">
+                    <span className="font-bold">Total:</span>
+                    <span className="font-bold">
+                      {new Intl.NumberFormat('pt-AO', {
+                        style: 'currency',
+                        currency: 'AOA',
+                        minimumFractionDigits: 0
+                      }).format(selectedInvoice.valor)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8">
+              <p><strong>Status:</strong> {selectedInvoice.status === 'pago' ? 'Pago' : 'Pendente'}</p>
+              {selectedInvoice.data_pagamento && (
+                <p><strong>Data de Pagamento:</strong> {format(new Date(selectedInvoice.data_pagamento), "dd/MM/yyyy")}</p>
+              )}
+            </div>
+            
+            {selectedInvoice.tipo === 'proforma' && (
+              <div className="mt-8 p-4 border border-dashed border-gray-400 text-center">
+                <p className="font-bold text-lg">FATURA PROFORMA - NÃO VÁLIDA COMO FATURA</p>
+                <p>Este documento é apenas um orçamento e não constitui prova de pagamento.</p>
+                <p>Válido por 15 dias a partir da data de emissão.</p>
+              </div>
+            )}
+            
+            <div className="mt-8">
+              <p className="text-center text-gray-600 text-sm">
+                Agradecemos a sua preferência!
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
     );
   }
 
@@ -369,7 +519,11 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
                       <td className="py-3 px-2">{getStatusBadge(invoice.status)}</td>
                       <td className="py-3 px-2 text-right">
                         <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setSelectedInvoice(invoice)}
+                          >
                             <FileText className="h-4 w-4" />
                             <span className="sr-only">Ver</span>
                           </Button>

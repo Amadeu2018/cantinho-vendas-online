@@ -5,12 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ClipboardCheck, FileText, Clock, PenSquare } from "lucide-react";
+import { Search, PenSquare } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import EventRequestDetail from "./EventRequestDetail";
 
 export type EventRequest = {
@@ -39,6 +37,30 @@ const AdminEventRequests = () => {
 
   useEffect(() => {
     fetchEventRequests();
+
+    // Configurar escuta em tempo real para atualizações de solicitações
+    const channel = supabase
+      .channel('event-requests-changes')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'event_requests'
+      }, payload => {
+        if (payload.new) {
+          setEventRequests(prev => 
+            prev.map(request => 
+              request.id === payload.new.id 
+                ? { ...request, ...payload.new } 
+                : request
+            )
+          );
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchEventRequests = async () => {
@@ -82,15 +104,7 @@ const AdminEventRequests = () => {
 
       if (error) throw error;
 
-      // Atualizar o estado local
-      setEventRequests(
-        eventRequests.map((request) =>
-          request.id === requestId
-            ? { ...request, status: newStatus, ...(newStatus === "atendido" ? { atendido_em: new Date().toISOString() } : {}) }
-            : request
-        )
-      );
-
+      // A atualização local será feita pelo listener em tempo real
       toast({
         title: "Status atualizado",
         description: `A solicitação foi marcada como ${newStatus}.`,
@@ -122,8 +136,6 @@ const AdminEventRequests = () => {
 
   const handleCloseDetail = () => {
     setSelectedRequest(null);
-    // Refresh the list after closing the detail view
-    fetchEventRequests();
   };
 
   const getStatusBadge = (status: string) => {

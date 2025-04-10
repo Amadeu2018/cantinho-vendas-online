@@ -19,46 +19,66 @@ const EventAdmin = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsLoading(false);
-        navigate('/auth/login');
-        return;
-      }
+    // Habilitar realtime no supabase para a tabela event_requests
+    const enableRealtime = async () => {
+      await supabase
+        .channel('event-requests-realtime')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'event_requests' 
+        }, payload => {
+          console.log('Evento em tempo real recebido:', payload);
+        })
+        .subscribe();
+    };
+
+    enableRealtime();
+    checkAdminStatus();
+
+    return () => {
+      // Limpar canal ao desmontar componente
+      supabase.removeChannel(supabase.channel('event-requests-realtime'));
+    };
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    if (!user) {
+      setIsLoading(false);
+      navigate('/auth/login');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
       
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        
-        if (error) throw error;
-        
-        if (data.role === 'admin') {
-          setIsLoading(false);
-        } else {
-          toast({
-            title: "Acesso negado",
-            description: "Você não tem permissões de administrador.",
-            variant: "destructive"
-          });
-          navigate('/');
-        }
-      } catch (error) {
-        console.error("Erro ao verificar perfil:", error);
+      if (error) throw error;
+      
+      if (data.role === 'admin') {
+        setIsLoading(false);
+      } else {
         toast({
-          title: "Erro",
-          description: "Ocorreu um erro ao verificar suas permissões.",
+          title: "Acesso negado",
+          description: "Você não tem permissões de administrador.",
           variant: "destructive"
         });
-        setIsLoading(false);
         navigate('/');
       }
-    };
-    
-    checkAdminStatus();
-  }, [user, navigate, toast]);
+    } catch (error) {
+      console.error("Erro ao verificar perfil:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao verificar suas permissões.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      navigate('/');
+    }
+  };
 
   if (isLoading) {
     return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,13 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     cost: "0"
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
     fetchCategories();
+    ensureBasicCategoriesExist();
   }, []);
 
   const fetchCategories = async () => {
@@ -50,6 +53,44 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
       setCategories(data || []);
     } catch (error) {
       console.error("Erro ao carregar categorias:", error);
+    }
+  };
+
+  // Ensure we have basic categories for appetizers, main dishes, and desserts
+  const ensureBasicCategoriesExist = async () => {
+    const basicCategories = [
+      { name: "Entradas", description: "Appetizers and starters" },
+      { name: "Pratos Principais", description: "Main dishes" },
+      { name: "Sobremesas", description: "Desserts and sweets" }
+    ];
+
+    try {
+      // Get existing categories
+      const { data: existingCategories, error: fetchError } = await supabase
+        .from("categories")
+        .select("name");
+
+      if (fetchError) throw fetchError;
+
+      // Check which basic categories don't exist yet
+      const existingNames = existingCategories?.map(c => c.name.toLowerCase()) || [];
+      const categoriesToAdd = basicCategories.filter(c => 
+        !existingNames.includes(c.name.toLowerCase())
+      );
+
+      // Add missing categories
+      if (categoriesToAdd.length > 0) {
+        const { error: insertError } = await supabase
+          .from("categories")
+          .insert(categoriesToAdd);
+
+        if (insertError) throw insertError;
+        
+        // Refresh categories
+        fetchCategories();
+      }
+    } catch (error) {
+      console.error("Error ensuring basic categories exist:", error);
     }
   };
 
@@ -67,18 +108,63 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     if (!files || files.length === 0) return;
 
     const file = files[0];
+    setImageFile(file);
     
     // Create preview URL
     setImagePreview(URL.createObjectURL(file));
-
-    // For demo, use placeholder - in a real app you'd upload to storage
-    setFormData(prev => ({ ...prev, image_url: '/placeholder.svg' }));
     setImageUploading(false);
   };
 
   const removeImage = () => {
     setImagePreview(null);
+    setImageFile(null);
     setFormData(prev => ({ ...prev, image_url: "" }));
+  };
+
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    try {
+      // Check if storage is available
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      let bucketName = 'product-images';
+      
+      // If no product-images bucket exists, create it
+      if (!buckets?.some(b => b.name === bucketName) || bucketError) {
+        console.log("Creating product-images bucket");
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: 5242880, // 5MB
+        });
+        
+        if (createError) {
+          console.error("Error creating bucket:", createError);
+          throw createError;
+        }
+      }
+      
+      // Upload the file
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file);
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+      
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error("Error uploading image to storage:", error);
+      toast({
+        title: "Erro ao fazer upload da imagem",
+        description: "Não foi possível salvar a imagem. Usando imagem de placeholder.",
+        variant: "destructive"
+      });
+      return '/placeholder.svg';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,6 +193,12 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         return;
       }
       
+      // Handle image upload if there's a file
+      let imageUrl = formData.image_url || '/placeholder.svg';
+      if (imageFile) {
+        imageUrl = await uploadImageToStorage(imageFile);
+      }
+      
       // Prepare data for submission
       const productData = {
         name: formData.name,
@@ -116,7 +208,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         min_stock_quantity: parseInt(formData.min_stock_quantity) || 5,
         unit: formData.unit || "unidade",
-        image_url: formData.image_url || '/placeholder.svg',
+        image_url: imageUrl,
         sku: formData.sku || null,
         barcode: formData.barcode || null,
         cost: parseFloat(formData.cost) || 0,
@@ -158,6 +250,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         cost: "0"
       });
       setImagePreview(null);
+      setImageFile(null);
       
       // Success callback
       if (onSuccess) onSuccess();

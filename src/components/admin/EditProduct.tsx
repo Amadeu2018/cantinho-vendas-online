@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
     cost: (product.cost?.toString() || "0"),
   });
   const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -68,18 +70,63 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
     if (!files || files.length === 0) return;
 
     const file = files[0];
+    setImageFile(file);
     
     // Create preview URL
     setImagePreview(URL.createObjectURL(file));
-
-    // For demo purposes use placeholder
-    setFormData(prev => ({ ...prev, image_url: '/placeholder.svg' }));
     setImageUploading(false);
   };
 
   const removeImage = () => {
     setImagePreview(null);
+    setImageFile(null);
     setFormData(prev => ({ ...prev, image_url: "" }));
+  };
+
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    try {
+      // Check if storage is available
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      let bucketName = 'product-images';
+      
+      // If no product-images bucket exists, create it
+      if (!buckets?.some(b => b.name === bucketName) || bucketError) {
+        console.log("Creating product-images bucket");
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: 5242880, // 5MB
+        });
+        
+        if (createError) {
+          console.error("Error creating bucket:", createError);
+          throw createError;
+        }
+      }
+      
+      // Upload the file
+      const fileName = `${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file);
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+      
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error("Error uploading image to storage:", error);
+      toast({
+        title: "Erro ao fazer upload da imagem",
+        description: "Não foi possível salvar a imagem. Usando imagem atual ou placeholder.",
+        variant: "destructive"
+      });
+      return formData.image_url || '/placeholder.svg';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,6 +155,12 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         return;
       }
       
+      // Handle image upload if there's a file
+      let imageUrl = formData.image_url;
+      if (imageFile) {
+        imageUrl = await uploadImageToStorage(imageFile);
+      }
+      
       // Prepare data for submission
       const productData = {
         name: formData.name,
@@ -117,7 +170,7 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         min_stock_quantity: parseInt(formData.min_stock_quantity) || 5,
         unit: formData.unit,
-        image_url: formData.image_url,
+        image_url: imageUrl,
         sku: formData.sku || null,
         barcode: formData.barcode || null,
         cost: parseFloat(formData.cost) || 0,

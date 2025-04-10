@@ -29,6 +29,7 @@ const EventAdmin = () => {
           table: 'event_requests' 
         }, payload => {
           console.log('Evento em tempo real recebido:', payload);
+          // Os componentes filhos já estão escutando e atualizando seus estados
         })
         .subscribe();
     };

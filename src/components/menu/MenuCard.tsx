@@ -1,13 +1,12 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ShoppingBag, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { formatCurrency } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MenuCardProps {
@@ -17,24 +16,35 @@ interface MenuCardProps {
   price: number;
   imageUrl: string;
   category: string;
-  promotion?: {
-    type: string;
-    value: number;
-  };
-  isFavorite?: boolean;
 }
 
-const MenuCard = ({ id, name, description, price, imageUrl, category, promotion, isFavorite: initialIsFavorite }: MenuCardProps) => {
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite || false);
-  const { user } = useAuth();
+const MenuCard = ({ id, name, description, price, imageUrl, category }: MenuCardProps) => {
+  const [showDialog, setShowDialog] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      name,
+      price,
+      quantity: 1,
+      imageUrl
+    });
+    
+    toast({
+      title: "Item adicionado",
+      description: `${name} foi adicionado ao seu carrinho.`,
+    });
+  };
 
   const toggleFavorite = async () => {
     if (!user) {
       toast({
         title: "Login necessário",
-        description: "Faça login para adicionar aos favoritos",
+        description: "Faça login para adicionar itens aos favoritos.",
         variant: "destructive",
       });
       return;
@@ -42,128 +52,112 @@ const MenuCard = ({ id, name, description, price, imageUrl, category, promotion,
 
     try {
       if (isFavorite) {
-        // Remove from favorites
+        // Remover dos favoritos
         await supabase
           .from('favorites')
           .delete()
           .eq('user_id', user.id)
           .eq('dish_id', id);
       } else {
-        // Add to favorites
+        // Adicionar aos favoritos
         await supabase
           .from('favorites')
-          .insert([{ user_id: user.id, dish_id: id }]);
+          .insert([
+            { user_id: user.id, dish_id: id }
+          ]);
       }
-
+      
       setIsFavorite(!isFavorite);
+      
       toast({
         title: isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos",
-        description: "",
+        description: isFavorite 
+          ? `${name} foi removido dos seus favoritos.` 
+          : `${name} foi adicionado aos seus favoritos.`,
       });
     } catch (error) {
-      console.error("Error toggling favorite:", error);
+      console.error("Erro ao atualizar favoritos:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar os favoritos",
+        description: "Não foi possível atualizar seus favoritos.",
         variant: "destructive",
       });
     }
   };
 
-  const handleViewDish = () => {
-    navigate(`/menu/${id}`);
-  };
-
-  const getDiscountedPrice = () => {
-    if (promotion && promotion.type === "percentage") {
-      return price - (price * promotion.value) / 100;
-    }
-    if (promotion && promotion.type === "fixed") {
-      return price - promotion.value;
-    }
-    return price;
-  };
-
-  const getCategoryLabel = () => {
-    switch (category) {
-      case "appetizer":
-        return "Entrada";
-      case "main":
-        return "Prato Principal";
-      case "dessert":
-        return "Sobremesa";
-      default:
-        return category;
-    }
-  };
-
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg h-full flex flex-col">
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={imageUrl || "/placeholder.svg"}
-          alt={name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = "/placeholder.svg";
-          }}
+    <>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+        <div 
+          className="h-48 bg-cover bg-center cursor-pointer" 
+          style={{ backgroundImage: `url(${imageUrl || '/placeholder.svg'})` }}
+          onClick={() => setShowDialog(true)}
         />
-        <button
-          onClick={toggleFavorite}
-          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-          aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        >
-          <Heart
-            size={18}
-            className={isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}
-          />
-        </button>
-        <div className="absolute top-2 left-2">
-          <Badge variant="secondary" className="bg-white/90 text-xs font-medium">
-            {getCategoryLabel()}
-          </Badge>
-        </div>
-        {promotion && (
-          <div className="absolute bottom-0 left-0 bg-cantinho-terracotta text-white px-2 py-1 text-xs font-bold">
-            {promotion.type === "percentage"
-              ? `${promotion.value}% OFF`
-              : `${formatCurrency(promotion.value)} OFF`}
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <h3 
+              className="text-lg font-bold cursor-pointer hover:text-cantinho-terracotta"
+              onClick={() => setShowDialog(true)}
+            >
+              {name}
+            </h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full hover:bg-gray-100"
+              onClick={toggleFavorite}
+            >
+              <Heart 
+                className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+              />
+            </Button>
           </div>
-        )}
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{description}</p>
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-cantinho-navy">{formatCurrency(price)}</span>
+            <Button 
+              size="sm" 
+              onClick={handleAddToCart}
+              className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+            >
+              <ShoppingBag className="h-4 w-4 mr-1" />
+              Adicionar
+            </Button>
+          </div>
+        </div>
       </div>
-      <CardContent className="pt-4 pb-5 flex flex-col flex-grow">
-        <h3 className="font-bold text-lg mb-1 line-clamp-1">{name}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-          {description}
-        </p>
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-1">
-            {promotion ? (
-              <>
-                <span className="font-bold text-lg text-cantinho-navy">
-                  {formatCurrency(getDiscountedPrice())}
-                </span>
-                <span className="text-gray-400 text-sm line-through">
-                  {formatCurrency(price)}
-                </span>
-              </>
-            ) : (
-              <span className="font-bold text-lg text-cantinho-navy">
-                {formatCurrency(price)}
-              </span>
-            )}
+
+      {/* Dialog with dish details */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <div className="h-48 w-full bg-cover bg-center rounded-t-lg mb-4" 
+            style={{ backgroundImage: `url(${imageUrl || '/placeholder.svg'})` }} 
+          />
+          <DialogTitle className="text-xl flex justify-between items-center">
+            {name}
+            <span className="text-cantinho-navy">{formatCurrency(price)}</span>
+          </DialogTitle>
+          <DialogDescription className="text-gray-700">{description}</DialogDescription>
+          <div className="mt-2">
+            <span className="inline-block bg-gray-100 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2">
+              {category}
+            </span>
           </div>
-          <Button
-            size="sm"
-            variant="default"
-            className="bg-cantinho-navy hover:bg-cantinho-navy/90"
-            onClick={handleViewDish}
-          >
-            Detalhes
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowDialog(false)}>
+              Fechar
+            </Button>
+            <Button onClick={() => {
+              handleAddToCart();
+              setShowDialog(false);
+            }}>
+              <ShoppingBag className="h-4 w-4 mr-1" />
+              Adicionar ao carrinho
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

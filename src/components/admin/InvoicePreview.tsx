@@ -17,11 +17,23 @@ interface InvoicePreviewProps {
 
 const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePreviewProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { toPDF } = usePDF();
+  const { toPDF } = usePDF({
+    filename: `fatura-${invoice.numero}.pdf`
+  });
+
+  const handleDownloadPDF = () => {
+    if (ref.current) {
+      toPDF();
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <Button
           variant="outline"
           size="sm"
@@ -32,29 +44,29 @@ const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePrevie
           Voltar
         </Button>
         <div className="flex gap-2 print:hidden">
-          <Button onClick={() => window.print()} className="flex items-center gap-2">
+          <Button onClick={handlePrint} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
-            Imprimir
+            <span className="hidden sm:inline">Imprimir</span>
           </Button>
-          <Button onClick={() => toPDF()} className="flex items-center gap-2">
+          <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
-            Baixar PDF
+            <span className="hidden sm:inline">Baixar PDF</span>
           </Button>
         </div>
       </div>
 
-      <Card className="p-6" ref={ref} id="invoice-container">
+      <Card className="p-4 sm:p-6" ref={ref} id="invoice-container">
         <div className="invoice-container">
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-cantinho-navy">Cantinho Algarvio</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-cantinho-navy">Cantinho Algarvio</h2>
               <p>Rua Principal, 123</p>
               <p>Luanda, Angola</p>
               <p>Telefone: +244 123 456 789</p>
               <p>Email: info@cantinhoalgarvio.com</p>
             </div>
-            <div className="text-right">
-              <h3 className="text-xl font-bold">
+            <div className="text-left sm:text-right mt-4 sm:mt-0">
+              <h3 className="text-lg sm:text-xl font-bold">
                 {invoice.tipo === 'proforma' ? "FATURA PROFORMA" : "FATURA"}
               </h3>
               <p><strong>Nº:</strong> {invoice.numero}</p>
@@ -85,7 +97,7 @@ const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePrevie
             )}
             
             <div className="flex justify-end mt-4">
-              <div className="w-64">
+              <div className="w-full sm:w-64">
                 <div className="flex justify-between py-2 border-t border-b">
                   <span className="font-bold">Total:</span>
                   <span className="font-bold">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import EventRequestInfo from "./EventRequestInfo";
 import EventDetailsInfo from "./EventDetailsInfo";
 import InvoiceList from "./InvoiceList";
 import InvoicePreview from "./InvoicePreview";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface Invoice {
   id: string;
@@ -42,6 +44,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const { toast } = useToast();
   const targetRef = useRef<HTMLDivElement>(null);
   const { toPDF } = usePDF();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchInvoices();
@@ -168,9 +171,6 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
   const handleExportInvoicePDF = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
-    setTimeout(() => {
-      toPDF();
-    }, 100);
   };
 
   if (showInvoiceForm) {
@@ -198,7 +198,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <Button
           variant="outline"
           size="sm"
@@ -206,10 +206,10 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
           onClick={onClose}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar para lista
+          {isMobile ? "Voltar" : "Voltar para lista"}
         </Button>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {request.status !== "atendido" && (
             <Button
               size="sm"
@@ -218,7 +218,8 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
               className="bg-green-600 hover:bg-green-700"
             >
               <Clock className="h-4 w-4 mr-1" />
-              Marcar como Atendido
+              <span className="hidden sm:inline">Marcar como Atendido</span>
+              <span className="sm:hidden">Atendido</span>
             </Button>
           )}
 
@@ -229,7 +230,8 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
               className="border-red-200 text-red-700 hover:bg-red-50"
               onClick={() => onStatusChange(request.id, "cancelado")}
             >
-              Cancelar Solicitação
+              <span className="hidden sm:inline">Cancelar Solicitação</span>
+              <span className="sm:hidden">Cancelar</span>
             </Button>
           )}
         </div>
@@ -237,7 +239,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle>Detalhes da Solicitação</CardTitle>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">Status:</div>
@@ -249,7 +251,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <EventClientInfo request={request} />
-              <Separator />
+              <Separator className="my-4" />
               <EventRequestInfo request={request} />
             </div>
 
@@ -262,14 +264,15 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <CardTitle className="flex items-center">
               <FileText className="mr-2 h-5 w-5" />
               Faturas
             </CardTitle>
             <Button onClick={() => setShowInvoiceForm(true)}>
               <FileText className="mr-2 h-4 w-4" />
-              Nova Fatura
+              <span className="hidden sm:inline">Nova Fatura</span>
+              <span className="sm:hidden">+</span>
             </Button>
           </div>
         </CardHeader>

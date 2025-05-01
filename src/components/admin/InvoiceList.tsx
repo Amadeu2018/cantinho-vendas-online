@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { BanknoteIcon, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Invoice } from "./EventRequestDetail";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InvoiceListProps {
   invoices: Invoice[];
@@ -22,6 +23,7 @@ const InvoiceList = ({
   onDeleteInvoice,
   getStatusBadge 
 }: InvoiceListProps) => {
+  const isMobile = useIsMobile();
   
   const getInvoiceTypeBadge = (tipo: string) => {
     switch (tipo) {
@@ -52,6 +54,68 @@ const InvoiceList = ({
     );
   }
 
+  // Versão para dispositivos móveis - cards ao invés de tabela
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {invoices.map((invoice) => (
+          <div key={invoice.id} className="border rounded-md p-4 bg-white hover:bg-gray-50">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="mb-2">{getInvoiceTypeBadge(invoice.tipo)}</div>
+                <p className="font-mono font-medium">{invoice.numero}</p>
+                <p className="text-sm text-muted-foreground">
+                  {format(new Date(invoice.created_at), "dd/MM/yyyy")}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">
+                  {new Intl.NumberFormat('pt-AO', {
+                    style: 'currency',
+                    currency: 'AOA',
+                  }).format(invoice.valor)}
+                </p>
+                <div className="mt-1">{getStatusBadge(invoice.status)}</div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 mt-4 border-t pt-4">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => onViewInvoice(invoice)}
+                className="flex-1"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Ver
+              </Button>
+              {invoice.status !== "pago" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-green-200 text-green-700 hover:bg-green-50 flex-1"
+                  onClick={() => onMarkPaid(invoice.id)}
+                >
+                  <BanknoteIcon className="h-4 w-4 mr-2" />
+                  Pago
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-200 text-red-700 hover:bg-red-50"
+                onClick={() => onDeleteInvoice(invoice.id)}
+              >
+                &times;
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Versão para desktop - tabela
   return (
     <div className="overflow-x-auto">
       <table className="w-full">

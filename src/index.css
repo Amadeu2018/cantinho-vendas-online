@@ -3,67 +3,58 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --cantinho-navy: #1d3557;
+  --cantinho-cornflower: #457b9d;
+  --cantinho-sky: #a8dadc;
+  --cantinho-offwhite: #f1faee;
+  --cantinho-terracotta: #e63946;
+}
+
 @layer base {
   :root {
-    --background: 42 30% 94%;
-    --foreground: 222 47% 11%;
-
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 9 65% 63%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 214 80% 23%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 42 80% 76%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 152 24% 60%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 11%;
-
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
-    --card: 222 47% 11%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 11%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 9 65% 63%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 42 80% 76%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 152 24% 60%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 63% 31%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -71,15 +62,116 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-@layer components {
-  .hero-text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+.text-cantinho-navy {
+  color: var(--cantinho-navy);
+}
+.text-cantinho-cornflower {
+  color: var(--cantinho-cornflower);
+}
+.text-cantinho-sky {
+  color: var(--cantinho-sky);
+}
+.text-cantinho-offwhite {
+  color: var(--cantinho-offwhite);
+}
+.text-cantinho-terracotta {
+  color: var(--cantinho-terracotta);
+}
+
+.bg-cantinho-navy {
+  background-color: var(--cantinho-navy);
+}
+.bg-cantinho-cornflower {
+  background-color: var(--cantinho-cornflower);
+}
+.bg-cantinho-sky {
+  background-color: var(--cantinho-sky);
+}
+.bg-cantinho-offwhite {
+  background-color: var(--cantinho-offwhite);
+}
+.bg-cantinho-terracotta {
+  background-color: var(--cantinho-terracotta);
+}
+
+.hover\:bg-cantinho-navy:hover {
+  background-color: var(--cantinho-navy);
+}
+.hover\:bg-cantinho-cornflower:hover {
+  background-color: var(--cantinho-cornflower);
+}
+.hover\:bg-cantinho-sky:hover {
+  background-color: var(--cantinho-sky);
+}
+.hover\:bg-cantinho-offwhite:hover {
+  background-color: var(--cantinho-offwhite);
+}
+.hover\:bg-cantinho-terracotta:hover {
+  background-color: var(--cantinho-terracotta);
+}
+.hover\:bg-cantinho-terracotta\/90:hover {
+  background-color: color-mix(in srgb, var(--cantinho-terracotta) 90%, transparent);
+}
+
+.hover\:text-cantinho-terracotta:hover {
+  color: var(--cantinho-terracotta);
+}
+
+/* Regras específicas para impressão de faturas */
+@media print {
+  /* Esconde elementos não relevantes para a impressão */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostra apenas o conteúdo do container da fatura */
+  #invoice-container, 
+  #invoice-container * {
+    visibility: visible;
+  }
+  
+  /* Posiciona o container da fatura no topo da página */
+  #invoice-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+  }
+  
+  /* Remove bordas arredondadas e sombras para impressão limpa */
+  #invoice-container.card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  /* Esconde botões e outros elementos desnecessários */
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Ajusta cores para impressão */
+  .text-cantinho-navy {
+    color: #000 !important;
+  }
+  
+  /* Garante que tabelas e conteúdo caibam bem na página */
+  #invoice-container table {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+  
+  /* Evita quebrar elementos importantes */
+  h2, h3, h4, 
+  #invoice-container .invoice-header, 
+  #invoice-container .customer-info,
+  #invoice-container .invoice-summary {
+    page-break-inside: avoid;
   }
 }

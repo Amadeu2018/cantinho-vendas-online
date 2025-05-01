@@ -18,13 +18,26 @@ import { Loader2 } from "lucide-react";
 import NavEventButton from "@/components/admin/NavEventButton";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
 import AdminOrdersList from "@/components/admin/AdminOrdersList";
+import { Order as CartOrder } from "@/contexts/CartContext";
+
+// Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
+const convertOrderType = (order: any): CartOrder => {
+  return {
+    ...order,
+    paymentMethod: {
+      id: order.paymentMethod.id || 'default-id',
+      name: order.paymentMethod.name,
+      icon: order.paymentMethod.icon || 'credit-card'
+    }
+  };
+};
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("orders");
-  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any | null>(null);
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -35,7 +48,7 @@ const Admin = () => {
     orders, 
     isLoading: fetchingOrders, 
     refreshOrders, 
-    updateOrderStatus, 
+    updateOrderStatus,
     updatePaymentStatus
   } = useAdminOrders();
   
@@ -100,7 +113,7 @@ const Admin = () => {
   };
   
   const handlePrepareInvoice = (order: any) => {
-    setSelectedInvoiceOrder(order);
+    setSelectedInvoiceOrder(convertOrderType(order));
     setActiveTab("invoice");
   };
   
@@ -136,9 +149,9 @@ const Admin = () => {
             <AdminLogin onLogin={handleLogin} />
           ) : (
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <div className="p-4 bg-cantinho-navy text-white flex justify-between items-center">
+              <div className="p-4 bg-cantinho-navy text-white flex justify-between items-center flex-wrap gap-3">
                 <h2 className="text-xl font-semibold">Painel de Administração</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <NavEventButton />
                   <button 
                     onClick={handleLogout}
@@ -149,7 +162,7 @@ const Admin = () => {
                 </div>
               </div>
               
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 {selectedOrder ? (
                   <div>
                     <button 
@@ -159,7 +172,7 @@ const Admin = () => {
                       &larr; Voltar para todos os pedidos
                     </button>
                     <AdminOrderDetail 
-                      order={selectedOrder} 
+                      order={convertOrderType(selectedOrder)} 
                       onStatusChange={updateOrderStatus}
                       onPaymentStatusChange={updatePaymentStatus}
                       onPrepareInvoice={handlePrepareInvoice}
@@ -180,7 +193,7 @@ const Admin = () => {
                   </div>
                 ) : (
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="w-full mb-6 grid grid-cols-5 md:flex md:flex-wrap">
+                    <TabsList className="w-full mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                       <TabsTrigger value="orders">Pedidos</TabsTrigger>
                       <TabsTrigger value="products">Produtos</TabsTrigger>
                       <TabsTrigger value="finance">Finanças</TabsTrigger>
@@ -190,7 +203,7 @@ const Admin = () => {
                     
                     <TabsContent value="orders">
                       <AdminOrdersList 
-                        orders={orders}
+                        orders={orders.map(order => convertOrderType(order) as any)} 
                         onSelectOrder={handleSelectOrder}
                         fetchingOrders={fetchingOrders}
                       />
@@ -201,7 +214,7 @@ const Admin = () => {
                     </TabsContent>
                     
                     <TabsContent value="finance">
-                      <AdminFinance orders={orders} />
+                      <AdminFinance orders={orders.map(order => convertOrderType(order) as any)} />
                     </TabsContent>
                     
                     <TabsContent value="inventory">
@@ -209,7 +222,7 @@ const Admin = () => {
                     </TabsContent>
                     
                     <TabsContent value="reports">
-                      <AdminReports orders={orders} />
+                      <AdminReports orders={orders.map(order => convertOrderType(order) as any)} />
                     </TabsContent>
                   </Tabs>
                 )}

@@ -11,7 +11,11 @@ export interface Order {
   total: number;
   status: string;
   paymentStatus: string;
-  paymentMethod: { name: string };
+  paymentMethod: {
+    name: string;
+    id?: string;
+    icon?: string;
+  };
   customerInfo: {
     name: string;
     address: string;
@@ -71,7 +75,11 @@ export const useAdminOrders = () => {
         total: order.total,
         status: order.status,
         paymentStatus: order.payment_status,
-        paymentMethod: { name: order.payment_method || '' },
+        paymentMethod: { 
+          name: order.payment_method || '',
+          id: 'payment-' + order.id,
+          icon: 'credit-card'
+        },
         customerInfo: {
           name: order.customer_name || '',
           address: order.customer_address || '',

@@ -17,7 +17,7 @@ interface InvoicePreviewProps {
 
 const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePreviewProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { toPDF } = usePDF({ targetRef: ref });
+  const { toPDF } = usePDF();
 
   return (
     <div className="space-y-6">

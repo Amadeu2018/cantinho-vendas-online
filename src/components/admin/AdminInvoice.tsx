@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { format } from "date-fns";
 import { Order } from "@/contexts/CartContext";
@@ -15,9 +14,7 @@ type AdminInvoiceProps = {
 
 const AdminInvoice = ({ order }: AdminInvoiceProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
-  const { toPDF, targetRef } = usePDF({
-    filename: `${order.isProforma ? 'proforma' : 'fatura'}-${order.id}.pdf`,
-  });
+  const { toPDF } = usePDF();
   
   const date = new Date(order.createdAt);
   const formattedDate = format(date, "dd/MM/yyyy");
@@ -48,7 +45,7 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
         </div>
       </div>
       
-      <Card className="p-6" ref={targetRef}>
+      <Card className="p-6" ref={invoiceRef}>
         <div className="invoice-container">
           <div className="flex justify-between items-start mb-8">
             <div>

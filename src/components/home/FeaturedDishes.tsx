@@ -44,7 +44,7 @@ const FeaturedDishes = () => {
                 id={dish.id}
                 name={dish.name}
                 description={dish.description}
-                price={Number(dish.price)} 
+                price={parseFloat(dish.price as unknown as string)} 
                 imageUrl={dish.image_url}
                 category={dish.category}
               />

@@ -19,6 +19,12 @@ export interface Order {
   };
   createdAt: string;
   notes: string;
+  location: {
+    id: number;
+    name: string;
+    fee: number;
+    estimatedTime: string;
+  };
 }
 
 export const useAdminOrders = () => {
@@ -72,7 +78,13 @@ export const useAdminOrders = () => {
           phone: order.customer_phone || ''
         },
         createdAt: order.created_at,
-        notes: order.notes || ''
+        notes: order.notes || '',
+        location: {
+          id: 1, // Default location info
+          name: order.customer_address || 'Not specified',
+          fee: order.delivery_fee || 0,
+          estimatedTime: '30-45 min'
+        }
       }));
 
       setOrders(formattedOrders);

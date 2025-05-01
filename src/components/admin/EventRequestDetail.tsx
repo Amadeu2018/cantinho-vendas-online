@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +41,7 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
   const targetRef = useRef<HTMLDivElement>(null);
-  const { toPDF } = usePDF({ targetRef });
+  const { toPDF } = usePDF();
 
   useEffect(() => {
     fetchInvoices();

@@ -34,9 +34,9 @@ const Admin = () => {
   const { 
     orders, 
     isLoading: fetchingOrders, 
-    refreshOrders: fetchOrders, 
-    updateOrderStatus: handleStatusChange,
-    updatePaymentStatus: handlePaymentStatusChange 
+    refreshOrders, 
+    updateOrderStatus, 
+    updatePaymentStatus
   } = useAdminOrders();
   
   useEffect(() => {
@@ -83,7 +83,7 @@ const Admin = () => {
   const handleLogin = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
     if (isAdmin) {
-      fetchOrders();
+      refreshOrders();
     }
     return isAdmin;
   };
@@ -160,8 +160,8 @@ const Admin = () => {
                     </button>
                     <AdminOrderDetail 
                       order={selectedOrder} 
-                      onStatusChange={handleStatusChange}
-                      onPaymentStatusChange={handlePaymentStatusChange}
+                      onStatusChange={updateOrderStatus}
+                      onPaymentStatusChange={updatePaymentStatus}
                       onPrepareInvoice={handlePrepareInvoice}
                     />
                   </div>

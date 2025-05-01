@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,9 +41,8 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const [loadingInvoices, setLoadingInvoices] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
-  const { toPDF, targetRef } = usePDF({
-    filename: `invoice-${selectedInvoice?.numero || "preview"}.pdf`,
-  });
+  const targetRef = useRef<HTMLDivElement>(null);
+  const { toPDF } = usePDF({ targetRef });
 
   useEffect(() => {
     fetchInvoices();

@@ -2,7 +2,24 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/integrations/supabase/client";
-import { Order } from '@/contexts/CartContext';
+
+export interface Order {
+  id: string;
+  items: any[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: { name: string };
+  customerInfo: {
+    name: string;
+    address: string;
+    phone: string;
+  };
+  createdAt: string;
+  notes: string;
+}
 
 export const useAdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -48,11 +65,11 @@ export const useAdminOrders = () => {
         total: order.total,
         status: order.status,
         paymentStatus: order.payment_status,
-        paymentMethod: { name: order.payment_method } as { name: string }, // Specify the type correctly
+        paymentMethod: { name: order.payment_method || '' },
         customerInfo: {
-          name: order.customer_name,
-          address: order.customer_address,
-          phone: order.customer_phone
+          name: order.customer_name || '',
+          address: order.customer_address || '',
+          phone: order.customer_phone || ''
         },
         createdAt: order.created_at,
         notes: order.notes || ''
@@ -87,11 +104,13 @@ export const useAdminOrders = () => {
       });
       
       // Update the local state
-      setOrders(orders.map(order => 
+      const updatedOrders = orders.map(order => 
         order.id === orderId 
           ? { ...order, status } 
           : order
-      ));
+      ) as Order[];
+      
+      setOrders(updatedOrders);
       
       return true;
     } catch (error: any) {
@@ -120,11 +139,13 @@ export const useAdminOrders = () => {
       });
       
       // Update the local state
-      setOrders(orders.map(order => 
+      const updatedOrders = orders.map(order => 
         order.id === orderId 
           ? { ...order, paymentStatus } 
           : order
-      ));
+      ) as Order[];
+      
+      setOrders(updatedOrders);
       
       return true;
     } catch (error: any) {
@@ -147,3 +168,5 @@ export const useAdminOrders = () => {
     updatePaymentStatus
   };
 };
+
+export default useAdminOrders;

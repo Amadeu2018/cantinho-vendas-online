@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDishes } from "@/hooks/use-dishes";
 import { Button } from "@/components/ui/button";
-import { BowlFood } from "lucide-react";
+import { Utensils } from "lucide-react";
 import MenuCard from "../menu/MenuCard";
 import { Dish } from "@/types/dish";
 
 const FeaturedDishes = () => {
-  const { dishes, isLoading } = useDishes();
+  const { dishes, loading } = useDishes();
   const navigate = useNavigate();
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
 
@@ -32,7 +32,7 @@ const FeaturedDishes = () => {
           </p>
         </div>
 
-        {isLoading ? (
+        {loading ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cantinho-terracotta"></div>
           </div>
@@ -59,7 +59,7 @@ const FeaturedDishes = () => {
             size="lg"
             className="gap-2"
           >
-            <BowlFood size={18} />
+            <Utensils size={18} />
             <span>Ver Menu Completo</span>
           </Button>
         </div>

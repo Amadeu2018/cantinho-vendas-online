@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Download, Printer } from "lucide-react";
 import { format } from "date-fns";
+import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
 import type { Invoice } from "./EventRequestDetail";
 import type { EventRequest } from "./AdminEventRequests";
@@ -15,9 +16,8 @@ interface InvoicePreviewProps {
 }
 
 const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePreviewProps) => {
-  const { targetRef } = usePDF({
-    filename: `fatura-${invoice.numero}.pdf`,
-  });
+  const ref = useRef<HTMLDivElement>(null);
+  const { toPDF } = usePDF({ targetRef: ref });
 
   return (
     <div className="space-y-6">
@@ -36,14 +36,14 @@ const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePrevie
             <Printer className="h-4 w-4" />
             Imprimir
           </Button>
-          <Button onClick={() => onExportPDF(invoice)} className="flex items-center gap-2">
+          <Button onClick={() => toPDF()} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Baixar PDF
           </Button>
         </div>
       </div>
 
-      <Card className="p-6" ref={targetRef} id="invoice-container">
+      <Card className="p-6" ref={ref} id="invoice-container">
         <div className="invoice-container">
           <div className="flex justify-between items-start mb-8">
             <div>

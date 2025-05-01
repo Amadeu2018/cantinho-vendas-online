@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { get_user_favorites } from "@/functions/get_user_favorites";
 
 interface MenuCardProps {
   id: string;

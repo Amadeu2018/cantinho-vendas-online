@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/Navbar";
@@ -162,8 +163,12 @@ const Menu = () => {
                     {filteredItems.appetizer.map(dish => (
                       <MenuCard 
                         key={dish.id} 
-                        dish={dish} 
-                        onToggleFavorite={toggleFavorite}
+                        id={dish.id}
+                        name={dish.name}
+                        description={dish.description}
+                        price={Number(dish.price)} 
+                        imageUrl={dish.image_url}
+                        category={dish.category}
                         isFavorite={isFavorite(dish.id)}
                       />
                     ))}
@@ -183,8 +188,12 @@ const Menu = () => {
                     {filteredItems.main.map(dish => (
                       <MenuCard 
                         key={dish.id} 
-                        dish={dish} 
-                        onToggleFavorite={toggleFavorite}
+                        id={dish.id}
+                        name={dish.name}
+                        description={dish.description}
+                        price={Number(dish.price)} 
+                        imageUrl={dish.image_url}
+                        category={dish.category}
                         isFavorite={isFavorite(dish.id)}
                       />
                     ))}
@@ -204,8 +213,12 @@ const Menu = () => {
                     {filteredItems.dessert.map(dish => (
                       <MenuCard 
                         key={dish.id} 
-                        dish={dish} 
-                        onToggleFavorite={toggleFavorite}
+                        id={dish.id}
+                        name={dish.name}
+                        description={dish.description}
+                        price={Number(dish.price)} 
+                        imageUrl={dish.image_url}
+                        category={dish.category}
                         isFavorite={isFavorite(dish.id)}
                       />
                     ))}

@@ -33,10 +33,10 @@ const Admin = () => {
   // Use the custom hook for orders management
   const { 
     orders, 
-    fetchingOrders, 
-    fetchOrders, 
-    handleStatusChange,
-    handlePaymentStatusChange 
+    isLoading: fetchingOrders, 
+    refreshOrders: fetchOrders, 
+    updateOrderStatus: handleStatusChange,
+    updatePaymentStatus: handlePaymentStatusChange 
   } = useAdminOrders();
   
   useEffect(() => {

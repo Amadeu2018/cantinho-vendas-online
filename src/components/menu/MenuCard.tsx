@@ -16,17 +16,18 @@ interface MenuCardProps {
   price: number;
   imageUrl: string;
   category: string;
+  isFavorite?: boolean; // Tornando opcional para compatibilidade
 }
 
-const MenuCard = ({ id, name, description, price, imageUrl, category }: MenuCardProps) => {
+const MenuCard = ({ id, name, description, price, imageUrl, category, isFavorite: initialFavorite = false }: MenuCardProps) => {
   const [showDialog, setShowDialog] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { addToCart } = useCart();
+  const { addItem } = useCart(); // Usando addItem em vez de addToCart
 
   const handleAddToCart = () => {
-    addToCart({
+    addItem({
       id,
       name,
       price,

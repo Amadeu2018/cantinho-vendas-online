@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdminOrdersListProps {
   orders: any[];
@@ -22,6 +23,7 @@ interface AdminOrdersListProps {
 const AdminOrdersList = ({ orders, onSelectOrder, fetchingOrders }: AdminOrdersListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
+  const isMobile = useIsMobile();
   
   // Filter orders based on search term
   const filteredOrders = orders.filter(order => {
@@ -112,66 +114,68 @@ const AdminOrdersList = ({ orders, onSelectOrder, fetchingOrders }: AdminOrdersL
             </Button>
           </div>
           
-          <Tabs defaultValue="pending">
-            <TabsList className="w-full overflow-x-auto flex">
-              <TabsTrigger value="pending">Pendentes</TabsTrigger>
-              <TabsTrigger value="confirmed">Confirmados</TabsTrigger>
-              <TabsTrigger value="preparing">Em Preparo</TabsTrigger>
-              <TabsTrigger value="delivering">Em Entrega</TabsTrigger>
-              <TabsTrigger value="completed">Concluídos</TabsTrigger>
-              <TabsTrigger value="cancelled">Cancelados</TabsTrigger>
-              <TabsTrigger value="all">Todos</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="pending">
-              <AdminOrders 
-                orders={getOrdersByStatus("pending")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="confirmed">
-              <AdminOrders 
-                orders={getOrdersByStatus("confirmed")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="preparing">
-              <AdminOrders 
-                orders={getOrdersByStatus("preparing")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="delivering">
-              <AdminOrders 
-                orders={getOrdersByStatus("delivering")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="completed">
-              <AdminOrders 
-                orders={getOrdersByStatus("completed")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="cancelled">
-              <AdminOrders 
-                orders={getOrdersByStatus("cancelled")} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-            
-            <TabsContent value="all">
-              <AdminOrders 
-                orders={sortedOrders} 
-                onSelectOrder={onSelectOrder}
-              />
-            </TabsContent>
-          </Tabs>
+          <div className="overflow-x-auto">
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className={`w-full ${isMobile ? 'overflow-x-auto flex no-scrollbar' : ''}`}>
+                <TabsTrigger value="pending">Pendentes</TabsTrigger>
+                <TabsTrigger value="confirmed">Confirmados</TabsTrigger>
+                <TabsTrigger value="preparing">Em Preparo</TabsTrigger>
+                <TabsTrigger value="delivering">Em Entrega</TabsTrigger>
+                <TabsTrigger value="completed">Concluídos</TabsTrigger>
+                <TabsTrigger value="cancelled">Cancelados</TabsTrigger>
+                <TabsTrigger value="all">Todos</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="pending" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("pending")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="confirmed" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("confirmed")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="preparing" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("preparing")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="delivering" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("delivering")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="completed" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("completed")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="cancelled" className="mt-4">
+                <AdminOrders 
+                  orders={getOrdersByStatus("cancelled")} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+              
+              <TabsContent value="all" className="mt-4">
+                <AdminOrders 
+                  orders={sortedOrders} 
+                  onSelectOrder={onSelectOrder}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       )}
     </div>

@@ -8,7 +8,7 @@ import MenuCard from "../menu/MenuCard";
 import { Dish } from "@/types/dish";
 
 const FeaturedDishes = () => {
-  const { dishes, loading } = useDishes();
+  const { dishes, loading, isFavorite } = useDishes();
   const navigate = useNavigate();
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
 
@@ -47,6 +47,7 @@ const FeaturedDishes = () => {
                 price={parseFloat(dish.price as unknown as string)} 
                 imageUrl={dish.image_url}
                 category={dish.category}
+                isFavorite={isFavorite(dish.id)}
               />
             ))}
           </div>

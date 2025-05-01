@@ -17,11 +17,13 @@ import {
 import PromotionsSection from "@/components/promotions/PromotionsSection";
 import { useDishes } from "@/hooks/use-dishes";
 import { Dish } from "@/types/dish";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Menu = () => {
-  const { dishes, loading, isFavorite, toggleFavorite } = useDishes();
+  const { dishes, loading, isFavorite } = useDishes();
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
+  const isMobile = useIsMobile();
   const [filteredItems, setFilteredItems] = useState<{
     appetizer: Dish[];
     main: Dish[];
@@ -151,7 +153,7 @@ const Menu = () => {
             </div>
           ) : (
             <Tabs defaultValue="main" className="w-full">
-              <TabsList className="w-full flex justify-center mb-8">
+              <TabsList className={`w-full flex justify-center mb-8 ${isMobile ? 'overflow-x-auto no-scrollbar' : ''}`}>
                 <TabsTrigger value="appetizer" className="px-6">Entradas</TabsTrigger>
                 <TabsTrigger value="main" className="px-6">Pratos Principais</TabsTrigger>
                 <TabsTrigger value="dessert" className="px-6">Sobremesas</TabsTrigger>
@@ -162,7 +164,7 @@ const Menu = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.appetizer.map(dish => (
                       <MenuCard 
-                        key={dish.id} 
+                        key={dish.id}
                         id={dish.id}
                         name={dish.name}
                         description={dish.description}
@@ -187,7 +189,7 @@ const Menu = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.main.map(dish => (
                       <MenuCard 
-                        key={dish.id} 
+                        key={dish.id}
                         id={dish.id}
                         name={dish.name}
                         description={dish.description}
@@ -212,7 +214,7 @@ const Menu = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.dessert.map(dish => (
                       <MenuCard 
-                        key={dish.id} 
+                        key={dish.id}
                         id={dish.id}
                         name={dish.name}
                         description={dish.description}

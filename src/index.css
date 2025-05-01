@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -120,6 +119,81 @@
 
 .hover\:text-cantinho-terracotta:hover {
   color: var(--cantinho-terracotta);
+}
+
+/* Animação do hero header */
+@keyframes soft-glow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    270deg,
+    rgba(29, 53, 87, 0.8) 0%,
+    rgba(230, 57, 70, 0.8) 50%,
+    rgba(29, 53, 87, 0.8) 100%
+  );
+  background-size: 200% 200%;
+  animation: soft-glow 8s ease infinite;
+}
+
+.hero-text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Classes responsivas para tabelas administrativas */
+@layer components {
+  .admin-table-container {
+    @apply w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  }
+  
+  .admin-card-responsive {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .admin-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4;
+  }
+}
+
+/* Estilização para menus responsivos */
+.mobile-menu-container {
+  @apply max-h-[70vh] overflow-y-auto;
+}
+
+/* Responsividade para tabelas */
+@media (max-width: 640px) {
+  .responsive-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .responsive-table th,
+  .responsive-table td {
+    white-space: nowrap;
+    padding: 0.5rem;
+  }
+  
+  .mobile-card-view {
+    @apply flex flex-col border rounded-lg p-4 mb-4 shadow-sm;
+  }
+  
+  .mobile-card-label {
+    @apply text-sm text-gray-500 mb-1;
+  }
+  
+  .mobile-card-value {
+    @apply font-medium mb-2;
+  }
 }
 
 /* Regras específicas para impressão de faturas */

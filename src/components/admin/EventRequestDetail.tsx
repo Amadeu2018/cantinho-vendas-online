@@ -10,7 +10,7 @@ import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EventInvoiceForm from "./EventInvoiceForm";
-import { toPDF } from "react-to-pdf";
+import { usePDF } from "react-to-pdf";
 import type { EventRequest } from "./AdminEventRequests";
 import EventClientInfo from "./EventClientInfo";
 import EventRequestInfo from "./EventRequestInfo";
@@ -41,7 +41,9 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const [loadingInvoices, setLoadingInvoices] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
-  const invoiceRef = { current: null };
+  const { toPDF, targetRef } = usePDF({
+    filename: `invoice-${selectedInvoice?.numero || "preview"}.pdf`,
+  });
 
   useEffect(() => {
     fetchInvoices();
@@ -166,22 +168,10 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
     }
   };
 
-  const handlePrintInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setTimeout(() => {
-      window.print();
-    }, 100);
-  };
-
   const handleExportInvoicePDF = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setTimeout(() => {
-      const options = {
-        filename: `fatura-${invoice.numero}.pdf`,
-      };
-      if (document.getElementById('invoice-container')) {
-        toPDF(document.getElementById('invoice-container'), options);
-      }
+      toPDF();
     }, 100);
   };
 

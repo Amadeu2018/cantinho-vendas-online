@@ -1,108 +1,166 @@
 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Heart, Tag } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import DishReviews from "@/components/reviews/DishReviews";
-import { Dish } from "@/types/dish";
+import { Badge } from "@/components/ui/badge";
+import { Heart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { get_user_favorites } from "@/functions/get_user_favorites";
 
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('pt-AO', {
-    style: 'currency',
-    currency: 'AOA',
-    minimumFractionDigits: 0
-  }).format(price);
-};
-
-type MenuCardProps = {
-  dish: Dish;
-  onToggleFavorite?: (dishId: string) => void;
+interface MenuCardProps {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  promotion?: {
+    type: string;
+    value: number;
+  };
   isFavorite?: boolean;
-};
+}
 
-const MenuCard = ({ dish, onToggleFavorite, isFavorite = false }: MenuCardProps) => {
-  const { addItem } = useCart();
+const MenuCard = ({ id, name, description, price, imageUrl, category, promotion, isFavorite: initialIsFavorite }: MenuCardProps) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite || false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Ensure price is a number
-  const price = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para adicionar aos favoritos",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleAddToCart = () => {
-    addItem({
-      id: dish.id,
-      name: dish.name,
-      price: price,
-      image: dish.image_url
-    });
-    
-    toast.success(`${dish.name} adicionado ao carrinho!`, {
-      duration: 2000,
-    });
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('dish_id', id);
+      } else {
+        // Add to favorites
+        await supabase
+          .from('favorites')
+          .insert([{ user_id: user.id, dish_id: id }]);
+      }
+
+      setIsFavorite(!isFavorite);
+      toast({
+        title: isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos",
+        description: "",
+      });
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar os favoritos",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleToggleFavorite = () => {
-    if (onToggleFavorite) {
-      onToggleFavorite(dish.id);
+  const handleViewDish = () => {
+    navigate(`/menu/${id}`);
+  };
+
+  const getDiscountedPrice = () => {
+    if (promotion && promotion.type === "percentage") {
+      return price - (price * promotion.value) / 100;
+    }
+    if (promotion && promotion.type === "fixed") {
+      return price - promotion.value;
+    }
+    return price;
+  };
+
+  const getCategoryLabel = () => {
+    switch (category) {
+      case "appetizer":
+        return "Entrada";
+      case "main":
+        return "Prato Principal";
+      case "dessert":
+        return "Sobremesa";
+      default:
+        return category;
     }
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 overflow-hidden relative">
-        <img 
-          src={dish.image_url} 
-          alt={dish.name} 
-          className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+    <Card className="overflow-hidden transition-all hover:shadow-lg h-full flex flex-col">
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={imageUrl || "/placeholder.svg"}
+          alt={name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
-        {onToggleFavorite && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600"
-            onClick={handleToggleFavorite}
-          >
-            <Heart className={cn("h-5 w-5", isFavorite ? "fill-red-500 text-red-500" : "")} />
-          </Button>
-        )}
-        
-        {dish.promotion && (
-          <div className="absolute top-2 left-2">
-            <span className="bg-cantinho-terracotta text-white text-xs font-bold px-2 py-1 rounded-md flex items-center">
-              <Tag className="h-3 w-3 mr-1" />
-              {dish.promotion.label || `${dish.promotion.discount}% OFF`}
-            </span>
+        <button
+          onClick={toggleFavorite}
+          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
+          aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        >
+          <Heart
+            size={18}
+            className={isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}
+          />
+        </button>
+        <div className="absolute top-2 left-2">
+          <Badge variant="secondary" className="bg-white/90 text-xs font-medium">
+            {getCategoryLabel()}
+          </Badge>
+        </div>
+        {promotion && (
+          <div className="absolute bottom-0 left-0 bg-cantinho-terracotta text-white px-2 py-1 text-xs font-bold">
+            {promotion.type === "percentage"
+              ? `${promotion.value}% OFF`
+              : `${formatCurrency(promotion.value)} OFF`}
           </div>
         )}
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{dish.name}</h3>
-        <p className="text-gray-600 text-sm mb-4 min-h-[40px]">{dish.description}</p>
-        <div className="border-t border-gray-100 pt-3 mb-3">
-          <DishReviews dishId={dish.id} dishName={dish.name} />
-        </div>
-        <div className="flex justify-between items-center">
-          <div>
-            {dish.promotion ? (
-              <div className="flex flex-col">
-                <span className="text-sm line-through text-gray-400">
-                  {formatPrice(price)}
+      <CardContent className="pt-4 pb-5 flex flex-col flex-grow">
+        <h3 className="font-bold text-lg mb-1 line-clamp-1">{name}</h3>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
+          {description}
+        </p>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-1">
+            {promotion ? (
+              <>
+                <span className="font-bold text-lg text-cantinho-navy">
+                  {formatCurrency(getDiscountedPrice())}
                 </span>
-                <span className="font-bold text-cantinho-navy">
-                  {formatPrice(price * (100 - dish.promotion.discount) / 100)}
+                <span className="text-gray-400 text-sm line-through">
+                  {formatCurrency(price)}
                 </span>
-              </div>
+              </>
             ) : (
-              <span className="font-bold text-cantinho-navy">{formatPrice(price)}</span>
+              <span className="font-bold text-lg text-cantinho-navy">
+                {formatCurrency(price)}
+              </span>
             )}
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleAddToCart}
-            className="text-cantinho-terracotta hover:text-cantinho-terracotta/90 hover:bg-cantinho-terracotta/10"
+          <Button
+            size="sm"
+            variant="default"
+            className="bg-cantinho-navy hover:bg-cantinho-navy/90"
+            onClick={handleViewDish}
           >
-            <PlusCircle className="h-5 w-5" />
+            Detalhes
           </Button>
         </div>
       </CardContent>

@@ -1,176 +1,149 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Order } from '@/contexts/CartContext';
 
-// Define a JSON type for handling Supabase JSON data
-type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
-
-interface PaymentMethod {
-  name: string;
-}
-
-export function useAdminOrders() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [fetchingOrders, setFetchingOrders] = useState(false);
+export const useAdminOrders = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  
+
+  useEffect(() => {
+    fetchOrders();
+    
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('orders-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'orders' }, 
+        () => {
+          fetchOrders();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const fetchOrders = async () => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setFetchingOrders(true);
       const { data, error } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
-      
+        
       if (error) throw error;
-      
-      const formattedOrders = data.map(order => {
-        let customerInfo = { name: 'Cliente' };
-        
-        try {
-          if (typeof order.customer_info === 'string') {
-            customerInfo = JSON.parse(order.customer_info);
-          } else if (order.customer_info) {
-            customerInfo = order.customer_info;
-          }
-        } catch (e) {
-          console.error("Error parsing customer info:", e);
-        }
-        
-        // Convert payment method to a PaymentMethod object
-        const paymentMethodStr = convertToPaymentMethodString(order.payment_method);
-        const paymentMethodObj: PaymentMethod = { name: paymentMethodStr };
-        
-        return {
-          ...order,
-          id: order.id,
-          customerInfo,
-          paymentMethod: paymentMethodObj,
-          total: order.total,
-          createdAt: order.created_at,
-          updatedAt: order.updated_at,
-          status: order.status || 'pending',
-          paymentStatus: order.payment_status || 'pending',
-          items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || [])
-        };
-      });
-      
+
+      const formattedOrders: Order[] = data.map((order: any) => ({
+        id: order.id,
+        items: order.items,
+        subtotal: order.subtotal,
+        deliveryFee: order.delivery_fee,
+        total: order.total,
+        status: order.status,
+        paymentStatus: order.payment_status,
+        paymentMethod: { name: order.payment_method } as { name: string }, // Specify the type correctly
+        customerInfo: {
+          name: order.customer_name,
+          address: order.customer_address,
+          phone: order.customer_phone
+        },
+        createdAt: order.created_at,
+        notes: order.notes || ''
+      }));
+
       setOrders(formattedOrders);
-      
-    } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+    } catch (error: any) {
+      console.error('Error fetching orders:', error);
+      setError(error.message);
       toast({
-        title: "Erro ao carregar pedidos",
-        description: "Não foi possível carregar a lista de pedidos.",
-        variant: "destructive"
+        title: 'Erro ao carregar pedidos',
+        description: error.message,
+        variant: 'destructive',
       });
     } finally {
-      setFetchingOrders(false);
+      setIsLoading(false);
     }
   };
 
-  // Helper function to convert any payment method type to a string representation
-  const convertToPaymentMethodString = (paymentMethod: any): string => {
-    if (paymentMethod === null || paymentMethod === undefined) {
-      return 'Desconhecido';
-    }
-    
-    if (typeof paymentMethod === 'string') {
-      return paymentMethod;
-    }
-    
-    if (typeof paymentMethod === 'number') {
-      return String(paymentMethod);
-    }
-    
-    if (typeof paymentMethod === 'boolean') {
-      return paymentMethod ? 'Confirmado' : 'Não Confirmado';
-    }
-    
-    if (typeof paymentMethod === 'object') {
-      if (Array.isArray(paymentMethod)) {
-        return paymentMethod.join(', ') || 'Lista de Métodos';
-      }
-      
-      // It's an object
-      if (paymentMethod && 'name' in paymentMethod && typeof paymentMethod.name === 'string') {
-        return paymentMethod.name;
-      }
-      
-      // Handle generic object by converting to a string representation
-      return 'Método de Pagamento Personalizado';
-    }
-    
-    return 'Desconhecido';
-  };
-
-  // Function to handle order status changes
-  const handleStatusChange = async (orderId: string, status: string) => {
+  const updateOrderStatus = async (orderId: string, status: string) => {
     try {
       const { error } = await supabase
         .from('orders')
         .update({ status })
         .eq('id', orderId);
-      
+        
       if (error) throw error;
       
+      toast({
+        title: 'Status atualizado',
+        description: `Pedido marcado como "${status}"`,
+      });
+      
+      // Update the local state
       setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status } : order
+        order.id === orderId 
+          ? { ...order, status } 
+          : order
       ));
       
-      toast({
-        title: "Status atualizado",
-        description: `O status do pedido foi atualizado para ${status}.`
-      });
-      
       return true;
-    } catch (error) {
-      console.error("Erro ao atualizar status:", error);
+    } catch (error: any) {
+      console.error('Error updating order status:', error);
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao atualizar o status do pedido.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  };
-  
-  const handlePaymentStatusChange = async (orderId: string, status: "pending" | "completed") => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ payment_status: status })
-        .eq('id', orderId);
-      
-      if (error) throw error;
-      
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, paymentStatus: status } : order
-      ));
-      
-      toast({
-        title: "Status de pagamento atualizado",
-        description: `O status de pagamento foi atualizado para ${status === 'completed' ? 'pago' : 'pendente'}.`
-      });
-      
-      return true;
-    } catch (error) {
-      console.error("Erro ao atualizar status de pagamento:", error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao atualizar o status de pagamento.",
-        variant: "destructive"
+        title: 'Erro ao atualizar status',
+        description: error.message,
+        variant: 'destructive',
       });
       return false;
     }
   };
 
-  return {
-    orders,
-    fetchingOrders,
-    fetchOrders,
-    handleStatusChange,
-    handlePaymentStatusChange
+  const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: paymentStatus })
+        .eq('id', orderId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: 'Pagamento atualizado',
+        description: `Pagamento marcado como "${paymentStatus}"`,
+      });
+      
+      // Update the local state
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, paymentStatus } 
+          : order
+      ));
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error updating payment status:', error);
+      toast({
+        title: 'Erro ao atualizar pagamento',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
-}
+
+  return { 
+    orders, 
+    isLoading, 
+    error, 
+    refreshOrders: fetchOrders,
+    updateOrderStatus,
+    updatePaymentStatus
+  };
+};

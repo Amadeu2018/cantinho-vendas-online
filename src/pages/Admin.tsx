@@ -80,7 +80,7 @@ const Admin = () => {
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
   const convertedOrders = orders.map(order => convertOrderType(order));
 
-  // Wrapper functions to convert the returned Promise<boolean> to Promise<void>
+  // Wrapper functions that discard the boolean return value from the original functions
   const handleOrderStatusChange = async (orderId: string, status: string): Promise<void> => {
     await updateOrderStatus(orderId, status);
   };

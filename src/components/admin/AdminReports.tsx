@@ -50,8 +50,8 @@ const AdminReports = ({ orders: initialOrders }: AdminReportsProps) => {
     page: { margin: 20 },
     canvas: {
       // Improves quality of the PDF
-      dpi: 300,
       mimeType: "image/png",
+      // Remove the dpi property as it's not supported
     },
   });
   

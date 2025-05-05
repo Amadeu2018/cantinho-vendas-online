@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import NotificationsDropdown from "@/components/admin/NotificationsDropdown";
 import NavEventButton from "@/components/admin/NavEventButton";
+import AdminOrderNotifications from "@/components/admin/AdminOrderNotifications";
 
 interface AdminHeaderActionsProps {
   onLogout: () => void;
@@ -11,6 +12,7 @@ interface AdminHeaderActionsProps {
 const AdminHeaderActions = ({ onLogout }: AdminHeaderActionsProps) => {
   return (
     <div className="flex items-center gap-2 flex-wrap">
+      <AdminOrderNotifications />
       <NotificationsDropdown />
       <NavEventButton />
       <button 

@@ -117,7 +117,7 @@ export const useAdminOrders = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: string) => {
+  const updateOrderStatus = async (orderId: string, status: string): Promise<void> => {
     try {
       const { error } = await supabase
         .from('orders')
@@ -139,8 +139,6 @@ export const useAdminOrders = () => {
       ) as Order[];
       
       setOrders(updatedOrders);
-      
-      return true;
     } catch (error: any) {
       console.error('Error updating order status:', error);
       toast({
@@ -148,11 +146,10 @@ export const useAdminOrders = () => {
         description: error.message,
         variant: 'destructive',
       });
-      return false;
     }
   };
 
-  const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
+  const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
     try {
       const { error } = await supabase
         .from('orders')
@@ -174,8 +171,6 @@ export const useAdminOrders = () => {
       ) as Order[];
       
       setOrders(updatedOrders);
-      
-      return true;
     } catch (error: any) {
       console.error('Error updating payment status:', error);
       toast({
@@ -183,7 +178,6 @@ export const useAdminOrders = () => {
         description: error.message,
         variant: 'destructive',
       });
-      return false;
     }
   };
 

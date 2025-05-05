@@ -45,9 +45,17 @@ export const useAdminOrders = () => {
       .channel('orders-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'orders' }, 
-        () => {
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            // New order notification
+            toast({
+              title: 'Novo pedido recebido',
+              description: `Pedido #${payload.new.id.slice(0, 8)} foi recebido.`
+            });
+          }
           fetchOrders();
-      })
+        }
+      )
       .subscribe();
 
     return () => {

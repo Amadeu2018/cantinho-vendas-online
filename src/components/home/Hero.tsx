@@ -1,19 +1,37 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Hero = () => {
+  const [animationState, setAnimationState] = useState(0);
+
+  useEffect(() => {
+    // Create a smooth background animation that cycles between different states
+    const interval = setInterval(() => {
+      setAnimationState((prev) => (prev + 1) % 100);
+    }, 70);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate the opacity and scale values based on the animation state
+  const backgroundOpacity = 0.7 + Math.sin(animationState / 10) * 0.1;
+  const backgroundScale = 1 + Math.sin(animationState / 15) * 0.02;
+  
   return (
     <div className="relative h-[70vh] overflow-hidden">
       {/* Camada de animação de gradiente */}
       <div className="absolute inset-0 hero-gradient"></div>
       
-      {/* Fundo com imagem */}
+      {/* Fundo com imagem animada */}
       <div 
-        className="absolute inset-0 bg-cover bg-center transform transition-all duration-7000"
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-7000"
         style={{ 
           backgroundImage: "url('/background.jpg')", 
-          opacity: 0.7 
+          opacity: backgroundOpacity,
+          transform: `scale(${backgroundScale})`,
+          transition: "opacity 2s ease-in-out, transform 2s ease-in-out"
         }}
       ></div>
       

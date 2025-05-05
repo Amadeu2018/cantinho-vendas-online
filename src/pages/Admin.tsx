@@ -19,6 +19,7 @@ import NavEventButton from "@/components/admin/NavEventButton";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
 import AdminOrdersList from "@/components/admin/AdminOrdersList";
 import { Order as CartOrder } from "@/contexts/CartContext";
+import NotificationsDropdown from "@/components/admin/NotificationsDropdown";
 
 // Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
 const convertOrderType = (order: any): CartOrder => {
@@ -93,6 +94,78 @@ const Admin = () => {
     checkAdminStatus();
   }, [user, navigate, toast]);
 
+  // Hook to create a notification when a new order is placed
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const createOrderNotification = async (orderId: string) => {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: user?.id,
+            type: 'order',
+            title: 'Novo Pedido',
+            message: `Pedido ${orderId.slice(0, 8)} recebido`,
+            read: false
+          });
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error("Erro ao criar notificação:", error);
+      }
+    };
+
+    // Set up subscription for new orders
+    const orderChannel = supabase
+      .channel('new-orders')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'orders' }, 
+        (payload) => {
+          if (payload.new && payload.new.id) {
+            createOrderNotification(payload.new.id);
+          }
+        }
+      )
+      .subscribe();
+
+    // Set up subscription for order status changes
+    const orderUpdateChannel = supabase
+      .channel('order-updates')
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'orders' }, 
+        (payload) => {
+          if (payload.new && payload.new.id && payload.old && 
+              (payload.new.status !== payload.old.status || 
+               payload.new.payment_status !== payload.old.payment_status)) {
+            // Create notification for status change
+            const statusChange = payload.new.status !== payload.old.status 
+              ? `${payload.new.status}` 
+              : `pagamento ${payload.new.payment_status}`;
+            
+            supabase
+              .from('notifications')
+              .insert({
+                user_id: user?.id,
+                type: 'order',
+                title: 'Pedido Atualizado',
+                message: `Pedido ${payload.new.id.slice(0, 8)} alterado para ${statusChange}`,
+                read: false
+              })
+              .then(({ error }) => {
+                if (error) console.error("Erro ao criar notificação de atualização:", error);
+              });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(orderChannel);
+      supabase.removeChannel(orderUpdateChannel);
+    };
+  }, [isAdmin, user]);
+
   const handleLogin = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
     if (isAdmin) {
@@ -152,6 +225,7 @@ const Admin = () => {
               <div className="p-4 bg-cantinho-navy text-white flex justify-between items-center flex-wrap gap-3">
                 <h2 className="text-xl font-semibold">Painel de Administração</h2>
                 <div className="flex items-center gap-2 flex-wrap">
+                  <NotificationsDropdown />
                   <NavEventButton />
                   <button 
                     onClick={handleLogout}

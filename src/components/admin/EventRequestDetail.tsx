@@ -1,23 +1,14 @@
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { CalendarDays, Users, MapPin, Phone, Mail, Clock, ArrowLeft, FileText, ListTodo, Building, BanknoteIcon, Download, Printer } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EventInvoiceForm from "./EventInvoiceForm";
-import { usePDF } from "react-to-pdf";
 import type { EventRequest } from "./AdminEventRequests";
-import EventClientInfo from "./EventClientInfo";
-import EventRequestInfo from "./EventRequestInfo";
-import EventDetailsInfo from "./EventDetailsInfo";
-import InvoiceList from "./InvoiceList";
 import InvoicePreview from "./InvoicePreview";
-import { useIsMobile } from "@/hooks/use-mobile";
+import EventRequestActions from "./EventRequestActions";
+import EventRequestSummary from "./EventRequestSummary";
+import EventRequestInvoices from "./EventRequestInvoices";
 
 export interface Invoice {
   id: string;
@@ -42,9 +33,6 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
   const [loadingInvoices, setLoadingInvoices] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
-  const targetRef = useRef<HTMLDivElement>(null);
-  const { toPDF } = usePDF();
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchInvoices();
@@ -169,10 +157,6 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
     }
   };
 
-  const handleExportInvoicePDF = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-  };
-
   if (showInvoiceForm) {
     return (
       <EventInvoiceForm
@@ -191,102 +175,35 @@ const EventRequestDetail = ({ request, onClose, onStatusChange }: EventRequestDe
         invoice={selectedInvoice} 
         request={request} 
         onBack={() => setSelectedInvoice(null)}
-        onExportPDF={handleExportInvoicePDF}
+        onExportPDF={setSelectedInvoice}
       />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center"
-          onClick={onClose}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {isMobile ? "Voltar" : "Voltar para lista"}
-        </Button>
+      <EventRequestActions 
+        requestId={request.id}
+        status={request.status}
+        onClose={onClose}
+        onStatusChange={onStatusChange}
+      />
 
-        <div className="flex flex-wrap gap-2">
-          {request.status !== "atendido" && (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => onStatusChange(request.id, "atendido")}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Clock className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Marcar como Atendido</span>
-              <span className="sm:hidden">Atendido</span>
-            </Button>
-          )}
+      <EventRequestSummary 
+        request={request} 
+        statusBadge={getStatusBadge(request.status)} 
+      />
 
-          {request.status !== "cancelado" && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-red-200 text-red-700 hover:bg-red-50"
-              onClick={() => onStatusChange(request.id, "cancelado")}
-            >
-              <span className="hidden sm:inline">Cancelar Solicitação</span>
-              <span className="sm:hidden">Cancelar</span>
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <CardTitle>Detalhes da Solicitação</CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground">Status:</div>
-              {getStatusBadge(request.status)}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <EventClientInfo request={request} />
-              <Separator className="my-4" />
-              <EventRequestInfo request={request} />
-            </div>
-
-            <div className="space-y-4">
-              <EventDetailsInfo request={request} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Faturas
-            </CardTitle>
-            <Button onClick={() => setShowInvoiceForm(true)}>
-              <FileText className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Nova Fatura</span>
-              <span className="sm:hidden">+</span>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <InvoiceList 
-            invoices={invoices} 
-            loadingInvoices={loadingInvoices} 
-            onViewInvoice={setSelectedInvoice}
-            onMarkPaid={handleMarkPaid}
-            onDeleteInvoice={handleDeleteInvoice}
-            getStatusBadge={getStatusBadge}
-          />
-        </CardContent>
-      </Card>
+      <EventRequestInvoices 
+        invoices={invoices}
+        loadingInvoices={loadingInvoices}
+        request={request}
+        getStatusBadge={getStatusBadge}
+        onShowInvoiceForm={() => setShowInvoiceForm(true)}
+        onViewInvoice={setSelectedInvoice}
+        onMarkPaid={handleMarkPaid}
+        onDeleteInvoice={handleDeleteInvoice}
+      />
     </div>
   );
 };

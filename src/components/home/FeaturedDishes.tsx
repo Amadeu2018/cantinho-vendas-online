@@ -44,7 +44,7 @@ const FeaturedDishes = () => {
                 id={dish.id}
                 name={dish.name}
                 description={dish.description}
-                price={parseFloat(dish.price as unknown as string)} 
+                price={typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price} 
                 imageUrl={dish.image_url}
                 category={dish.category}
                 isFavorite={isFavorite(dish.id)}

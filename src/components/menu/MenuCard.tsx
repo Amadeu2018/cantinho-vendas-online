@@ -1,58 +1,48 @@
 
-import { useState } from "react";
-import { Heart, ShoppingCart, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useCart } from "@/contexts/CartContext";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Plus, Minus } from "lucide-react";
+import { Dish } from "@/types/dish";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
-interface MenuCardProps {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  isFavorite: boolean;
-}
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("pt-AO", {
-    style: "currency",
-    currency: "AOA",
-    minimumFractionDigits: 0,
-  }).format(price);
+type MenuCardProps = {
+  dish: Dish;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 };
 
-const MenuCard: React.FC<MenuCardProps> = ({
-  id,
-  name,
-  description,
-  price,
-  imageUrl,
-  category,
-  isFavorite: initialIsFavorite,
-}) => {
-  const { addItem } = useCart();
-  const { toast } = useToast();
+const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps) => {
   const { user } = useAuth();
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
-  const [isLoading, setIsLoading] = useState(false);
+  const { addItem, removeItem, items } = useCart();
+  const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
+  const { toast } = useToast();
 
-  const toggleFavorite = async () => {
+  // Convert string price to number if necessary
+  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+  
+  // Count how many of this dish is in the cart
+  const itemInCart = items.find((item) => item.id === dish.id);
+  const quantity = itemInCart ? itemInCart.quantity : 0;
+
+  const handleToggleFavorite = async () => {
     if (!user) {
       toast({
-        title: "Aviso",
-        description: "Faça login para adicionar aos favoritos.",
-        variant: "default",
+        title: "Login necessário",
+        description: "Você precisa estar logado para adicionar aos favoritos.",
+        variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
+    if (onToggleFavorite) {
+      onToggleFavorite();
+      return;
+    }
+
+    setIsAddingToFavorites(true);
     try {
       if (isFavorite) {
         // Remove from favorites
@@ -60,105 +50,101 @@ const MenuCard: React.FC<MenuCardProps> = ({
           .from("favorites")
           .delete()
           .eq("user_id", user.id)
-          .eq("dish_id", id);
+          .eq("dish_id", dish.id);
 
         if (error) throw error;
-        setIsFavorite(false);
+
+        toast({
+          title: "Removido dos favoritos",
+          description: `${dish.name} foi removido dos seus favoritos`,
+        });
       } else {
         // Add to favorites
         const { error } = await supabase.from("favorites").insert({
           user_id: user.id,
-          dish_id: id,
+          dish_id: dish.id,
         });
 
         if (error) throw error;
-        setIsFavorite(true);
+
+        toast({
+          title: "Adicionado aos favoritos",
+          description: `${dish.name} foi adicionado aos seus favoritos`,
+        });
       }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
+    } catch (error: any) {
+      console.error("Erro ao modificar favoritos:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao atualizar os favoritos.",
+        description: "Não foi possível modificar os favoritos. Tente novamente.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsAddingToFavorites(false);
     }
   };
 
-  const handleAddToCart = () => {
-    addItem({
-      id,
-      name,
-      price,
-      quantity: 1,
-      notes: "",
-      image: imageUrl,
-    });
-
-    toast({
-      title: "Adicionado ao carrinho",
-      description: `${name} foi adicionado ao seu carrinho.`,
-    });
-  };
-
   return (
-    <Card className="overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg">
-      <div className="relative overflow-hidden aspect-[4/3]">
+    <div className="bg-white shadow-md rounded-lg overflow-hidden transform transition-transform hover:scale-[1.02]">
+      <div className="relative">
         <img
-          src={imageUrl || "/placeholder.svg"}
-          alt={name}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          src={dish.image || "/placeholder.svg"}
+          alt={dish.name}
+          className="w-full h-48 object-cover"
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full"
-          onClick={toggleFavorite}
-          disabled={isLoading}
+        <button
+          onClick={handleToggleFavorite}
+          disabled={isAddingToFavorites}
+          className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow-md transition-colors hover:bg-gray-100"
+          aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         >
           <Heart
             className={`h-5 w-5 ${
-              isFavorite ? "fill-red-500 text-red-500" : ""
+              isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
             }`}
           />
-        </Button>
+        </button>
+        {dish.featured && (
+          <Badge className="absolute bottom-2 left-2 bg-cantinho-terracotta">
+            Destaque
+          </Badge>
+        )}
       </div>
-      <CardContent className="p-4 flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-bold text-lg line-clamp-1">{name}</h3>
-          <span className="font-bold text-cantinho-terracotta">
-            {formatPrice(price)}
-          </span>
-        </div>
-        <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
-          {description}
+      <div className="p-4">
+        <h3 className="font-bold text-lg mb-1">{dish.name}</h3>
+        <p className="text-gray-700 text-sm mb-2 line-clamp-2">
+          {dish.description}
         </p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 text-xs md:text-sm"
-          asChild
-        >
-          <Link to={`/menu/reviews/${id}`}>
-            <MessageSquare className="mr-1 h-4 w-4" />
-            <span className="hidden sm:inline">Avaliações</span>
-            <span className="sm:hidden">Ver</span>
-          </Link>
-        </Button>
-        <Button
-          size="sm"
-          className="flex-1 text-xs md:text-sm bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-          onClick={handleAddToCart}
-        >
-          <ShoppingCart className="mr-1 h-4 w-4" />
-          <span className="hidden sm:inline">Adicionar</span>
-          <span className="sm:hidden">+</span>
-        </Button>
-      </CardFooter>
-    </Card>
+        <div className="flex justify-between items-center">
+          <span className="font-semibold text-cantinho-navy">{dishPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
+          <div className="flex items-center gap-2">
+            {quantity > 0 && (
+              <>
+                <button
+                  onClick={() => removeItem(dish.id)}
+                  className="bg-cantinho-navy text-white p-1 rounded-full"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="font-medium w-5 text-center">{quantity}</span>
+              </>
+            )}
+            <button
+              onClick={() => addItem({
+                id: dish.id,
+                name: dish.name,
+                price: dishPrice,
+                image: dish.image || "/placeholder.svg",
+                quantity: 1,
+              })}
+              className="bg-cantinho-navy text-white p-1 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

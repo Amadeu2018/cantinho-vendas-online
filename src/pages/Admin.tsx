@@ -80,6 +80,15 @@ const Admin = () => {
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
   const convertedOrders = orders.map(order => convertOrderType(order));
 
+  // Wrapper functions to convert the returned Promise<boolean> to Promise<void>
+  const handleOrderStatusChange = async (orderId: string, status: string): Promise<void> => {
+    await updateOrderStatus(orderId, status);
+  };
+  
+  const handlePaymentStatusChange = async (orderId: string, status: string): Promise<void> => {
+    await updatePaymentStatus(orderId, status);
+  };
+
   // Render different content based on application state
   const renderContent = () => {
     if (!isAuthenticated) {
@@ -91,8 +100,8 @@ const Admin = () => {
         <AdminOrderView 
           order={convertOrderType(selectedOrder)}
           onSelectOrder={handleSelectOrder}
-          onStatusChange={updateOrderStatus}
-          onPaymentStatusChange={updatePaymentStatus}
+          onStatusChange={handleOrderStatusChange}
+          onPaymentStatusChange={handlePaymentStatusChange}
           onPrepareInvoice={handlePrepareInvoice}
         />
       );

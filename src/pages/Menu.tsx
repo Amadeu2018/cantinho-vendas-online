@@ -20,7 +20,7 @@ import { Dish } from "@/types/dish";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Menu = () => {
-  const { dishes, loading, isFavorite } = useDishes();
+  const { dishes, loading, isFavorite, toggleFavorite } = useDishes();
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
   const isMobile = useIsMobile();
@@ -165,13 +165,9 @@ const Menu = () => {
                     {filteredItems.appetizer.map(dish => (
                       <MenuCard 
                         key={dish.id}
-                        id={dish.id}
-                        name={dish.name}
-                        description={dish.description}
-                        price={Number(dish.price)} 
-                        imageUrl={dish.image_url}
-                        category={dish.category}
+                        dish={dish}
                         isFavorite={isFavorite(dish.id)}
+                        onToggleFavorite={() => toggleFavorite(dish.id)}
                       />
                     ))}
                   </div>
@@ -190,13 +186,9 @@ const Menu = () => {
                     {filteredItems.main.map(dish => (
                       <MenuCard 
                         key={dish.id}
-                        id={dish.id}
-                        name={dish.name}
-                        description={dish.description}
-                        price={Number(dish.price)} 
-                        imageUrl={dish.image_url}
-                        category={dish.category}
+                        dish={dish}
                         isFavorite={isFavorite(dish.id)}
+                        onToggleFavorite={() => toggleFavorite(dish.id)}
                       />
                     ))}
                   </div>
@@ -215,13 +207,9 @@ const Menu = () => {
                     {filteredItems.dessert.map(dish => (
                       <MenuCard 
                         key={dish.id}
-                        id={dish.id}
-                        name={dish.name}
-                        description={dish.description}
-                        price={Number(dish.price)} 
-                        imageUrl={dish.image_url}
-                        category={dish.category}
+                        dish={dish}
                         isFavorite={isFavorite(dish.id)}
+                        onToggleFavorite={() => toggleFavorite(dish.id)}
                       />
                     ))}
                   </div>

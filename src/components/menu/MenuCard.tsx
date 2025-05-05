@@ -88,7 +88,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
     <div className="bg-white shadow-md rounded-lg overflow-hidden transform transition-transform hover:scale-[1.02]">
       <div className="relative">
         <img
-          src={dish.image || "/placeholder.svg"}
+          src={dish.image_url || "/placeholder.svg"}
           alt={dish.name}
           className="w-full h-48 object-cover"
         />
@@ -104,7 +104,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
             }`}
           />
         </button>
-        {dish.featured && (
+        {dish.promotion && (
           <Badge className="absolute bottom-2 left-2 bg-cantinho-terracotta">
             Destaque
           </Badge>
@@ -134,7 +134,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
                 id: dish.id,
                 name: dish.name,
                 price: dishPrice,
-                image: dish.image || "/placeholder.svg",
+                image: dish.image_url || "/placeholder.svg",
                 quantity: 1,
               })}
               className="bg-cantinho-navy text-white p-1 rounded-full"

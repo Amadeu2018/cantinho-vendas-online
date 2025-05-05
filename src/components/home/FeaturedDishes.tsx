@@ -8,7 +8,7 @@ import MenuCard from "../menu/MenuCard";
 import { Dish } from "@/types/dish";
 
 const FeaturedDishes = () => {
-  const { dishes, loading, isFavorite } = useDishes();
+  const { dishes, loading, isFavorite, toggleFavorite } = useDishes();
   const navigate = useNavigate();
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
 
@@ -40,14 +40,10 @@ const FeaturedDishes = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {popularDishes.map((dish) => (
               <MenuCard 
-                key={dish.id} 
-                id={dish.id}
-                name={dish.name}
-                description={dish.description}
-                price={typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price} 
-                imageUrl={dish.image_url}
-                category={dish.category}
+                key={dish.id}
+                dish={dish}
                 isFavorite={isFavorite(dish.id)}
+                onToggleFavorite={() => toggleFavorite(dish.id)}
               />
             ))}
           </div>

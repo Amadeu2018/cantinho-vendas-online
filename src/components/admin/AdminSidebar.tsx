@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { 
   LayoutDashboard, 
@@ -22,33 +23,65 @@ import {
   BarChart, 
   Users, 
   Settings, 
-  LogOut 
+  LogOut,
+  Menu,
+  ChevronLeft
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
-const AdminSidebar = () => {
+interface AdminSidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
   
   return (
-    <Sidebar className="bg-gradient-to-br from-cantinho-navy to-cantinho-navy/90 text-white border-r-0">
+    <Sidebar 
+      className="bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] text-white border-r-0"
+      data-collapsed={collapsed}
+      data-state={collapsed ? "collapsed" : "expanded"}
+    >
       <SidebarHeader className="border-b border-white/10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
             <Utensils className="h-6 w-6" />
-            <span className="text-xl font-bold">Cantinho Algarvio</span>
+            {!collapsed && <span className="text-xl font-bold">Cantinho Algarvio</span>}
           </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white hover:bg-white/10"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          </Button>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-300">Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-indigo-200 uppercase text-xs font-bold">Principal</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Dashboard">
                 <Link to="/admin">
                   <LayoutDashboard className="h-5 w-5" />
                   <span>Dashboard</span>
@@ -57,7 +90,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/orders")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/orders")} tooltip="Pedidos">
                 <Link to="/admin">
                   <ShoppingCart className="h-5 w-5" />
                   <span>Pedidos</span>
@@ -66,7 +99,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/event-admin")}>
+              <SidebarMenuButton asChild isActive={isActive("/event-admin")} tooltip="Eventos">
                 <Link to="/event-admin">
                   <CalendarDays className="h-5 w-5" />
                   <span>Eventos</span>
@@ -75,7 +108,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/products")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/products")} tooltip="Cardápio">
                 <Link to="/admin">
                   <Utensils className="h-5 w-5" />
                   <span>Cardápio</span>
@@ -86,10 +119,10 @@ const AdminSidebar = () => {
         </SidebarGroup>
         
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-300">Financeiro</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-indigo-200 uppercase text-xs font-bold">Financeiro</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/finance")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/finance")} tooltip="Pagamentos">
                 <Link to="/admin">
                   <Wallet className="h-5 w-5" />
                   <span>Pagamentos</span>
@@ -98,7 +131,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/invoices")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/invoices")} tooltip="Faturas">
                 <Link to="/admin">
                   <FileText className="h-5 w-5" />
                   <span>Faturas</span>
@@ -107,7 +140,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/reports")} tooltip="Relatórios">
                 <Link to="/admin">
                   <BarChart className="h-5 w-5" />
                   <span>Relatórios</span>
@@ -118,10 +151,10 @@ const AdminSidebar = () => {
         </SidebarGroup>
         
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-300">Configurações</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-indigo-200 uppercase text-xs font-bold">Configurações</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/customers")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/customers")} tooltip="Clientes">
                 <Link to="/admin">
                   <Users className="h-5 w-5" />
                   <span>Clientes</span>
@@ -130,7 +163,7 @@ const AdminSidebar = () => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/settings")}>
+              <SidebarMenuButton asChild isActive={isActive("/admin/settings")} tooltip="Configurações">
                 <Link to="/admin">
                   <Settings className="h-5 w-5" />
                   <span>Configurações</span>
@@ -144,15 +177,17 @@ const AdminSidebar = () => {
       <SidebarFooter className="border-t border-white/10 p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/auth/login">
+            <SidebarMenuButton asChild onClick={handleLogout} tooltip="Sair">
+              <button className="w-full flex items-center gap-2">
                 <LogOut className="h-5 w-5" />
                 <span>Sair</span>
-              </Link>
+              </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      
+      <SidebarRail />
     </Sidebar>
   );
 };

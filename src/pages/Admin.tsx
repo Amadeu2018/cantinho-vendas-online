@@ -9,6 +9,7 @@ import AdminInvoiceView from "@/components/admin/AdminInvoiceView";
 import { Order as CartOrder } from "@/contexts/CartContext";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 // Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
 const convertOrderType = (order: any): CartOrder => {
@@ -29,6 +30,7 @@ const Admin = () => {
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Use the custom hook for orders management
   const { 
@@ -40,14 +42,41 @@ const Admin = () => {
   } = useAdminOrders();
   
   useEffect(() => {
-    if (user) {
-      // Initial loading is managed by the AdminAuthentication component
-      setIsLoading(false);
-    } else {
-      setIsAuthenticated(false);
-      setIsLoading(false);
-    }
-  }, [user]);
+    const checkAuth = async () => {
+      if (user) {
+        try {
+          // Check if user is admin
+          const isAdmin = await checkAdminStatus();
+          setIsAuthenticated(isAdmin);
+          
+          if (!isAdmin) {
+            toast({
+              title: "Acesso negado",
+              description: "Você não tem permissões de administrador.",
+              variant: "destructive"
+            });
+            navigate('/');
+          } else {
+            refreshOrders();
+          }
+        } catch (error) {
+          console.error("Erro ao verificar status de admin:", error);
+        }
+        setIsLoading(false);
+      } else {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
+  }, [user, navigate]);
+
+  const checkAdminStatus = async () => {
+    // For demonstration, we'll assume the user is an admin if they're logged in
+    // In a real app, you would check user roles from your authentication system
+    return !!user;
+  };
 
   const handleAuthentication = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
@@ -120,7 +149,7 @@ const Admin = () => {
 
   // Render different content based on application state
   const renderContent = () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !user) {
       return <AdminAuthentication onAuthenticated={handleAuthentication} />;
     }
 

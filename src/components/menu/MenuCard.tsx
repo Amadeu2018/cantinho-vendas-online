@@ -1,150 +1,192 @@
 
-import React, { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCart } from "@/contexts/CartContext";
+import React, { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Plus, Minus } from "lucide-react";
-import { Dish } from "@/types/dish";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from '@/contexts/CartContext';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Heart, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Dish } from '@/types/dish';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 type MenuCardProps = {
   dish: Dish;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
 };
 
-const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps) => {
-  const { user } = useAuth();
-  const { addItem, removeItem, items } = useCart();
-  const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
+const MenuCard = ({ dish }: MenuCardProps) => {
+  const [quantity, setQuantity] = useState(1);
+  const [isLiked, setIsLiked] = useState(false);
+  const { addToCart } = useCart();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Convert string price to number if necessary
-  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
-  
-  // Count how many of this dish is in the cart
-  const itemInCart = items.find((item) => item.id === dish.id);
-  const quantity = itemInCart ? itemInCart.quantity : 0;
+  React.useEffect(() => {
+    const checkIfLiked = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('favorites')
+          .select('dish_id')
+          .eq('user_id', user.id)
+          .eq('dish_id', dish.id)
+          .single();
+        
+        if (!error && data) {
+          setIsLiked(true);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar favorito:', error);
+      }
+    };
+    
+    checkIfLiked();
+  }, [dish.id, user]);
 
-  const handleToggleFavorite = async () => {
+  const handleAddToCart = () => {
+    addToCart({
+      id: dish.id,
+      name: dish.name,
+      price: dish.price,
+      quantity,
+      image: dish.image_url || ''
+    });
+    
+    toast({
+      title: "Item adicionado",
+      description: `${dish.name} foi adicionado ao carrinho.`,
+      variant: "success",
+    });
+  };
+
+  const toggleFavorite = async () => {
     if (!user) {
       toast({
-        title: "Login necessário",
-        description: "Você precisa estar logado para adicionar aos favoritos.",
+        title: "Não autenticado",
+        description: "Faça login para adicionar aos favoritos.",
         variant: "destructive",
       });
       return;
     }
-
-    if (onToggleFavorite) {
-      onToggleFavorite();
-      return;
-    }
-
-    setIsAddingToFavorites(true);
+    
     try {
-      if (isFavorite) {
+      if (isLiked) {
         // Remove from favorites
-        const { error } = await supabase
-          .from("favorites")
+        await supabase
+          .from('favorites')
           .delete()
-          .eq("user_id", user.id)
-          .eq("dish_id", dish.id);
-
-        if (error) throw error;
-
+          .eq('user_id', user.id)
+          .eq('dish_id', dish.id);
+          
+        setIsLiked(false);
         toast({
           title: "Removido dos favoritos",
-          description: `${dish.name} foi removido dos seus favoritos`,
+          description: `${dish.name} foi removido dos seus favoritos.`,
         });
       } else {
         // Add to favorites
-        const { error } = await supabase.from("favorites").insert({
-          user_id: user.id,
-          dish_id: dish.id,
-        });
-
-        if (error) throw error;
-
+        await supabase
+          .from('favorites')
+          .insert([
+            { user_id: user.id, dish_id: dish.id }
+          ]);
+          
+        setIsLiked(true);
         toast({
           title: "Adicionado aos favoritos",
-          description: `${dish.name} foi adicionado aos seus favoritos`,
+          description: `${dish.name} foi adicionado aos seus favoritos.`,
+          variant: "success",
         });
       }
-    } catch (error: any) {
-      console.error("Erro ao modificar favoritos:", error);
+    } catch (error) {
+      console.error('Erro ao atualizar favorito:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível modificar os favoritos. Tente novamente.",
+        description: "Não foi possível atualizar seus favoritos.",
         variant: "destructive",
       });
-    } finally {
-      setIsAddingToFavorites(false);
     }
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-AO', { 
+      style: 'currency', 
+      currency: 'AOA',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden transform transition-transform hover:scale-[1.02]">
+    <Card className="overflow-hidden transition-all hover:shadow-md">
       <div className="relative">
-        <img
-          src={dish.image_url || "/placeholder.svg"}
-          alt={dish.name}
-          className="w-full h-48 object-cover"
-        />
-        <button
-          onClick={handleToggleFavorite}
-          disabled={isAddingToFavorites}
-          className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow-md transition-colors hover:bg-gray-100"
-          aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        >
-          <Heart
-            className={`h-5 w-5 ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-            }`}
+        <AspectRatio ratio={16 / 9}>
+          <img
+            src={dish.image_url || "/placeholder.svg"}
+            alt={dish.name}
+            className="object-cover w-full h-full"
           />
-        </button>
-        {dish.promotion && (
-          <Badge className="absolute bottom-2 left-2 bg-cantinho-terracotta">
-            Destaque
+        </AspectRatio>
+        
+        <div className="absolute top-2 right-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`rounded-full bg-white ${isLiked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500`}
+            onClick={toggleFavorite}
+          >
+            <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+          </Button>
+        </div>
+        
+        {dish.category && (
+          <Badge className="absolute bottom-2 left-2 bg-white/80 text-black hover:bg-white/70">
+            {dish.category}
           </Badge>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="font-bold text-lg mb-1">{dish.name}</h3>
-        <p className="text-gray-700 text-sm mb-2 line-clamp-2">
-          {dish.description}
-        </p>
-        <div className="flex justify-between items-center">
-          <span className="font-semibold text-cantinho-navy">{dishPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
-          <div className="flex items-center gap-2">
-            {quantity > 0 && (
-              <>
-                <button
-                  onClick={() => removeItem(dish.id)}
-                  className="bg-cantinho-navy text-white p-1 rounded-full"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="font-medium w-5 text-center">{quantity}</span>
-              </>
-            )}
-            <button
-              onClick={() => addItem({
-                id: dish.id,
-                name: dish.name,
-                price: dishPrice,
-                image: dish.image_url || "/placeholder.svg",
-                quantity: 1,
-              })}
-              className="bg-cantinho-navy text-white p-1 rounded-full"
+      
+      <CardContent className="p-4">
+        <h3 className="font-semibold text-lg mb-1 line-clamp-1">{dish.name}</h3>
+        <p className="text-gray-500 text-sm mb-3 line-clamp-2">{dish.description}</p>
+        
+        <div className="flex items-center justify-between">
+          <p className="font-bold text-lg">{formatPrice(dish.price)}</p>
+          
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              disabled={quantity <= 1}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            
+            <span className="w-8 text-center font-medium">{quantity}</span>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => setQuantity(quantity + 1)}
             >
               <Plus className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+        
+        <Button 
+          className="w-full mt-3 bg-cantinho-navy hover:bg-cantinho-navy/90"
+          onClick={handleAddToCart}
+        >
+          <ShoppingBag className="h-4 w-4 mr-2" />
+          Adicionar
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

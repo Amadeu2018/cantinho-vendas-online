@@ -45,8 +45,9 @@ const Admin = () => {
     const checkAuth = async () => {
       if (user) {
         try {
-          // Check if user is admin
-          const isAdmin = await checkAdminStatus();
+          // Check if user is admin - in a real app, check the user role property
+          // For demonstration purposes, we'll assume any logged-in user can access admin
+          const isAdmin = user.role === 'admin';
           setIsAuthenticated(isAdmin);
           
           if (!isAdmin) {
@@ -70,13 +71,7 @@ const Admin = () => {
     };
     
     checkAuth();
-  }, [user, navigate]);
-
-  const checkAdminStatus = async () => {
-    // For demonstration, we'll assume the user is an admin if they're logged in
-    // In a real app, you would check user roles from your authentication system
-    return !!user;
-  };
+  }, [user, navigate, toast, refreshOrders]);
 
   const handleAuthentication = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
@@ -149,7 +144,7 @@ const Admin = () => {
 
   // Render different content based on application state
   const renderContent = () => {
-    if (!isAuthenticated && !user) {
+    if (!isAuthenticated) {
       return <AdminAuthentication onAuthenticated={handleAuthentication} />;
     }
 

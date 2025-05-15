@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Sidebar, 
@@ -42,24 +42,6 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   
-  useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Acesso negado",
-        description: "Você precisa estar logado para acessar esta área.",
-        variant: "destructive",
-      });
-      navigate('/auth/login');
-    } else if (user.role !== 'admin') {
-      toast({
-        title: "Acesso restrito",
-        description: "Esta área é restrita para administradores.",
-        variant: "destructive",
-      });
-      navigate('/');
-    }
-  }, [user, navigate, toast]);
-  
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -68,14 +50,19 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
     try {
       await signOut();
       navigate('/auth/login');
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu com sucesso da área administrativa",
+      });
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+      toast({
+        title: "Erro ao sair",
+        description: "Ocorreu um erro ao tentar fazer logout",
+        variant: "destructive"
+      });
     }
   };
-  
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
   
   return (
     <Sidebar 

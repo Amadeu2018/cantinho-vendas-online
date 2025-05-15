@@ -6,7 +6,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import AdminHeaderActions from "@/components/admin/AdminHeaderActions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,24 +22,15 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
   const { toast } = useToast();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
-  // Check if user is authenticated and has admin role
+  // Check if user is authenticated
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        toast({
-          title: "Acesso negado",
-          description: "Você precisa estar logado para acessar esta área.",
-          variant: "destructive",
-        });
-        navigate('/auth/login');
-      } else if (user.role !== 'admin') {
-        toast({
-          title: "Acesso restrito",
-          description: "Esta área é restrita para administradores.",
-          variant: "destructive",
-        });
-        navigate('/');
-      }
+    if (!isLoading && !user) {
+      toast({
+        title: "Acesso negado",
+        description: "Você precisa estar logado para acessar esta área.",
+        variant: "destructive",
+      });
+      navigate('/auth/login');
     }
   }, [user, isLoading, navigate, toast]);
 
@@ -48,8 +38,17 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
     try {
       await signOut();
       navigate('/auth/login');
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu com sucesso da área administrativa",
+      });
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+      toast({
+        title: "Erro ao sair",
+        description: "Ocorreu um erro ao tentar fazer logout",
+        variant: "destructive"
+      });
     }
   };
 
@@ -64,14 +63,14 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
     );
   }
 
-  // If user is not authenticated or not admin, don't render the layout
-  if (!user || user.role !== 'admin') {
+  // If user is not authenticated, don't render the layout
+  if (!user) {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 w-full">
         <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -134,7 +133,7 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] flex items-center justify-center text-white">
                       <User className="h-4 w-4" />
                     </div>
-                    <span className="hidden md:inline-block">Admin</span>
+                    <span className="hidden md:inline-block">{user.email || "Admin"}</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>

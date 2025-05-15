@@ -75,24 +75,24 @@ const AdminOrdersList = ({ orders, onSelectOrder, fetchingOrders }: AdminOrdersL
     <div>
       {fetchingOrders ? (
         <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin mr-2" />
+          <Loader2 className="h-8 w-8 animate-spin mr-2 text-cantinho-navy" />
           <p>Carregando pedidos...</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Search and sort controls */}
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-4 bg-gray-50 p-4 rounded-lg">
             <div className="flex-1 relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input 
                 placeholder="Pesquisar pedidos..." 
-                className="pl-8"
+                className="pl-10 bg-white border-gray-200"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as any)}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-[200px] bg-white border-gray-200">
                 <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
@@ -104,7 +104,7 @@ const AdminOrdersList = ({ orders, onSelectOrder, fetchingOrders }: AdminOrdersL
             </Select>
             <Button 
               variant="outline" 
-              className="w-full md:w-auto"
+              className="w-full md:w-auto border-gray-200 bg-white"
               onClick={() => {
                 setSearchTerm("");
                 setSortOrder("newest");
@@ -114,61 +114,61 @@ const AdminOrdersList = ({ orders, onSelectOrder, fetchingOrders }: AdminOrdersL
             </Button>
           </div>
           
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto bg-white rounded-lg border border-gray-100 shadow-sm">
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className={`w-full ${isMobile ? 'overflow-x-auto flex no-scrollbar' : ''}`}>
-                <TabsTrigger value="pending">Pendentes</TabsTrigger>
-                <TabsTrigger value="confirmed">Confirmados</TabsTrigger>
-                <TabsTrigger value="preparing">Em Preparo</TabsTrigger>
-                <TabsTrigger value="delivering">Em Entrega</TabsTrigger>
-                <TabsTrigger value="completed">Concluídos</TabsTrigger>
-                <TabsTrigger value="cancelled">Cancelados</TabsTrigger>
-                <TabsTrigger value="all">Todos</TabsTrigger>
+              <TabsList className={`w-full ${isMobile ? 'overflow-x-auto flex no-scrollbar' : ''} bg-gray-50 p-1 rounded-t-lg border-b`}>
+                <TabsTrigger value="pending" className="data-[state=active]:bg-white">Pendentes</TabsTrigger>
+                <TabsTrigger value="confirmed" className="data-[state=active]:bg-white">Confirmados</TabsTrigger>
+                <TabsTrigger value="preparing" className="data-[state=active]:bg-white">Em Preparo</TabsTrigger>
+                <TabsTrigger value="delivering" className="data-[state=active]:bg-white">Em Entrega</TabsTrigger>
+                <TabsTrigger value="completed" className="data-[state=active]:bg-white">Concluídos</TabsTrigger>
+                <TabsTrigger value="cancelled" className="data-[state=active]:bg-white">Cancelados</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-white">Todos</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="pending" className="mt-4">
+              <TabsContent value="pending" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("pending")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="confirmed" className="mt-4">
+              <TabsContent value="confirmed" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("confirmed")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="preparing" className="mt-4">
+              <TabsContent value="preparing" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("preparing")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="delivering" className="mt-4">
+              <TabsContent value="delivering" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("delivering")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="completed" className="mt-4">
+              <TabsContent value="completed" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("completed")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="cancelled" className="mt-4">
+              <TabsContent value="cancelled" className="p-4">
                 <AdminOrders 
                   orders={getOrdersByStatus("cancelled")} 
                   onSelectOrder={onSelectOrder}
                 />
               </TabsContent>
               
-              <TabsContent value="all" className="mt-4">
+              <TabsContent value="all" className="p-4">
                 <AdminOrders 
                   orders={sortedOrders} 
                   onSelectOrder={onSelectOrder}

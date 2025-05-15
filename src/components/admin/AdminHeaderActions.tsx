@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import NotificationsDropdown from "@/components/admin/NotificationsDropdown";
 import NavEventButton from "@/components/admin/NavEventButton";
 import AdminOrderNotifications from "@/components/admin/AdminOrderNotifications";
+import { LogOut } from "lucide-react";
 
 interface AdminHeaderActionsProps {
   onLogout: () => void;
@@ -11,16 +12,19 @@ interface AdminHeaderActionsProps {
 
 const AdminHeaderActions = ({ onLogout }: AdminHeaderActionsProps) => {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-3 flex-wrap">
       <AdminOrderNotifications />
       <NotificationsDropdown />
       <NavEventButton />
-      <button 
+      <Button 
+        variant="destructive" 
+        size="sm"
+        className="flex items-center gap-1 bg-red-600 hover:bg-red-700"
         onClick={onLogout}
-        className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-md text-sm"
       >
-        Sair
-      </button>
+        <LogOut className="h-4 w-4" />
+        <span>Sair</span>
+      </Button>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, BellRing } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,11 +84,15 @@ const AdminOrderNotifications = () => {
   return (
     <Button
       variant="ghost"
-      className="relative p-2"
+      className="relative p-2 rounded-full bg-white/10 hover:bg-white/20"
       onClick={handleClick}
       title="Verificar novos pedidos"
     >
-      <Bell className="h-5 w-5" />
+      {newOrders > 0 ? (
+        <BellRing className="h-5 w-5" />
+      ) : (
+        <Bell className="h-5 w-5" />
+      )}
       {newOrders > 0 && (
         <Badge 
           className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] min-h-[1.25rem] flex items-center justify-center bg-red-500 text-white"

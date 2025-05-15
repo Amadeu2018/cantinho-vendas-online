@@ -23,27 +23,27 @@ const formatPrice = (price: number): string => {
 const getStatusBadgeColor = (status: Order["status"]) => {
   switch (status) {
     case "pending":
-      return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
+      return "bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200";
     case "confirmed":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-100";
+      return "bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200";
     case "preparing":
-      return "bg-indigo-100 text-indigo-800 hover:bg-indigo-100";
+      return "bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-200";
     case "delivering":
-      return "bg-purple-100 text-purple-800 hover:bg-purple-100";
+      return "bg-purple-50 text-purple-700 hover:bg-purple-50 border-purple-200";
     case "completed":
-      return "bg-green-100 text-green-800 hover:bg-green-100";
+      return "bg-green-50 text-green-700 hover:bg-green-50 border-green-200";
     case "cancelled":
-      return "bg-red-100 text-red-800 hover:bg-red-100";
+      return "bg-red-50 text-red-700 hover:bg-red-50 border-red-200";
     default:
-      return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+      return "bg-gray-50 text-gray-700 hover:bg-gray-50 border-gray-200";
   }
 };
 
 // Helper for getting payment status badge color
 const getPaymentBadgeColor = (status: "pending" | "completed") => {
   return status === "completed" 
-    ? "bg-green-100 text-green-800 hover:bg-green-100" 
-    : "bg-orange-100 text-orange-800 hover:bg-orange-100";
+    ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-200" 
+    : "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
 };
 
 // Helper for formatting status names
@@ -73,8 +73,8 @@ const AdminOrders = ({ orders, onSelectOrder }: AdminOrdersProps) => {
 
   if (sortedOrders.length === 0) {
     return (
-      <div className="bg-muted/30 rounded-lg p-10 text-center">
-        <p className="text-muted-foreground">
+      <div className="bg-gray-50 rounded-lg p-10 text-center">
+        <p className="text-gray-500">
           Nenhum pedido encontrado nesta categoria.
         </p>
       </div>
@@ -85,24 +85,24 @@ const AdminOrders = ({ orders, onSelectOrder }: AdminOrdersProps) => {
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-muted/30">
-            <th className="px-4 py-3 text-left">ID Pedido</th>
-            <th className="px-4 py-3 text-left">Cliente</th>
-            <th className="px-4 py-3 text-left">Data</th>
-            <th className="px-4 py-3 text-left">Total</th>
-            <th className="px-4 py-3 text-left">Status</th>
-            <th className="px-4 py-3 text-left">Pagamento</th>
-            <th className="px-4 py-3 text-left">Ações</th>
+          <tr className="bg-gray-50">
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">ID Pedido</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Cliente</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Data</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Total</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Status</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Pagamento</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Ações</th>
           </tr>
         </thead>
         <tbody>
           {sortedOrders.map((order) => (
-            <tr key={order.id} className="border-b hover:bg-muted/20">
+            <tr key={order.id} className="border-b hover:bg-gray-50 transition-colors">
               <td className="px-4 py-3">
                 <span className="font-mono text-sm">{order.id.slice(0, 10)}...</span>
               </td>
-              <td className="px-4 py-3">{order.customerInfo.name}</td>
-              <td className="px-4 py-3 text-sm text-muted-foreground">
+              <td className="px-4 py-3 font-medium">{order.customerInfo.name}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">
                 {formatDistanceToNow(new Date(order.createdAt), {
                   addSuffix: true,
                   locale: ptBR
@@ -110,17 +110,22 @@ const AdminOrders = ({ orders, onSelectOrder }: AdminOrdersProps) => {
               </td>
               <td className="px-4 py-3 font-medium">{formatPrice(order.total)}</td>
               <td className="px-4 py-3">
-                <Badge className={getStatusBadgeColor(order.status)}>
+                <Badge variant="outline" className={getStatusBadgeColor(order.status)}>
                   {formatStatus(order.status)}
                 </Badge>
               </td>
               <td className="px-4 py-3">
-                <Badge className={getPaymentBadgeColor(order.paymentStatus)}>
+                <Badge variant="outline" className={getPaymentBadgeColor(order.paymentStatus)}>
                   {formatPaymentStatus(order.paymentStatus)}
                 </Badge>
               </td>
               <td className="px-4 py-3">
-                <Button variant="outline" size="sm" onClick={() => onSelectOrder(order.id)}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onSelectOrder(order.id)}
+                  className="border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white"
+                >
                   Detalhes
                 </Button>
               </td>

@@ -1,4 +1,7 @@
 
+// This file re-exports the toast components and hooks from @/hooks/use-toast
+// This pattern allows us to maintain the original shadcn structure while using our customized implementation
+
 import * as React from "react"
 import { Cross2Icon } from "@radix-ui/react-icons"
 import * as ToastPrimitives from "@radix-ui/react-toast"
@@ -130,5 +133,5 @@ export {
   ToastAction,
 }
 
-import { useToast as useToastOriginal } from "@/hooks/use-toast";
-export { useToast, toast } from "@/hooks/use-toast";
+// Re-export the toast hooks from our custom implementation
+export { useToast, toast } from "@/hooks/use-toast"

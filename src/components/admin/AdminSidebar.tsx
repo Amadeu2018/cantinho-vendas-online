@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Sidebar, 
@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminSidebarProps {
   collapsed: boolean;
@@ -38,7 +39,26 @@ interface AdminSidebarProps {
 const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Acesso negado",
+        description: "Você precisa estar logado para acessar esta área.",
+        variant: "destructive",
+      });
+      navigate('/auth/login');
+    } else if (user.role !== 'admin') {
+      toast({
+        title: "Acesso restrito",
+        description: "Esta área é restrita para administradores.",
+        variant: "destructive",
+      });
+      navigate('/');
+    }
+  }, [user, navigate, toast]);
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -52,6 +72,10 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
       console.error('Erro ao fazer logout:', error);
     }
   };
+  
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
   
   return (
     <Sidebar 
@@ -99,8 +123,8 @@ const AdminSidebar = ({ collapsed, setCollapsed }: AdminSidebarProps) => {
             </SidebarMenuItem>
             
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/event-admin")} tooltip="Eventos">
-                <Link to="/event-admin">
+              <SidebarMenuButton asChild isActive={isActive("/admin/eventos")} tooltip="Eventos">
+                <Link to="/admin/eventos">
                   <CalendarDays className="h-5 w-5" />
                   <span>Eventos</span>
                 </Link>

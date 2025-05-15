@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -47,14 +48,16 @@ const Navbar = () => {
             <Link to="/eventos" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Eventos</Link>
             <Link to="/sobre" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Sobre Nós</Link>
             <Link to="/contacto" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Contacto</Link>
-            <Link to="/carrinho">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              </Button>
-            </Link>
+            {user && (
+              <Link to="/carrinho">
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                </Button>
+              </Link>
+            )}
             
             {user ? (
               <DropdownMenu>
@@ -105,14 +108,16 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <Link to="/carrinho" className="mr-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              </Button>
-            </Link>
+            {user && (
+              <Link to="/carrinho" className="mr-4">
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                </Button>
+              </Link>
+            )}
             <Button variant="ghost" size="icon" onClick={toggleMenu}>
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -161,13 +166,15 @@ const Navbar = () => {
           >
             Contacto
           </Link>
-          <Link 
-            to="/carrinho" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Carrinho
-          </Link>
+          {user && (
+            <Link 
+              to="/carrinho" 
+              className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Carrinho
+            </Link>
+          )}
           
           {user ? (
             <>

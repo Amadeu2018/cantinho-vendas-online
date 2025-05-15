@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { Loader2, Menu, Bell, User, ChevronDown } from "lucide-react";
+import { Loader2, Menu, Bell, User, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminHeaderActions from "@/components/admin/AdminHeaderActions";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -16,17 +18,31 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children, isLoading = false, title = "Área Administrativa" }: AdminLayoutProps) => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
-  // Check if user is authenticated and redirect if not
+  // Check if user is authenticated and has admin role
   useEffect(() => {
-    if (!user && !isLoading) {
-      navigate('/auth/login');
+    if (!isLoading) {
+      if (!user) {
+        toast({
+          title: "Acesso negado",
+          description: "Você precisa estar logado para acessar esta área.",
+          variant: "destructive",
+        });
+        navigate('/auth/login');
+      } else if (user.role !== 'admin') {
+        toast({
+          title: "Acesso restrito",
+          description: "Esta área é restrita para administradores.",
+          variant: "destructive",
+        });
+        navigate('/');
+      }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, toast]);
 
   const handleLogout = async () => {
     try {
@@ -48,8 +64,8 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
     );
   }
 
-  // If user is not authenticated, don't render the layout
-  if (!user && !isLoading) {
+  // If user is not authenticated or not admin, don't render the layout
+  if (!user || user.role !== 'admin') {
     return null;
   }
 
@@ -57,12 +73,6 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-50">
         <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
-        
-        {/* Mobile overlay */}
-        <div 
-          className={`fixed inset-0 bg-black/50 md:hidden z-20 ${sidebarOpen ? 'block' : 'hidden'}`}
-          onClick={() => setSidebarOpen(false)}
-        />
         
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top header */}
@@ -72,7 +82,7 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
                 variant="ghost" 
                 size="icon" 
                 className="md:hidden mr-4"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -131,14 +141,14 @@ const AdminLayout = ({ children, isLoading = false, title = "Área Administrativ
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel className="border-b bg-gray-50">
                     <div className="text-xs font-medium text-gray-500">Logado como</div>
-                    <div className="text-sm font-medium text-gray-800">Admin</div>
+                    <div className="text-sm font-medium text-gray-800">{user.email}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuItem className="cursor-pointer">
                     <User className="h-4 w-4 mr-2" /> Perfil
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
-                    <Menu className="h-4 w-4 mr-2" /> Sair
+                    <LogOut className="h-4 w-4 mr-2" /> Sair
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

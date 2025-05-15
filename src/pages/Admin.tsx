@@ -8,15 +8,16 @@ import AdminOrderView from "@/components/admin/AdminOrderView";
 import AdminInvoiceView from "@/components/admin/AdminInvoiceView";
 import { Order as CartOrder } from "@/contexts/CartContext";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
+import { useToast } from "@/hooks/use-toast";
 
 // Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
 const convertOrderType = (order: any): CartOrder => {
   return {
     ...order,
     paymentMethod: {
-      id: order.paymentMethod.id || 'default-id',
-      name: order.paymentMethod.name,
-      icon: order.paymentMethod.icon || 'credit-card'
+      id: order.paymentMethod?.id || 'default-id',
+      name: order.paymentMethod?.name || 'Método de pagamento',
+      icon: order.paymentMethod?.icon || 'credit-card'
     }
   };
 };
@@ -27,6 +28,7 @@ const Admin = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
   
   // Use the custom hook for orders management
   const { 
@@ -82,11 +84,38 @@ const Admin = () => {
 
   // Wrapper functions that discard the boolean return value from the original functions
   const handleOrderStatusChange = async (orderId: string, status: string): Promise<void> => {
-    await updateOrderStatus(orderId, status);
+    try {
+      await updateOrderStatus(orderId, status);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do pedido",
+        variant: "destructive"
+      });
+    }
   };
   
   const handlePaymentStatusChange = async (orderId: string, status: string): Promise<void> => {
-    await updatePaymentStatus(orderId, status);
+    try {
+      await updatePaymentStatus(orderId, status);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do pagamento",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Define the title based on the current view
+  const getTitle = () => {
+    if (selectedOrder) {
+      return `Pedido #${selectedOrder.id.slice(0, 8)}`;
+    }
+    if (selectedInvoiceOrder) {
+      return "Fatura";
+    }
+    return "Dashboard";
   };
 
   // Render different content based on application state
@@ -128,7 +157,7 @@ const Admin = () => {
   };
 
   return (
-    <AdminLayout isLoading={isLoading}>
+    <AdminLayout isLoading={isLoading} title={getTitle()}>
       {renderContent()}
     </AdminLayout>
   );

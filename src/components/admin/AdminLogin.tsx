@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 type AdminLoginProps = {
-  onLogin: (isAdmin: boolean) => void;
+  onLogin: (isAdmin: boolean) => Promise<boolean>;
 };
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
@@ -25,19 +25,32 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     try {
       await signIn(email, password);
       
-      // Verificar se o usuário é admin
+      // Check if the user is admin
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData.user) {
+        throw new Error("Falha ao obter informações do usuário");
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('id', userData.user.id)
         .single();
       
       if (error) {
         throw error;
       }
       
-      if (data.role === 'admin') {
-        onLogin(true);
+      if (data && data.role === 'admin') {
+        const success = await onLogin(true);
+        if (!success) {
+          toast({
+            title: "Autenticação falhou",
+            description: "Não foi possível autenticar como administrador.",
+            variant: "destructive"
+          });
+        }
       } else {
         toast({
           title: "Acesso negado",

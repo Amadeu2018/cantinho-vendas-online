@@ -57,7 +57,7 @@ const AdminDashboard = ({
             <Plus className="mr-2 h-4 w-4" /> Novo Pedido
           </Button>
           <Button className="bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] hover:opacity-90 flex items-center">
-            <CalendarPlus className="mr-2 h-4 w-4" onClick={() => navigate('/event-admin')} /> Agendar Evento
+            <CalendarPlus className="mr-2 h-4 w-4" onClick={() => navigate('/admin/eventos')} /> Agendar Evento
           </Button>
         </div>
       </div>

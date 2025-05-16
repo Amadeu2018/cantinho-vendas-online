@@ -1,339 +1,197 @@
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { toast } from "@/hooks/use-toast";
-
-export type CartItem = {
-  id: number;
+// Types
+export interface CartItem {
+  id: string;
   name: string;
   price: number;
   quantity: number;
-  image: string;
-};
+  image_url?: string;
+  notes?: string;
+}
 
-export type DeliveryLocation = {
-  id: number;
-  name: string;
-  fee: number;
-  estimatedTime: string;
-};
-
-export type PaymentMethod = {
-  id: string;
-  name: string;
-  icon: string;
-};
-
-export type OrderStatus = 
-  | "pending" 
-  | "confirmed" 
-  | "preparing" 
-  | "delivering" 
-  | "completed" 
-  | "cancelled";
-
-export type Order = {
+export interface Order {
   id: string;
   items: CartItem[];
-  customerInfo: CustomerInfo;
-  location: DeliveryLocation;
-  paymentMethod: PaymentMethod;
   subtotal: number;
   deliveryFee: number;
   total: number;
-  status: OrderStatus;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: {
+    id: string;
+    name: string;
+    icon: string;
+  };
+  customerInfo: {
+    name: string;
+    address: string;
+    phone: string;
+  };
   createdAt: string;
-  notes?: string;
-  paymentStatus: "pending" | "completed";
-  isProforma?: boolean;
-};
+  notes: string;
+  type?: string; // Add type property to Order interface
+  location: {
+    id: number;
+    name: string;
+    fee: number;
+    estimatedTime: string;
+  };
+}
 
-type CartContextType = {
+interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  addItem: (item: CartItem) => void;
+  updateItemQuantity: (id: string, quantity: number) => void;
+  removeItem: (id: string) => void;
   clearCart: () => void;
-  totalItems: number;
   subtotal: number;
-  deliveryLocations: DeliveryLocation[];
-  selectedLocation: DeliveryLocation | null;
-  setSelectedLocation: (location: DeliveryLocation | null) => void;
-  paymentMethods: PaymentMethod[];
-  selectedPaymentMethod: PaymentMethod | null;
-  setSelectedPaymentMethod: (method: PaymentMethod | null) => void;
-  submitOrder: (customerInfo: CustomerInfo) => Promise<string>;
-  orders: Order[];
-  getOrderById: (id: string) => Order | undefined;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
-  updateOrderPaymentStatus: (orderId: string, status: "pending" | "completed") => void;
-  favorites: number[];
-  addToFavorites: (dishId: number) => void;
-  removeFromFavorites: (dishId: number) => void;
-  isFavorite: (dishId: number) => boolean;
-  orderStatus?: OrderStatus; // Adicionado orderStatus como opcional
-};
+  total: number;
+  deliveryFee: number;
+  setDeliveryFee: (fee: number) => void;
+  itemCount: number;
+  order: Order | null;
+  createOrder: (orderData: Partial<Order>) => Promise<Order>;
+  getOrderById: (orderId: string) => Promise<Order | null>;
+  updateItemNotes: (id: string, notes: string) => void;
+}
 
-export type CustomerInfo = {
-  name: string;
-  address: string;
-  phone: string;
-  notes?: string;
-};
-
+// Context
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Provider
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [favorites, setFavorites] = useState<number[]>([]);
-  
-  const deliveryLocations: DeliveryLocation[] = [
-    { id: 1, name: "Bairro Azul", fee: 1000, estimatedTime: "20-30 min" },
-    { id: 2, name: "Maculusso", fee: 1500, estimatedTime: "25-35 min" },
-    { id: 3, name: "Maianga", fee: 1500, estimatedTime: "25-35 min" },
-    { id: 4, name: "Talatona", fee: 2500, estimatedTime: "35-50 min" },
-    { id: 5, name: "Miramar", fee: 1800, estimatedTime: "30-40 min" },
-    { id: 6, name: "Kilamba", fee: 3000, estimatedTime: "40-60 min" }
-  ];
-  
-  const paymentMethods: PaymentMethod[] = [
-    { id: "cash", name: "Dinheiro na Entrega", icon: "banknote" },
-    { id: "multicaixa", name: "Multicaixa Express", icon: "credit-card" },
-    { id: "transfer", name: "Transferência Bancária", icon: "landmark" }
-  ];
-  
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cantinho-cart");
-    if (savedCart) {
-      try {
-        setItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Erro ao carregar carrinho:", error);
-      }
-    }
-    
-    const savedOrders = localStorage.getItem("cantinho-orders");
-    if (savedOrders) {
-      try {
-        setOrders(JSON.parse(savedOrders));
-      } catch (error) {
-        console.error("Erro ao carregar pedidos:", error);
-      }
-    }
-    
-    const savedFavorites = localStorage.getItem("cantinho-favorites");
-    if (savedFavorites) {
-      try {
-        setFavorites(JSON.parse(savedFavorites));
-      } catch (error) {
-        console.error("Erro ao carregar favoritos:", error);
-      }
-    }
-  }, []);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+
+    const storedItems = localStorage.getItem('cartItems');
+    return storedItems ? JSON.parse(storedItems) : [];
+  });
+  const [deliveryFee, setDeliveryFee] = useState<number>(0);
+  const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    localStorage.setItem("cantinho-cart", JSON.stringify(items));
+    localStorage.setItem('cartItems', JSON.stringify(items));
   }, [items]);
-  
-  useEffect(() => {
-    localStorage.setItem("cantinho-orders", JSON.stringify(orders));
-  }, [orders]);
-  
-  useEffect(() => {
-    localStorage.setItem("cantinho-favorites", JSON.stringify(favorites));
-  }, [favorites]);
 
-  const addItem = (item: Omit<CartItem, "quantity">) => {
-    setItems(currentItems => {
-      const existingItemIndex = currentItems.findIndex(i => i.id === item.id);
-      
-      if (existingItemIndex > -1) {
-        const updatedItems = [...currentItems];
-        updatedItems[existingItemIndex].quantity += 1;
-        toast({
-          title: "Item atualizado",
-          description: `Quantidade de ${item.name} aumentada para ${updatedItems[existingItemIndex].quantity}`,
-        });
-        return updatedItems;
-      } else {
-        toast({
-          title: "Item adicionado",
-          description: `${item.name} foi adicionado ao carrinho`,
-        });
-        return [...currentItems, { ...item, quantity: 1 }];
-      }
-    });
-  };
+  const addItem = (item: CartItem) => {
+    const existingItemIndex = items.findIndex((i) => i.id === item.id);
 
-  const removeItem = (id: number) => {
-    setItems(currentItems => {
-      const itemToRemove = currentItems.find(item => item.id === id);
-      if (itemToRemove) {
-        toast({
-          title: "Item removido",
-          description: `${itemToRemove.name} foi removido do carrinho`,
-        });
-      }
-      return currentItems.filter(item => item.id !== id);
-    });
-  };
-
-  const updateQuantity = (id: number, quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(id);
-      return;
+    if (existingItemIndex !== -1) {
+      const newItems = [...items];
+      newItems[existingItemIndex].quantity += item.quantity;
+      setItems(newItems);
+    } else {
+      setItems([...items, item]);
     }
-    
-    setItems(currentItems => 
-      currentItems.map(item => 
-        item.id === id ? { ...item, quantity } : item
+  };
+
+  const updateItemQuantity = (id: string, quantity: number) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: quantity > 0 ? quantity : 1 } : item
       )
     );
+  };
+
+  const updateItemNotes = (id: string, notes: string) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, notes: notes } : item
+      )
+    );
+  };
+
+  const removeItem = (id: string) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
   const clearCart = () => {
     setItems([]);
-    setSelectedLocation(null);
-    setSelectedPaymentMethod(null);
-    toast({
-      title: "Carrinho limpo",
-      description: "Todos os itens foram removidos do carrinho",
-    });
   };
 
-  const submitOrder = async (customerInfo: CustomerInfo): Promise<string> => {
-    if (!selectedLocation || !selectedPaymentMethod) {
-      toast({
-        title: "Não foi possível processar",
-        description: "Por favor, selecione uma localização e um método de pagamento",
-        variant: "destructive"
-      });
-      throw new Error("Localização ou método de pagamento não selecionado");
-    }
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const total = subtotal + deliveryFee;
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
-    const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
+  const createOrder = async (orderData: Partial<Order>): Promise<Order> => {
+    // Generate a unique ID for the order
+    const id = Math.random().toString(36).substring(2, 15);
+    const createdAt = new Date().toISOString();
+
     const newOrder: Order = {
-      id: orderId,
-      items: [...items],
-      customerInfo,
-      location: selectedLocation,
-      paymentMethod: selectedPaymentMethod,
-      subtotal,
-      deliveryFee: selectedLocation.fee,
-      total: subtotal + selectedLocation.fee,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      paymentStatus: "pending"
+      id,
+      items: items,
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      total: total,
+      status: 'pending',
+      paymentStatus: 'pending',
+      paymentMethod: {
+        id: 'default-payment-method',
+        name: 'Default Payment',
+        icon: 'credit-card',
+      },
+      customerInfo: {
+        name: 'Customer Name',
+        address: 'Customer Address',
+        phone: 'Customer Phone',
+      },
+      createdAt: createdAt,
+      notes: '',
+	  type: 'Pedido',
+      location: {
+        id: 1,
+        name: 'Default Location',
+        fee: 5,
+        estimatedTime: '30-45 min',
+      },
+      ...orderData,
     };
-    
-    setOrders(prev => [...prev, newOrder]);
-    
-    toast({
-      title: "Pedido recebido",
-      description: "Seu pedido foi registrado e está aguardando confirmação.",
-    });
-    
-    console.log("Novo pedido criado:", newOrder);
-    
-    return orderId;
+
+    setOrder(newOrder);
+    clearCart();
+    return newOrder;
   };
-  
-  const getOrderById = (id: string): Order | undefined => {
-    return orders.find(order => order.id === id);
-  };
-  
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId ? { ...order, status } : order
-      )
-    );
-    
-    toast({
-      title: "Status atualizado",
-      description: `O pedido ${orderId} foi atualizado para "${status}".`,
-    });
-  };
-  
-  const updateOrderPaymentStatus = (orderId: string, paymentStatus: "pending" | "completed") => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId ? { ...order, paymentStatus } : order
-      )
-    );
-    
-    toast({
-      title: "Pagamento atualizado",
-      description: `O pagamento do pedido ${orderId} foi marcado como "${paymentStatus}".`,
+
+  const getOrderById = async (orderId: string): Promise<Order | null> => {
+    // This is a placeholder, replace with actual data fetching logic
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (order && order.id === orderId) {
+          resolve(order);
+        } else {
+          resolve(null);
+        }
+      }, 500);
     });
   };
 
-  const addToFavorites = (dishId: number) => {
-    if (!favorites.includes(dishId)) {
-      setFavorites(prev => [...prev, dishId]);
-      toast({
-        title: "Adicionado aos favoritos",
-        description: "Prato adicionado à sua lista de favoritos"
-      });
-    }
+  const value: CartContextType = {
+    items,
+    addItem,
+    updateItemQuantity,
+    removeItem,
+    clearCart,
+    subtotal,
+    total,
+    deliveryFee,
+    setDeliveryFee,
+    itemCount,
+    order,
+    createOrder,
+    getOrderById,
+    updateItemNotes,
   };
 
-  const removeFromFavorites = (dishId: number) => {
-    setFavorites(prev => prev.filter(id => id !== dishId));
-    toast({
-      title: "Removido dos favoritos",
-      description: "Prato removido da sua lista de favoritos"
-    });
-  };
-
-  const isFavorite = (dishId: number) => favorites.includes(dishId);
-
-  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-  
-  const subtotal = items.reduce(
-    (total, item) => total + item.price * item.quantity, 
-    0
-  );
-
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        subtotal,
-        deliveryLocations,
-        selectedLocation,
-        setSelectedLocation,
-        paymentMethods,
-        selectedPaymentMethod,
-        setSelectedPaymentMethod,
-        submitOrder,
-        orders,
-        getOrderById,
-        updateOrderStatus,
-        updateOrderPaymentStatus,
-        favorites,
-        addToFavorites,
-        removeFromFavorites,
-        isFavorite
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
+// Hook
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
   }
   return context;
 };

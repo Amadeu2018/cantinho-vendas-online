@@ -19,7 +19,8 @@ const convertOrderType = (order: any): CartOrder => {
       id: order.paymentMethod?.id || 'default-id',
       name: order.paymentMethod?.name || 'Método de pagamento',
       icon: order.paymentMethod?.icon || 'credit-card'
-    }
+    },
+    type: order.type || "Pedido" // Add missing type property
   };
 };
 
@@ -43,31 +44,38 @@ const Admin = () => {
   
   useEffect(() => {
     const checkAuth = async () => {
-      if (user) {
-        try {
-          // Check if user is admin - in a real app, check the user role property
-          // For demonstration purposes, we'll assume any logged-in user can access admin
-          const isAdmin = user.role === 'admin';
-          setIsAuthenticated(isAdmin);
-          
-          if (!isAdmin) {
-            toast({
-              title: "Acesso negado",
-              description: "Você não tem permissões de administrador.",
-              variant: "destructive"
-            });
-            navigate('/');
-          } else {
-            refreshOrders();
-          }
-        } catch (error) {
-          console.error("Erro ao verificar status de admin:", error);
-        }
+      if (!user) {
+        // If no user is logged in, redirect to login page
         setIsLoading(false);
-      } else {
         setIsAuthenticated(false);
-        setIsLoading(false);
+        toast({
+          title: "Acesso negado",
+          description: "Você precisa estar logado para acessar a área administrativa.",
+          variant: "destructive"
+        });
+        navigate('/auth/login');
+        return;
       }
+      
+      try {
+        // Check if user is admin
+        const isAdmin = user.role === 'admin';
+        setIsAuthenticated(isAdmin);
+        
+        if (!isAdmin) {
+          toast({
+            title: "Acesso negado",
+            description: "Você não tem permissões de administrador.",
+            variant: "destructive"
+          });
+          navigate('/');
+        } else {
+          refreshOrders();
+        }
+      } catch (error) {
+        console.error("Erro ao verificar status de admin:", error);
+      }
+      setIsLoading(false);
     };
     
     checkAuth();

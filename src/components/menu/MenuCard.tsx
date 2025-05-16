@@ -13,37 +13,45 @@ import { supabase } from '@/integrations/supabase/client';
 
 type MenuCardProps = {
   dish: Dish;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 };
 
-const MenuCard = ({ dish }: MenuCardProps) => {
+const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps) => {
   const [quantity, setQuantity] = useState(1);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(isFavorite);
   const { addToCart } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
 
   React.useEffect(() => {
-    const checkIfLiked = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('favorites')
-          .select('dish_id')
-          .eq('user_id', user.id)
-          .eq('dish_id', dish.id)
-          .single();
+    setIsLiked(isFavorite);
+  }, [isFavorite]);
+
+  React.useEffect(() => {
+    if (!onToggleFavorite) {
+      const checkIfLiked = async () => {
+        if (!user) return;
         
-        if (!error && data) {
-          setIsLiked(true);
+        try {
+          const { data, error } = await supabase
+            .from('favorites')
+            .select('dish_id')
+            .eq('user_id', user.id)
+            .eq('dish_id', dish.id)
+            .single();
+          
+          if (!error && data) {
+            setIsLiked(true);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar favorito:', error);
         }
-      } catch (error) {
-        console.error('Erro ao verificar favorito:', error);
-      }
-    };
-    
-    checkIfLiked();
-  }, [dish.id, user]);
+      };
+      
+      checkIfLiked();
+    }
+  }, [dish.id, user, onToggleFavorite]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -57,11 +65,15 @@ const MenuCard = ({ dish }: MenuCardProps) => {
     toast({
       title: "Item adicionado",
       description: `${dish.name} foi adicionado ao carrinho.`,
-      variant: "success",
     });
   };
 
   const toggleFavorite = async () => {
+    if (onToggleFavorite) {
+      onToggleFavorite();
+      return;
+    }
+    
     if (!user) {
       toast({
         title: "Não autenticado",
@@ -97,7 +109,6 @@ const MenuCard = ({ dish }: MenuCardProps) => {
         toast({
           title: "Adicionado aos favoritos",
           description: `${dish.name} foi adicionado aos seus favoritos.`,
-          variant: "success",
         });
       }
     } catch (error) {

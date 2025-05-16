@@ -23,23 +23,24 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
+      const { error } = await signIn(email, password);
       
-      // Check if the user is admin
+      if (error) throw error;
+      
       const { data: userData } = await supabase.auth.getUser();
       
       if (!userData.user) {
         throw new Error("Falha ao obter informações do usuário");
       }
       
-      const { data, error } = await supabase
+      const { data, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userData.user.id)
         .single();
       
-      if (error) {
-        throw error;
+      if (profileError) {
+        throw profileError;
       }
       
       if (data && data.role === 'admin') {

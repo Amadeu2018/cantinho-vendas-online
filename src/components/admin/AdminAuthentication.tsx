@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,12 @@ const AdminAuthentication = ({ onAuthenticated }: AdminAuthenticationProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
+
   const checkAdminStatus = async () => {
     if (!user) return false;
     
@@ -28,6 +34,7 @@ const AdminAuthentication = ({ onAuthenticated }: AdminAuthenticationProps) => {
       if (error) throw error;
       
       if (data && data.role === 'admin') {
+        onAuthenticated(true);
         return true;
       } else {
         toast({

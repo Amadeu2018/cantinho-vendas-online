@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 
 type CartItemProps = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;

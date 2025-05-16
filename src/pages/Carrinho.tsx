@@ -91,7 +91,7 @@ const Carrinho = () => {
                                 name={item.name}
                                 price={item.price}
                                 quantity={item.quantity}
-                                image={item.image}
+                                image={item.image || ''}
                               />
                             ))}
                           </div>

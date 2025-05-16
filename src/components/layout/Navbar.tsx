@@ -1,212 +1,179 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, X, User, Settings } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import NavEventButton from "../admin/NavEventButton";
+import { Badge } from "@/components/ui/badge";
+import { Menu, ShoppingCart, User } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { totalItems } = useCart();
-  const { user, signOut } = useAuth();
+  const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { itemCount } = useCart();
+  const { user } = useAuth();
+  
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 50);
+    };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Navigation links
+  const navLinks = [
+    { name: "Início", path: "/" },
+    { name: "Menu", path: "/menu" },
+    { name: "Eventos", path: "/eventos" },
+    { name: "Sobre", path: "/sobre" },
+    { name: "Reservas", path: "/reservas" }
+  ];
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    }
-  };
-
+  const isActive = (path: string) => location.pathname === path;
+  
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo and brand name */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-cantinho-terracotta">Cantinho Algarvio</span>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        isScrolled
+          ? "bg-white shadow-sm py-2"
+          : "bg-white/80 backdrop-blur-md py-3"
+      )}
+    >
+      <div className="container flex items-center justify-between">
+        <Link to="/" className="flex items-center">
+          <h1 className="text-xl md:text-2xl font-bold text-cantinho-navy mr-2">
+            Cantinho<span className="text-cantinho-terracotta">Algarvio</span>
+          </h1>
+          <span className="hidden md:block text-xs bg-cantinho-terracotta text-white px-2 py-0.5 rounded-md font-medium">
+            Luanda
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-1">
+          {user && navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive(link.path)
+                  ? "text-cantinho-terracotta"
+                  : "text-gray-700 hover:text-cantinho-terracotta hover:bg-gray-100"
+              )}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* User Actions */}
+        <div className="flex items-center space-x-2">
+          <Link to="/carrinho">
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-cantinho-terracotta">
+                  {itemCount}
+                </Badge>
+              )}
+            </Button>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Início</Link>
-            <Link to="/menu" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Menu</Link>
-            <Link to="/eventos" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Eventos</Link>
-            <Link to="/sobre" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Sobre Nós</Link>
-            <Link to="/contacto" className="text-foreground hover:text-cantinho-terracotta transition duration-200">Contacto</Link>
-            {user && (
-              <Link to="/carrinho">
-                <Button variant="ghost" size="icon" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
+          <Link to={user ? "/profile" : "/auth/login"}>
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
                 </Button>
-              </Link>
-            )}
-            
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex items-center justify-start p-2">
-                    <div className="ml-2">
-                      <p className="text-sm font-medium">{user.email}</p>
-                    </div>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64 px-0">
+                <div className="flex flex-col h-full pt-8">
+                  <div className="px-6 pb-6 border-b">
+                    <h3 className="font-bold text-xl mb-1 text-cantinho-navy">
+                      Cantinho Algarvio
+                    </h3>
+                    <p className="text-sm text-gray-500">Luanda, Angola</p>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/perfil" className="cursor-pointer w-full">Meu Perfil</Link>
-                  </DropdownMenuItem>
-                  {user?.role === "admin" && (
-                    <div className="flex ml-2">
+
+                  <nav className="flex-1 py-4">
+                    <div className="px-3 space-y-1">
+                      {user && navLinks.map((link) => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          className={cn(
+                            "block px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                            isActive(link.path)
+                              ? "bg-cantinho-navy/10 text-cantinho-navy"
+                              : "text-gray-700 hover:bg-gray-100"
+                          )}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </nav>
+
+                  <div className="px-6 py-4 border-t mt-auto">
+                    <div className="flex items-center justify-between mb-2">
+                      <Link
+                        to="/carrinho"
+                        className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" /> Carrinho
+                        {itemCount > 0 && (
+                          <Badge className="ml-2 bg-cantinho-terracotta">
+                            {itemCount}
+                          </Badge>
+                        )}
+                      </Link>
+                    </div>
+
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Link to={user ? "/profile" : "/auth/login"}>
+                        <User className="h-4 w-4 mr-2" />
+                        {user ? "Meu Perfil" : "Entrar / Registrar"}
+                      </Link>
+                    </Button>
+                    
+                    {user?.role === 'admin' && (
                       <Button
-                        variant="outline"
                         asChild
+                        variant="default"
+                        className="w-full mt-2 bg-cantinho-navy hover:bg-cantinho-navy/90"
                       >
                         <Link to="/admin">
-                          <Settings className="h-4 w-4 mr-2" />
-                          Administração
+                          Área Administrativa
                         </Link>
                       </Button>
-                      <NavEventButton />
-                    </div>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link to="/carrinho" className="cursor-pointer w-full">Meu Carrinho</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 hover:text-red-600">
-                    Sair
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth/login">
-                <Button variant="outline">Entrar</Button>
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            {user && (
-              <Link to="/carrinho" className="mr-4">
-                <Button variant="ghost" size="icon" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-cantinho-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                </Button>
-              </Link>
-            )}
-            <Button variant="ghost" size="icon" onClick={toggleMenu}>
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      <div className={cn(
-        "md:hidden fixed inset-0 bg-white z-40 transform transition-transform duration-300 ease-in-out pt-16",
-        isMenuOpen ? "translate-x-0" : "translate-x-full"
-      )}>
-        <div className="flex flex-col space-y-4 p-6">
-          <Link 
-            to="/" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Início
-          </Link>
-          <Link 
-            to="/menu" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Menu
-          </Link>
-          <Link 
-            to="/eventos" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Eventos
-          </Link>
-          <Link 
-            to="/sobre" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Sobre Nós
-          </Link>
-          <Link 
-            to="/contacto" 
-            className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Contacto
-          </Link>
-          {user && (
-            <Link 
-              to="/carrinho" 
-              className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Carrinho
-            </Link>
-          )}
-          
-          {user ? (
-            <>
-              <Link 
-                to="/perfil" 
-                className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Meu Perfil
-              </Link>
-              <button 
-                onClick={() => {
-                  handleLogout();
-                  setIsMenuOpen(false);
-                }}
-                className="text-red-500 hover:text-red-600 transition duration-200 py-2 text-lg text-left"
-              >
-                Sair
-              </button>
-            </>
-          ) : (
-            <Link 
-              to="/auth/login" 
-              className="text-foreground hover:text-cantinho-terracotta transition duration-200 py-2 text-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Entrar
-            </Link>
-          )}
-        </div>
-      </div>
-    </nav>
+    </header>
   );
 };
 

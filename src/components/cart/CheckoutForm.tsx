@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useCart, CustomerInfo } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -141,46 +142,46 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
           
           <div>
             <label htmlFor="notes" className="block mb-1 text-sm font-medium">
-              Notas Adicionais (opcional)
+              Observações (opcional)
             </label>
             <Textarea
               id="notes"
               name="notes"
-              value={customerInfo.notes}
+              value={customerInfo.notes || ""}
               onChange={handleChange}
-              placeholder="Instruções especiais para entrega ou preparo..."
-              rows={2}
+              placeholder="Instruções especiais para entrega ou preparo"
+              rows={3}
             />
           </div>
         </div>
       </div>
       
       <div>
-        <h3 className="text-lg font-medium mb-3">Localização para Entrega</h3>
+        <h3 className="text-lg font-medium mb-3">Localização de Entrega</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {deliveryLocations.map((location) => (
             <div
               key={location.id}
-              className={`border rounded-md p-3 cursor-pointer transition-colors ${
+              className={`border rounded-lg p-4 cursor-pointer transition-all ${
                 selectedLocation?.id === location.id
-                  ? "border-cantinho-terracotta bg-cantinho-terracotta/10"
-                  : "border-gray-200 hover:border-cantinho-terracotta/50"
+                  ? "border-cantinho-navy bg-cantinho-navy/5"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
               onClick={() => setSelectedLocation(location)}
             >
               <div className="flex justify-between">
-                <div className="font-medium">{location.name}</div>
-                <div className="text-cantinho-navy font-bold">
-                  {new Intl.NumberFormat("pt-AO", {
-                    style: "currency",
-                    currency: "AOA",
-                    minimumFractionDigits: 0,
-                  }).format(location.fee)}
-                </div>
+                <h4 className="font-medium">{location.name}</h4>
+                <span className="font-semibold">
+                  {location.fee === 0
+                    ? "Grátis"
+                    : new Intl.NumberFormat("pt-AO", {
+                        style: "currency",
+                        currency: "AOA",
+                        minimumFractionDigits: 0,
+                      }).format(location.fee)}
+                </span>
               </div>
-              <div className="text-sm text-gray-500">
-                Tempo estimado: {location.estimatedTime}
-              </div>
+              <p className="text-sm text-gray-500">{location.estimatedTime}</p>
             </div>
           ))}
         </div>
@@ -188,45 +189,35 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       
       <div>
         <h3 className="text-lg font-medium mb-3">Método de Pagamento</h3>
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {paymentMethods.map((method) => (
             <div
               key={method.id}
-              className={`border rounded-md p-3 cursor-pointer transition-colors ${
+              className={`border rounded-lg p-4 cursor-pointer transition-all ${
                 selectedPaymentMethod?.id === method.id
-                  ? "border-cantinho-terracotta bg-cantinho-terracotta/10"
-                  : "border-gray-200 hover:border-cantinho-terracotta/50"
+                  ? "border-cantinho-navy bg-cantinho-navy/5"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
               onClick={() => setSelectedPaymentMethod(method)}
             >
               <div className="flex items-center">
-                {getPaymentIcon(method.icon)}
-                <span className="ml-2 font-medium">{method.name}</span>
+                <div className="h-8 w-8 rounded-full bg-cantinho-navy/10 flex items-center justify-center text-cantinho-navy mr-3">
+                  {getPaymentIcon(method.icon)}
+                </div>
+                <span className="font-medium">{method.name}</span>
               </div>
             </div>
           ))}
-        </div>
-        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm">
-          <p className="text-yellow-800">
-            Para sua comodidade, o pagamento será processado conforme o método selecionado após a confirmação do pedido.
-          </p>
         </div>
       </div>
       
       <Button
         type="submit"
         className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-        size="lg"
         disabled={loading}
       >
-        {loading ? (
-          <span className="flex items-center">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Processando...
-          </span>
-        ) : (
-          "Enviar Pedido"
-        )}
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {loading ? "Processando..." : "Finalizar Pedido"}
       </Button>
     </form>
   );

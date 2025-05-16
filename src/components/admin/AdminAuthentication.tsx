@@ -11,55 +11,35 @@ interface AdminAuthenticationProps {
 }
 
 const AdminAuthentication = ({ onAuthenticated }: AdminAuthenticationProps) => {
-  const { user } = useAuth();
+  const { user, checkAdminStatus } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      checkAdminStatus();
+      verifyAdminAccess();
     }
   }, [user]);
 
-  const checkAdminStatus = async () => {
-    if (!user) return false;
+  const verifyAdminAccess = async () => {
+    const isAdmin = await checkAdminStatus();
     
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data && data.role === 'admin') {
-        onAuthenticated(true);
-        return true;
-      } else {
-        toast({
-          title: "Acesso negado",
-          description: "Você não tem permissões de administrador.",
-          variant: "destructive"
-        });
-        navigate('/');
-        return false;
-      }
-    } catch (error) {
-      console.error("Erro ao verificar perfil:", error);
+    if (isAdmin) {
+      onAuthenticated(true);
+    } else {
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao verificar suas permissões.",
+        title: "Acesso negado",
+        description: "Você não tem permissões de administrador.",
         variant: "destructive"
       });
-      return false;
+      navigate('/');
     }
   };
 
-  const handleLogin = async (isAdmin: boolean) => {
-    const hasAdminAccess = await checkAdminStatus();
-    onAuthenticated(hasAdminAccess);
-    return hasAdminAccess;
+  const handleLogin = async () => {
+    const isAdmin = await checkAdminStatus();
+    onAuthenticated(isAdmin);
+    return isAdmin;
   };
 
   return <AdminLogin onLogin={handleLogin} />;

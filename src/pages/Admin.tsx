@@ -6,13 +6,13 @@ import AdminAuthentication from "@/components/admin/AdminAuthentication";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminOrderView from "@/components/admin/AdminOrderView";
 import AdminInvoiceView from "@/components/admin/AdminInvoiceView";
-import { Order as CartOrder } from "@/contexts/CartContext";
+import { Order } from "@/contexts/CartContext";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 // Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
-const convertOrderType = (order: any): CartOrder => {
+const convertOrderType = (order: any): Order => {
   return {
     ...order,
     paymentMethod: {
@@ -28,8 +28,8 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
-  const { user } = useAuth();
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
+  const { user, checkAdminStatus } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -59,7 +59,7 @@ const Admin = () => {
       
       try {
         // Check if user is admin
-        const isAdmin = user.role === 'admin';
+        const isAdmin = await checkAdminStatus();
         setIsAuthenticated(isAdmin);
         
         if (!isAdmin) {
@@ -79,7 +79,7 @@ const Admin = () => {
     };
     
     checkAuth();
-  }, [user, navigate, toast, refreshOrders]);
+  }, [user, navigate, toast, refreshOrders, checkAdminStatus]);
 
   const handleAuthentication = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
@@ -98,7 +98,7 @@ const Admin = () => {
     setSelectedOrderId(orderId);
   };
   
-  const handlePrepareInvoice = (order: CartOrder) => {
+  const handlePrepareInvoice = (order: Order) => {
     setSelectedInvoiceOrder(order);
     setSelectedOrderId(null);
   };

@@ -20,7 +20,7 @@ type MenuCardProps = {
 const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps) => {
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(isFavorite);
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -54,7 +54,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   }, [dish.id, user, onToggleFavorite]);
 
   const handleAddToCart = () => {
-    addToCart({
+    addItem({
       id: dish.id,
       name: dish.name,
       price: dish.price,
@@ -96,6 +96,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
         toast({
           title: "Removido dos favoritos",
           description: `${dish.name} foi removido dos seus favoritos.`,
+          variant: "default"
         });
       } else {
         // Add to favorites
@@ -109,6 +110,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
         toast({
           title: "Adicionado aos favoritos",
           description: `${dish.name} foi adicionado aos seus favoritos.`,
+          variant: "default"
         });
       }
     } catch (error) {

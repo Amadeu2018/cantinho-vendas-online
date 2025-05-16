@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -168,7 +169,7 @@ const Profile = () => {
       toast({
         title: "Endereço removido",
         description: "O endereço foi removido com sucesso.",
-        variant: "success"
+        variant: "default"
       });
     } catch (error) {
       console.error("Erro ao remover endereço:", error);
@@ -195,7 +196,7 @@ const Profile = () => {
       toast({
         title: "Favorito removido",
         description: "O item foi removido dos seus favoritos.",
-        variant: "success"
+        variant: "default"
       });
     } catch (error) {
       console.error("Erro ao remover favorito:", error);
@@ -232,7 +233,7 @@ const Profile = () => {
       toast({
         title: "Endereço padrão definido",
         description: "O endereço padrão foi atualizado com sucesso.",
-        variant: "success"
+        variant: "default"
       });
     } catch (error) {
       console.error("Erro ao definir endereço padrão:", error);

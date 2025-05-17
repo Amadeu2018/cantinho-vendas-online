@@ -1,15 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useCart } from '@/contexts/CartContext';
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { Dish } from '@/types/dish';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import DishImage from './DishImage';
+import DishDetails from './DishDetails';
+import { formatPrice } from '@/utils/formatter';
 
 type MenuCardProps = {
   dish: Dish;
@@ -24,11 +23,11 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   const { toast } = useToast();
   const { user } = useAuth();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsLiked(isFavorite);
   }, [isFavorite]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!onToggleFavorite) {
       const checkIfLiked = async () => {
         if (!user) return;
@@ -124,81 +123,23 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-AO', { 
-      style: 'currency', 
-      currency: 'AOA',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
-
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
-      <div className="relative">
-        <AspectRatio ratio={16 / 9}>
-          <img
-            src={dish.image_url || "/placeholder.svg"}
-            alt={dish.name}
-            className="object-cover w-full h-full"
-          />
-        </AspectRatio>
-        
-        <div className="absolute top-2 right-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`rounded-full bg-white ${isLiked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500`}
-            onClick={toggleFavorite}
-          >
-            <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
-        
-        {dish.category && (
-          <Badge className="absolute bottom-2 left-2 bg-white/80 text-black hover:bg-white/70">
-            {dish.category}
-          </Badge>
-        )}
-      </div>
+      <DishImage 
+        dish={dish} 
+        isLiked={isLiked} 
+        onToggleFavorite={toggleFavorite} 
+      />
       
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-1 line-clamp-1">{dish.name}</h3>
-        <p className="text-gray-500 text-sm mb-3 line-clamp-2">{dish.description}</p>
-        
-        <div className="flex items-center justify-between">
-          <p className="font-bold text-lg">{formatPrice(dish.price)}</p>
-          
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            
-            <span className="w-8 text-center font-medium">{quantity}</span>
-            
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => setQuantity(quantity + 1)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        <Button 
-          className="w-full mt-3 bg-cantinho-navy hover:bg-cantinho-navy/90"
-          onClick={handleAddToCart}
-        >
-          <ShoppingBag className="h-4 w-4 mr-2" />
-          Adicionar
-        </Button>
+      <CardContent className="p-0">
+        <DishDetails
+          dish={dish}
+          quantity={quantity}
+          onIncrease={() => setQuantity(quantity + 1)}
+          onDecrease={() => setQuantity(Math.max(1, quantity - 1))}
+          onAddToCart={handleAddToCart}
+          formatPrice={formatPrice}
+        />
       </CardContent>
     </Card>
   );

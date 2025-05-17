@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MapPin, Heart, ShoppingBag, User, Mail, Phone, Trash2, Plus, Edit } from "lucide-react";
 import { Dish } from "@/types/dish";
+import { formatPrice } from '@/utils/formatter';
 
 const Profile = () => {
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -433,11 +434,7 @@ const Profile = () => {
                         <p className="text-gray-600 text-sm line-clamp-2 mb-3">{dish.description}</p>
                         <div className="flex items-center justify-between">
                           <span className="font-bold">
-                            {new Intl.NumberFormat('pt-AO', { 
-                              style: 'currency', 
-                              currency: 'AOA',
-                              minimumFractionDigits: 0
-                            }).format(dish.price)}
+                            {formatPrice(dish.price)}
                           </span>
                           <div className="flex space-x-2">
                             <Button variant="outline" asChild>

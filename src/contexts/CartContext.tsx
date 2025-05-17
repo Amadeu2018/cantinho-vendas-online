@@ -10,7 +10,11 @@ export type CartItem = {
   price: number;
   quantity: number;
   image?: string;
+  image_url?: string;
 };
+
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed' | 'cancelled';
+export type PaymentStatus = 'pending' | 'completed';
 
 export type PaymentMethod = {
   id: string;
@@ -29,6 +33,7 @@ export type DeliveryLocation = {
   id: string;
   name: string;
   fee: number;
+  estimatedTime?: string;
 };
 
 export type Order = {
@@ -36,9 +41,14 @@ export type Order = {
   items: CartItem[];
   customerInfo: CustomerInfo;
   total: number;
-  status: 'pending' | 'completed';
+  subtotal: number;
+  deliveryFee: number;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
   type: string;
+  createdAt: string;
+  location: DeliveryLocation;
   isProforma?: boolean;
 };
 
@@ -50,6 +60,7 @@ interface CartContextType {
   clearCart: () => void;
   totalPrice: number;
   totalItems: number;
+  subtotal: number;
   itemCount: (id: string) => number;
   setItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
   deliveryLocations: DeliveryLocation[];
@@ -58,8 +69,9 @@ interface CartContextType {
   paymentMethods: PaymentMethod[];
   selectedPaymentMethod: PaymentMethod | null;
   setSelectedPaymentMethod: React.Dispatch<React.SetStateAction<PaymentMethod | null>>;
-  submitOrder: (customerInfo: CustomerInfo) => Promise<Order>;
-}
+  submitOrder: (customerInfo: CustomerInfo) => Promise<string>;
+  getOrderById: (orderId: string) => Promise<Order | null>;
+};
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -68,10 +80,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user } = useAuth();
   
   const [deliveryLocations, setDeliveryLocations] = useState<DeliveryLocation[]>([
-    { id: 'luanda', name: 'Luanda', fee: 500 },
-    { id: 'talatona', name: 'Talatona', fee: 700 },
-    { id: 'viana', name: 'Viana', fee: 900 },
-    { id: 'benfica', name: 'Benfica', fee: 600 },
+    { id: 'luanda', name: 'Luanda', fee: 500, estimatedTime: '30-45 min' },
+    { id: 'talatona', name: 'Talatona', fee: 700, estimatedTime: '45-60 min' },
+    { id: 'viana', name: 'Viana', fee: 900, estimatedTime: '50-70 min' },
+    { id: 'benfica', name: 'Benfica', fee: 600, estimatedTime: '40-55 min' },
   ]);
   
   const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(deliveryLocations[0]);
@@ -148,24 +160,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const totalPrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  
+  const subtotal = totalPrice;
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  const submitOrder = async (customerInfo: CustomerInfo): Promise<Order> => {
+  const submitOrder = async (customerInfo: CustomerInfo): Promise<string> => {
     // Calculate total including delivery fee
     const deliveryFee = selectedLocation?.fee || 0;
-    const subtotal = totalPrice;
-    const total = subtotal + deliveryFee;
+    const subtotalAmount = totalPrice;
+    const total = subtotalAmount + deliveryFee;
+
+    // Create order ID
+    const orderId = uuidv4();
 
     // Create order object
     const order: Order = {
-      id: uuidv4(),
+      id: orderId,
       items: [...items],
       customerInfo,
+      subtotal: subtotalAmount,
+      deliveryFee,
       total,
       status: 'pending',
+      paymentStatus: 'pending',
       paymentMethod: selectedPaymentMethod || paymentMethods[0],
-      type: 'Pedido'
+      type: 'Pedido',
+      createdAt: new Date().toISOString(),
+      location: selectedLocation || deliveryLocations[0]
     };
 
     try {
@@ -178,19 +198,83 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           total: order.total,
           customer_info: order.customerInfo,
           payment_method: order.paymentMethod.id,
-          status: order.status
+          status: order.status,
+          payment_status: order.paymentStatus,
+          created_at: order.createdAt,
+          subtotal: order.subtotal,
+          delivery_fee: order.deliveryFee,
+          location: order.location
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error submitting order to Supabase:", error);
+          throw error;
+        }
       }
+
+      // Save order to local storage for anonymous users or as a backup
+      const savedOrders = localStorage.getItem('orders');
+      const orders = savedOrders ? JSON.parse(savedOrders) : [];
+      orders.push(order);
+      localStorage.setItem('orders', JSON.stringify(orders));
 
       // Clear cart after successful order
       clearCart();
       
-      return order;
+      return orderId;
     } catch (error) {
       console.error('Error submitting order:', error);
       throw error;
+    }
+  };
+
+  const getOrderById = async (orderId: string): Promise<Order | null> => {
+    try {
+      // Try to get order from Supabase if user is authenticated
+      if (user) {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .single();
+        
+        if (!error && data) {
+          // Transform database order into app Order type
+          return {
+            id: data.id,
+            items: data.items || [],
+            customerInfo: data.customer_info || {},
+            total: data.total,
+            subtotal: data.subtotal || 0,
+            deliveryFee: data.delivery_fee || 0,
+            status: data.status as OrderStatus,
+            paymentStatus: data.payment_status as PaymentStatus,
+            paymentMethod: {
+              id: data.payment_method || 'unknown',
+              name: data.payment_method_name || 'Método de Pagamento',
+              icon: 'credit-card'
+            },
+            type: data.type || 'Pedido',
+            createdAt: data.created_at || new Date().toISOString(),
+            location: data.location || deliveryLocations[0]
+          };
+        }
+      }
+      
+      // Fallback to local storage
+      const savedOrders = localStorage.getItem('orders');
+      if (savedOrders) {
+        const orders = JSON.parse(savedOrders);
+        const order = orders.find((o: any) => o.id === orderId);
+        if (order) {
+          return order as Order;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting order:', error);
+      return null;
     }
   };
 
@@ -201,6 +285,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateQuantity,
     clearCart,
     totalPrice,
+    subtotal,
     totalItems,
     itemCount,
     setItems,
@@ -210,7 +295,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     paymentMethods,
     selectedPaymentMethod,
     setSelectedPaymentMethod,
-    submitOrder
+    submitOrder,
+    getOrderById
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

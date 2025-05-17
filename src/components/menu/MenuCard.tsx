@@ -65,6 +65,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
     toast({
       title: "Item adicionado",
       description: `${dish.name} foi adicionado ao carrinho.`,
+      variant: "default"
     });
   };
 
@@ -78,7 +79,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
       toast({
         title: "Não autenticado",
         description: "Faça login para adicionar aos favoritos.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -118,7 +119,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
       toast({
         title: "Erro",
         description: "Não foi possível atualizar seus favoritos.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };

@@ -41,11 +41,11 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
 
   const getPaymentIcon = (iconName: string) => {
     switch (iconName) {
-      case "banknote":
+      case "cash":
         return <Banknote className="h-5 w-5" />;
       case "credit-card":
         return <CreditCard className="h-5 w-5" />;
-      case "landmark":
+      case "bank":
         return <Landmark className="h-5 w-5" />;
       default:
         return <CreditCard className="h-5 w-5" />;
@@ -80,6 +80,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       toast({
         title: "Pedido enviado com sucesso!",
         description: `Seu pedido #${orderId.substring(0, 8)} foi registrado. Aguarde a confirmação.`,
+        variant: "default"
       });
       onSuccess(orderId);
     } catch (error) {
@@ -169,19 +170,21 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
               }`}
               onClick={() => setSelectedLocation(location)}
             >
-              <div className="flex justify-between">
-                <h4 className="font-medium">{location.name}</h4>
-                <span className="font-semibold">
-                  {location.fee === 0
-                    ? "Grátis"
-                    : new Intl.NumberFormat("pt-AO", {
-                        style: "currency",
-                        currency: "AOA",
-                        minimumFractionDigits: 0,
-                      }).format(location.fee)}
-                </span>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-medium">{location.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {location.estimatedTime ? `${location.estimatedTime} de entrega` : "Tempo estimado indisponível"}
+                  </p>
+                </div>
+                <p className="font-medium">
+                  +{new Intl.NumberFormat("pt-AO", {
+                    style: "currency",
+                    currency: "AOA",
+                    minimumFractionDigits: 0,
+                  }).format(location.fee)}
+                </p>
               </div>
-              <p className="text-sm text-gray-500">{location.estimatedTime}</p>
             </div>
           ))}
         </div>
@@ -189,7 +192,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       
       <div>
         <h3 className="text-lg font-medium mb-3">Método de Pagamento</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {paymentMethods.map((method) => (
             <div
               key={method.id}
@@ -201,20 +204,20 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
               onClick={() => setSelectedPaymentMethod(method)}
             >
               <div className="flex items-center">
-                <div className="h-8 w-8 rounded-full bg-cantinho-navy/10 flex items-center justify-center text-cantinho-navy mr-3">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
                   {getPaymentIcon(method.icon)}
                 </div>
-                <span className="font-medium">{method.name}</span>
+                <p className="font-medium">{method.name}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
       
-      <Button
+      <Button 
         type="submit"
-        className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
         disabled={loading}
+        className="w-full bg-cantinho-navy hover:bg-cantinho-navy/90"
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {loading ? "Processando..." : "Finalizar Pedido"}

@@ -111,7 +111,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
         toast({
           title: "Adicionado aos favoritos",
           description: `${dish.name} foi adicionado aos seus favoritos.`,
-          variant: "success"
+          variant: "default"
         });
       }
     } catch (error) {

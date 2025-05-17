@@ -242,8 +242,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Transform database order into app Order type
           return {
             id: data.id,
-            items: data.items || [],
-            customerInfo: data.customer_info || {},
+            items: data.items as CartItem[] || [],
+            customerInfo: data.customer_info as CustomerInfo || {},
             total: data.total,
             subtotal: data.subtotal || 0,
             deliveryFee: data.delivery_fee || 0,
@@ -251,7 +251,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             paymentStatus: data.payment_status as PaymentStatus,
             paymentMethod: {
               id: data.payment_method || 'unknown',
-              name: data.payment_method_name || 'Método de Pagamento',
+              name: data.payment_method || 'Método de Pagamento',
               icon: 'credit-card'
             },
             type: data.type || 'Pedido',

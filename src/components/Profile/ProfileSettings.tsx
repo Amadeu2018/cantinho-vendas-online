@@ -45,7 +45,7 @@ const ProfileSettings = () => {
 
       if (data) {
         setProfileInfo({
-          name: data.name || "",
+          name: data.company_name || "",
           phone: data.phone || "",
           address: data.address_street || "",
         });
@@ -74,7 +74,7 @@ const ProfileSettings = () => {
       setIsLoading(true);
       const { error } = await supabase.from("profiles").upsert({
         id: user.id,
-        name: profileInfo.name,
+        company_name: profileInfo.name,
         phone: profileInfo.phone,
         address_street: profileInfo.address,
         updated_at: new Date().toISOString(),

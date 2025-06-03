@@ -13,10 +13,13 @@ const FeaturedDishes = () => {
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
 
   useEffect(() => {
-    if (dishes) {
+    console.log("FeaturedDishes: dishes updated", dishes);
+    if (dishes && dishes.length > 0) {
       // Filter out popular dishes, or just take the first 3 if none are marked as popular
       const popular = dishes.filter((dish) => dish.popular);
-      setPopularDishes(popular.length ? popular.slice(0, 3) : dishes.slice(0, 3));
+      const displayDishes = popular.length > 0 ? popular.slice(0, 3) : dishes.slice(0, 3);
+      setPopularDishes(displayDishes);
+      console.log("FeaturedDishes: setting popular dishes", displayDishes);
     }
   }, [dishes]);
 
@@ -36,7 +39,7 @@ const FeaturedDishes = () => {
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cantinho-terracotta"></div>
           </div>
-        ) : (
+        ) : popularDishes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {popularDishes.map((dish) => (
               <MenuCard 
@@ -46,6 +49,11 @@ const FeaturedDishes = () => {
                 onToggleFavorite={() => toggleFavorite(dish.id)}
               />
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">Nenhum prato encontrado</p>
+            <p className="text-sm text-gray-500">Adicione produtos no painel de administração para vê-los aqui.</p>
           </div>
         )}
 

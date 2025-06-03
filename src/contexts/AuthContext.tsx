@@ -28,45 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.user?.id);
-        setSession(newSession);
-        
-        if (newSession?.user) {
-          // Get user role from profiles table
-          try {
-            const { data, error } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', newSession.user.id)
-              .maybeSingle();
-            
-            if (!error && data) {
-              const userWithRole = { 
-                ...newSession.user,
-                role: data.role
-              };
-              setUser(userWithRole);
-              console.log('User with role set:', userWithRole);
-            } else {
-              console.log('No profile found, setting user without role');
-              setUser(newSession.user);
-            }
-          } catch (error) {
-            console.error("Error fetching user profile:", error);
-            setUser(newSession.user);
-          }
-        } else {
-          setUser(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Get current session on initialization
+    // Get current session first
     const initializeAuth = async () => {
       try {
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
@@ -81,24 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(currentSession);
         
         if (currentSession?.user) {
-          // Get user role from profiles table
-          const { data, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', currentSession.user.id)
-            .maybeSingle();
-          
-          if (!profileError && data) {
-            const userWithRole = { 
-              ...currentSession.user,
-              role: data.role
-            };
-            setUser(userWithRole);
-            console.log('Initial user with role set:', userWithRole);
-          } else {
-            console.log('No initial profile found, setting user without role');
-            setUser(currentSession.user);
-          }
+          await setUserWithRole(currentSession.user);
         } else {
           setUser(null);
         }
@@ -109,12 +54,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.id);
+        setSession(newSession);
+        
+        if (newSession?.user) {
+          await setUserWithRole(newSession.user);
+        } else {
+          setUser(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
     initializeAuth();
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const setUserWithRole = async (authUser: User) => {
+    try {
+      // Get user role from profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authUser.id)
+        .maybeSingle();
+      
+      if (!error && data) {
+        const userWithRole = { 
+          ...authUser,
+          role: data.role
+        };
+        setUser(userWithRole);
+        console.log('User with role set:', userWithRole);
+      } else {
+        console.log('No profile found, setting user without role');
+        setUser(authUser);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setUser(authUser);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {

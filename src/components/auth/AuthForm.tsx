@@ -44,20 +44,28 @@ const AuthForm = ({ mode }: AuthFormProps) => {
       setIsSubmitting(true);
       
       if (mode === "login") {
+        console.log("Attempting login with:", email);
         const { error } = await signIn(email, password);
         
         if (error) {
           console.error("Login error:", error);
+          let errorMessage = "Não foi possível fazer login. Tente novamente.";
+          
+          if (error.message === "Invalid login credentials") {
+            errorMessage = "Email ou senha incorretos.";
+          } else if (error.message?.includes("Email not confirmed")) {
+            errorMessage = "Por favor, confirme seu email antes de fazer login.";
+          }
+          
           toast({
             title: "Erro no login",
-            description: error.message === "Invalid login credentials" 
-              ? "Email ou senha incorretos." 
-              : "Não foi possível fazer login. Tente novamente.",
+            description: errorMessage,
             variant: "destructive"
           });
           return;
         }
         
+        console.log("Login successful");
         toast({
           title: "Login realizado",
           description: "Bem-vindo de volta!",
@@ -66,27 +74,29 @@ const AuthForm = ({ mode }: AuthFormProps) => {
         
         navigate("/");
       } else {
+        console.log("Attempting signup with:", email);
         const { error } = await signUp(email, password);
         
         if (error) {
           console.error("Signup error:", error);
           
+          let errorMessage = "Não foi possível criar a conta. Tente novamente.";
+          
           if (error.message?.includes("already registered")) {
-            toast({
-              title: "Erro no cadastro",
-              description: "Este email já está cadastrado. Tente fazer login.",
-              variant: "destructive"
-            });
-          } else {
-            toast({
-              title: "Erro no cadastro",
-              description: "Não foi possível criar a conta. Tente novamente.",
-              variant: "destructive"
-            });
+            errorMessage = "Este email já está cadastrado. Tente fazer login.";
+          } else if (error.message?.includes("Password")) {
+            errorMessage = "A senha deve ter pelo menos 6 caracteres.";
           }
+          
+          toast({
+            title: "Erro no cadastro",
+            description: errorMessage,
+            variant: "destructive"
+          });
           return;
         }
         
+        console.log("Signup successful");
         toast({
           title: "Conta criada com sucesso!",
           description: "Você já pode fazer login com suas credenciais.",

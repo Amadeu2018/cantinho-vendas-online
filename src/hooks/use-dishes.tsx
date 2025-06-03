@@ -20,7 +20,11 @@ export const useDishes = () => {
       // Load favorites from local storage for non-authenticated users
       const savedFavorites = localStorage.getItem('dish_favorites');
       if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
+        try {
+          setFavorites(JSON.parse(savedFavorites));
+        } catch {
+          setFavorites([]);
+        }
       }
     }
   }, [user]);
@@ -65,6 +69,7 @@ export const useDishes = () => {
         `);
       
       if (productsError) {
+        console.error("Error fetching products:", productsError);
         throw productsError;
       }
       
@@ -132,7 +137,7 @@ export const useDishes = () => {
             price: price,
             image_url: product.image_url || '/placeholder.svg',
             category,
-            popular: Math.random() > 0.7, // Random for demo, ideally this would be a field in the database
+            popular: Math.random() > 0.7, // Random for demo
             tags: [],
             promotion
           };
@@ -145,7 +150,6 @@ export const useDishes = () => {
         // Fallback to static data if no products found
         setDishes(getFallbackDishes());
         
-        // Show a toast to inform the user
         toast({
           title: "Dados de demonstração",
           description: "Usando dados de exemplo. Adicione produtos no painel de administração.",
@@ -156,7 +160,6 @@ export const useDishes = () => {
       // Fallback to static data in case of error
       setDishes(getFallbackDishes());
       
-      // Show a toast to inform the user
       toast({
         title: "Erro ao carregar produtos",
         description: "Usando dados de exemplo. Verifique a conexão com o banco de dados.",
@@ -200,24 +203,6 @@ export const useDishes = () => {
         category: "main",
         tags: ["Churrasco"],
         popular: true
-      },
-      {
-        id: "4",
-        name: "Coxinha",
-        description: "Tradicional salgado brasileiro recheado com frango desfiado",
-        price: 3.5,
-        image_url: "/placeholder.svg",
-        category: "appetizer",
-        tags: ["Salgados"]
-      },
-      {
-        id: "5",
-        name: "Mousse de Maracujá",
-        description: "Sobremesa cremosa de maracujá com calda fresca",
-        price: 6.9,
-        image_url: "/placeholder.svg",
-        category: "dessert",
-        tags: ["Doces"]
       }
     ];
   };

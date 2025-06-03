@@ -54,27 +54,27 @@ const AdminInventory = () => {
       
       console.log("Inventory data:", data);
       
-      // Format the data to match our InventoryItem type
+      // Format the data to match our InventoryItem type with proper null checks
       const formattedData = data?.map(item => {
-        // Default category name
+        // Safe category name extraction
         let categoryName = "Sem categoria";
         
-        // Check if categories exists and has a name property
         if (item.categories && typeof item.categories === 'object' && item.categories !== null) {
-          // Make TypeScript happy by asserting to any first
           const categoryData = item.categories as any;
-          categoryName = categoryData.name || "Sem categoria";
+          if (categoryData && typeof categoryData.name === 'string') {
+            categoryName = categoryData.name;
+          }
         }
         
         return {
-          id: item.id,
-          name: item.name,
+          id: item.id || '',
+          name: item.name || 'Produto sem nome',
           category_name: categoryName,
-          stock_quantity: item.stock_quantity || 0,
+          stock_quantity: Number(item.stock_quantity) || 0,
           unit: item.unit || "unidade",
-          price: item.price || 0,
-          min_stock_quantity: item.min_stock_quantity || 5,
-          category_id: item.category_id
+          price: Number(item.price) || 0,
+          min_stock_quantity: Number(item.min_stock_quantity) || 5,
+          category_id: item.category_id || undefined
         };
       }) || [];
       
@@ -86,14 +86,16 @@ const AdminInventory = () => {
         description: error.message || "Não foi possível carregar o inventário",
         variant: "destructive",
       });
+      // Set empty array as fallback
+      setInventory([]);
     } finally {
       setLoading(false);
     }
   };
   
   const filteredInventory = inventory.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.category_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const handleEdit = (item: InventoryItem) => {

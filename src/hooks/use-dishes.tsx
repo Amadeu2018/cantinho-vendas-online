@@ -24,12 +24,13 @@ export const useDishes = () => {
       setLoading(true);
       console.log("Fetching dishes from Supabase...");
       
-      // Fetch products from Supabase with specified relationship to fix the SQL error
+      // Fetch products from Supabase with better error handling
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*, categories!fk_product_category(id, name)');
+        .select('*, categories(id, name)');
       
       if (productsError) {
+        console.error("Error fetching products:", productsError);
         throw productsError;
       }
       
@@ -52,27 +53,25 @@ export const useDishes = () => {
       
       // Create a map of product_id to promotion
       const promotionsMap: Record<string, { discount: number, label?: string }> = {};
-      if (promotionsData) {
+      if (promotionsData && Array.isArray(promotionsData)) {
         promotionsData.forEach((promo: any) => {
-          if (promo.product_id) {
+          if (promo && promo.product_id) {
             promotionsMap[promo.product_id] = {
-              discount: promo.discount_percentage || 10,
-              label: `${promo.discount_percentage}% OFF`
+              discount: Number(promo.discount_percentage) || 10,
+              label: `${promo.discount_percentage || 10}% OFF`
             };
           }
         });
       }
       
-      if (productsData && productsData.length > 0) {
-        // Map to the Dish format
+      if (productsData && Array.isArray(productsData) && productsData.length > 0) {
+        // Map to the Dish format with proper null checks
         const mappedDishes: Dish[] = productsData.map((product: any) => {
           // Determine category from categories relation or fallback
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
           
-          if (product.categories && typeof product.categories === 'object') {
-            // Safely access the name property with type checking
-            const categoryObj = product.categories as { name?: string } | null;
-            const categoryName = categoryObj?.name?.toLowerCase() || '';
+          if (product.categories && typeof product.categories === 'object' && product.categories !== null) {
+            const categoryName = (product.categories.name || '').toLowerCase();
             
             if (categoryName.includes('entrada')) {
               category = 'appetizer';
@@ -83,19 +82,19 @@ export const useDishes = () => {
             }
           }
           
-          // Ensure price is always a number
-          const price = typeof product.price === 'string' 
-            ? parseFloat(product.price) 
-            : (typeof product.price === 'number' ? product.price : 0);
+          // Ensure price is always a number with null safety
+          const price = product.price ? 
+            (typeof product.price === 'string' ? parseFloat(product.price) : Number(product.price)) 
+            : 0;
           
           // Check if the product has a promotion
-          const promotion = product.id && product.id in promotionsMap 
+          const promotion = product.id && promotionsMap[product.id] 
             ? promotionsMap[product.id] 
             : undefined;
           
           return {
-            id: product.id,
-            name: product.name,
+            id: product.id || '',
+            name: product.name || 'Produto sem nome',
             description: product.description || '',
             price: price,
             image_url: product.image_url || '/placeholder.svg',
@@ -119,7 +118,7 @@ export const useDishes = () => {
           description: "Usando dados de exemplo. Adicione produtos no painel de administração.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching dishes:", error);
       // Fallback to static data in case of error
       setDishes(getFallbackDishes());

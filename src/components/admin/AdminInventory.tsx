@@ -1,12 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import InventoryList from "./InventoryList";
 import InventorySearch from "./InventorySearch";
 import LowStockAlerts from "./LowStockAlerts";
+import { exportToPDF, generateInventoryReport } from "@/utils/pdfExports";
+import { Download, FileText, Loader2 } from "lucide-react";
 
 type InventoryItem = {
   id: string;
@@ -22,6 +24,7 @@ type InventoryItem = {
 const AdminInventory = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<InventoryItem | null>(null);
@@ -54,9 +57,7 @@ const AdminInventory = () => {
       
       console.log("Inventory data:", data);
       
-      // Format the data to match our InventoryItem type with proper null checks
       const formattedData = data?.map(item => {
-        // Safe category name extraction
         let categoryName = "Sem categoria";
         
         if (item.categories && typeof item.categories === 'object' && item.categories !== null) {
@@ -86,10 +87,51 @@ const AdminInventory = () => {
         description: error.message || "Não foi possível carregar o inventário",
         variant: "destructive",
       });
-      // Set empty array as fallback
       setInventory([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      const success = await exportToPDF('inventory-report-content', 'relatorio-inventario');
+      if (success) {
+        toast({
+          title: "Relatório exportado",
+          description: "O relatório de inventário foi exportado com sucesso!",
+        });
+      } else {
+        throw new Error("Falha na exportação");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar o relatório. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleGenerateDetailedReport = () => {
+    setExporting(true);
+    try {
+      generateInventoryReport(inventory);
+      toast({
+        title: "Relatório gerado",
+        description: "O relatório detalhado de inventário foi gerado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na geração",
+        description: "Não foi possível gerar o relatório. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
     }
   };
   
@@ -117,7 +159,6 @@ const AdminInventory = () => {
         
         if (error) throw error;
         
-        // Update local state
         setInventory(inventory.map(item => 
           item.id === editForm.id ? editForm : item
         ));
@@ -127,7 +168,6 @@ const AdminInventory = () => {
           description: "As alterações foram salvas com sucesso",
         });
         
-        // Reset editing state
         setEditingId(null);
         setEditForm(null);
         
@@ -188,7 +228,6 @@ const AdminInventory = () => {
       
       const newStock = Math.max(0, item.stock_quantity + change);
       
-      // Update in Supabase
       const { error } = await supabase
         .from("products")
         .update({ stock_quantity: newStock })
@@ -196,7 +235,6 @@ const AdminInventory = () => {
       
       if (error) throw error;
       
-      // Record the stock movement
       const { error: movementError } = await supabase
         .from("stock_movements")
         .insert({
@@ -208,7 +246,6 @@ const AdminInventory = () => {
       
       if (movementError) console.error("Error recording stock movement:", movementError);
       
-      // Update local state
       setInventory(inventory.map(item => 
         item.id === id ? { ...item, stock_quantity: newStock } : item
       ));
@@ -234,12 +271,39 @@ const AdminInventory = () => {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
       />
+
+      {/* Export buttons */}
+      <div className="flex justify-end gap-2">
+        <Button 
+          onClick={handleExportPDF} 
+          disabled={exporting}
+          variant="outline"
+          size="sm"
+        >
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+          Exportar Visualização
+        </Button>
+        <Button 
+          onClick={handleGenerateDetailedReport} 
+          disabled={exporting}
+          size="sm"
+        >
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
+          Relatório Detalhado
+        </Button>
+      </div>
       
       <Card>
         <CardHeader>
           <CardTitle>Inventário</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent id="inventory-report-content">
+          {/* Header for PDF */}
+          <div className="mb-6 text-center print:block hidden">
+            <h1 className="text-2xl font-bold">Relatório de Inventário</h1>
+            <p className="text-gray-600">Gerado em: {new Date().toLocaleString('pt-AO')}</p>
+          </div>
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <p>Carregando inventário...</p>

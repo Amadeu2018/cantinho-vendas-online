@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import InventoryList from "./InventoryList";
 import InventorySearch from "./InventorySearch";
 import LowStockAlerts from "./LowStockAlerts";
+import InventoryHeader from "./inventory/InventoryHeader";
 import { exportToPDF, generateInventoryReport } from "@/utils/pdfExports";
 import { Download, FileText, Loader2 } from "lucide-react";
 
@@ -54,8 +54,6 @@ const AdminInventory = () => {
         .order("name");
       
       if (error) throw error;
-      
-      console.log("Inventory data:", data);
       
       const formattedData = data?.map(item => {
         let categoryName = "Sem categoria";
@@ -108,7 +106,7 @@ const AdminInventory = () => {
     } catch (error) {
       toast({
         title: "Erro na exportação",
-        description: "Não foi possível exportar o relatório. Tente novamente.",
+        description: "Não foi possível exportar o relatório.",
         variant: "destructive",
       });
     } finally {
@@ -127,7 +125,7 @@ const AdminInventory = () => {
     } catch (error) {
       toast({
         title: "Erro na geração",
-        description: "Não foi possível gerar o relatório. Tente novamente.",
+        description: "Não foi possível gerar o relatório.",
         variant: "destructive",
       });
     } finally {
@@ -272,26 +270,11 @@ const AdminInventory = () => {
         onSearchChange={setSearchTerm}
       />
 
-      {/* Export buttons */}
-      <div className="flex justify-end gap-2">
-        <Button 
-          onClick={handleExportPDF} 
-          disabled={exporting}
-          variant="outline"
-          size="sm"
-        >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
-          Exportar Visualização
-        </Button>
-        <Button 
-          onClick={handleGenerateDetailedReport} 
-          disabled={exporting}
-          size="sm"
-        >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-          Relatório Detalhado
-        </Button>
-      </div>
+      <InventoryHeader
+        onExportPDF={handleExportPDF}
+        onGenerateReport={handleGenerateDetailedReport}
+        exporting={exporting}
+      />
       
       <Card>
         <CardHeader>

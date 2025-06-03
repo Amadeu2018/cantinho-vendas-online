@@ -6,14 +6,12 @@ import AdminProducts from "@/components/admin/AdminProducts";
 import AdminFinance from "@/components/admin/AdminFinance";
 import AdminInventory from "@/components/admin/AdminInventory";
 import AdminReports from "@/components/admin/AdminReports";
-import AdminHeaderActions from "@/components/admin/AdminHeaderActions";
 import { Order as CartOrder } from "@/contexts/CartContext";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Wallet, CalendarDays, Users, ArrowUp, ArrowDown, Plus, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
+import { Plus, CalendarPlus } from "lucide-react";
+import DashboardStats from "./dashboard/DashboardStats";
+import RecentOrders from "./dashboard/RecentOrders";
 
 interface AdminDashboardProps {
   orders: CartOrder[];
@@ -36,7 +34,6 @@ const AdminDashboard = ({
   const totalRevenue = orders.reduce((sum, order) => 
     order.paymentStatus === "completed" ? sum + order.total : sum, 0);
   
-  const completedOrders = orders.filter(order => order.status === "completed").length;
   const todaysOrders = orders.filter(order => {
     const today = new Date().toDateString();
     const orderDate = new Date(order.createdAt).toDateString();
@@ -61,137 +58,15 @@ const AdminDashboard = ({
         </div>
       </div>
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card className="p-6 transition-all hover:shadow-md hover:scale-[1.02]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Pedidos Hoje</p>
-              <h3 className="text-2xl font-bold text-gray-800">{todaysOrders}</h3>
-            </div>
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-              <ShoppingCart className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-green-500 text-sm font-semibold flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" /> 12%
-            </span>
-            <span className="text-gray-500 text-sm"> vs ontem</span>
-          </div>
-        </Card>
-        
-        <Card className="p-6 transition-all hover:shadow-md hover:scale-[1.02]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Receita Total</p>
-              <h3 className="text-2xl font-bold text-gray-800">
-                {new Intl.NumberFormat("pt-AO", {
-                  style: "currency",
-                  currency: "AOA",
-                  minimumFractionDigits: 0,
-                }).format(totalRevenue)}
-              </h3>
-            </div>
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <Wallet className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-green-500 text-sm font-semibold flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" /> 8%
-            </span>
-            <span className="text-gray-500 text-sm"> vs ontem</span>
-          </div>
-        </Card>
-        
-        <Card className="p-6 transition-all hover:shadow-md hover:scale-[1.02]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Eventos Agendados</p>
-              <h3 className="text-2xl font-bold text-gray-800">3</h3>
-            </div>
-            <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-red-500 text-sm font-semibold flex items-center">
-              <ArrowDown className="h-3 w-3 mr-1" /> 1
-            </span>
-            <span className="text-gray-500 text-sm"> vs ontem</span>
-          </div>
-        </Card>
-        
-        <Card className="p-6 transition-all hover:shadow-md hover:scale-[1.02]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Clientes Novos</p>
-              <h3 className="text-2xl font-bold text-gray-800">5</h3>
-            </div>
-            <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-              <Users className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-green-500 text-sm font-semibold flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" /> 2
-            </span>
-            <span className="text-gray-500 text-sm"> vs ontem</span>
-          </div>
-        </Card>
-      </div>
+      <DashboardStats 
+        todaysOrders={todaysOrders}
+        totalRevenue={totalRevenue}
+      />
       
-      {/* Recent Orders */}
-      <Card className="overflow-hidden">
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-800">Pedidos Recentes</h2>
-          <Button variant="link" className="text-sm text-cantinho-navy">
-            Ver todos
-          </Button>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {orders.slice(0, 4).map((order) => (
-            <div 
-              key={order.id}
-              className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-              onClick={() => onSelectOrder(order.id)}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-800">#{order.id.slice(0, 10)}</p>
-                  <p className="text-sm text-gray-500">{order.customerInfo.name}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-800">
-                    {new Intl.NumberFormat("pt-AO", {
-                      style: "currency",
-                      currency: "AOA",
-                      minimumFractionDigits: 0,
-                    }).format(order.total)}
-                  </p>
-                  <p className="text-sm text-gray-500">{order.status}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <Badge variant="outline" className={
-                  order.paymentStatus === "completed" 
-                    ? "bg-green-50 text-green-800 border-green-200" 
-                    : "bg-yellow-50 text-yellow-800 border-yellow-200"
-                }>
-                  {order.paymentStatus === "completed" ? "Pago" : "Pendente"}
-                </Badge>
-                <span className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(order.createdAt), {
-                    addSuffix: true,
-                    locale: ptBR
-                  })}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <RecentOrders 
+        orders={orders}
+        onSelectOrder={onSelectOrder}
+      />
       
       {/* Main admin tabs */}
       <Card className="overflow-hidden">

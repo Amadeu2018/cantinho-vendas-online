@@ -1,124 +1,72 @@
 
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Facebook, 
-  Instagram, 
-  Twitter, 
-  MapPin, 
-  Phone, 
-  Mail,
-  Clock
-} from 'lucide-react';
+import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-cantinho-navy text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* About */}
+    <footer className="bg-cantinho-navy text-white pt-10 pb-6">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Company Info */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Cantinho Algarvio</h3>
-            <p className="text-gray-300 mb-4">
-              Gestão de Cozinha, Prestação de Serviço no
-              ramo Hoteleiro, Restauração, Catering e Buffet, com equipamentos modernos e
-              pessoal competente.
-            </p>
+            <h3 className="text-xl font-bold mb-4">Cantinho Algarvio</h3>
+            <p className="mb-4">Trazendo os sabores autênticos da culinária portuguesa e angolana para a sua casa.</p>
             <div className="flex space-x-4">
-              <a href="#" className="hover:text-cantinho-terracotta transition-colors">
-                <Facebook className="h-5 w-5" />
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-cantinho-sand transition duration-200">
+                <Facebook size={20} />
               </a>
-              <a href="#" className="hover:text-cantinho-terracotta transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="hover:text-cantinho-terracotta transition-colors">
-                <Twitter className="h-5 w-5" />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-cantinho-sand transition duration-200">
+                <Instagram size={20} />
               </a>
             </div>
           </div>
-          
-          {/* Links */}
+
+          {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Links Rápidos</h3>
+            <h3 className="text-xl font-bold mb-4">Links Rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-300 hover:text-cantinho-terracotta transition-colors">
-                  Início
-                </Link>
+                <Link to="/menu" className="hover:text-cantinho-sand transition duration-200">Menu</Link>
               </li>
               <li>
-                <Link to="/menu" className="text-gray-300 hover:text-cantinho-terracotta transition-colors">
-                  Menu
-                </Link>
+                <Link to="/eventos" className="hover:text-cantinho-sand transition duration-200">Serviços de Catering</Link>
               </li>
               <li>
-                <Link to="/sobre" className="text-gray-300 hover:text-cantinho-terracotta transition-colors">
-                  Sobre Nós
-                </Link>
+                <Link to="/sobre" className="hover:text-cantinho-sand transition duration-200">Sobre Nós</Link>
               </li>
               <li>
-                <Link to="/eventos" className="text-gray-300 hover:text-cantinho-terracotta transition-colors">
-                  Eventos
-                </Link>
+                <Link to="/contacto" className="hover:text-cantinho-sand transition duration-200">Contacto</Link>
               </li>
               <li>
-                <Link to="/contacto" className="text-gray-300 hover:text-cantinho-terracotta transition-colors">
-                  Contacto
-                </Link>
+                <Link to="/carrinho" className="hover:text-cantinho-sand transition duration-200">Carrinho</Link>
               </li>
             </ul>
           </div>
-          
+
           {/* Contact Info */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Contactos</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5 text-cantinho-terracotta" />
-                <span className="text-gray-300">
-                  Bairro da Praia do Bispo, Rua Drº António Agostinho Neto, s/nº, Luanda
-                </span>
-              </li>
-              <li className="flex items-center">
-                <Phone className="h-5 w-5 mr-2 flex-shrink-0 text-cantinho-terracotta" />
-                <span className="text-gray-300">+244 924 678 544 / +244 934 625 513</span>
-              </li>
-              <li className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 flex-shrink-0 text-cantinho-terracotta" />
-                <span className="text-gray-300">cantinhoalgarvio@gmail.com</span>
-              </li>
-            </ul>
-          </div>
-          
-          {/* Hours */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Horário de Funcionamento</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center">
-                <Clock className="h-5 w-5 mr-2 flex-shrink-0 text-cantinho-terracotta" />
-                <div>
-                  <p className="text-gray-300">Segunda - Sexta</p>
-                  <p className="text-gray-300">8:00 - 22:00</p>
-                </div>
-              </li>
-              <li className="flex items-center">
-                <Clock className="h-5 w-5 mr-2 flex-shrink-0 text-cantinho-terracotta" />
-                <div>
-                  <p className="text-gray-300">Sábado - Domingo</p>
-                  <p className="text-gray-300">10:00 - 23:00</p>
-                </div>
-              </li>
-            </ul>
+            <h3 className="text-xl font-bold mb-4">Contacto</h3>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <MapPin size={20} className="mt-1 flex-shrink-0" />
+                <p>Luanda, Bairro Azul</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone size={20} />
+                <p>+244 949 645 654</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail size={20} />
+                <p>info@cantinhoalgarvio.ao</p>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between">
-          <p className="text-gray-400 mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} Cantinho Algarvio. Todos os direitos reservados.
-          </p>
-          <div>
-            <span className="text-gray-400">NIF: 5417453110</span>
-          </div>
+
+        <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm">
+          <p>&copy; {currentYear} Cantinho Algarvio. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

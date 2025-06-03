@@ -1,7 +1,7 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Order, OrderStatus, PaymentStatus } from "@/contexts/CartContext";
+import { Order, OrderStatus } from "@/contexts/CartContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { Check, FileText, Printer, Truck, Clock, Ban } from "lucide-react";
 type AdminOrderDetailProps = {
   order: Order;
   onStatusChange: (orderId: string, status: OrderStatus) => void;
-  onPaymentStatusChange: (orderId: string, status: PaymentStatus) => void;
+  onPaymentStatusChange: (orderId: string, status: "pending" | "completed") => void;
   onPrepareInvoice: (order: Order) => void;
 };
 
@@ -43,17 +43,8 @@ const AdminOrderDetail = ({
     onStatusChange(order.id, status);
   };
   
-  const handlePaymentStatusChange = (status: PaymentStatus) => {
+  const handlePaymentStatusChange = (status: "pending" | "completed") => {
     onPaymentStatusChange(order.id, status);
-  };
-
-  const handlePrepareInvoice = (isProforma: boolean = false) => {
-    // Create a copy of the order with the isProforma flag
-    const orderCopy = {
-      ...order,
-      isProforma
-    };
-    onPrepareInvoice(orderCopy);
   };
 
   return (
@@ -68,7 +59,7 @@ const AdminOrderDetail = ({
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
-            onClick={() => handlePrepareInvoice(false)}
+            onClick={() => onPrepareInvoice(order)}
           >
             <Printer className="h-4 w-4" />
             Gerar Fatura
@@ -77,7 +68,7 @@ const AdminOrderDetail = ({
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
-            onClick={() => handlePrepareInvoice(true)}
+            onClick={() => onPrepareInvoice({...order, isProforma: true})}
           >
             <FileText className="h-4 w-4" />
             Proforma
@@ -136,7 +127,7 @@ const AdminOrderDetail = ({
               <div key={item.id} className="flex items-center justify-between border-b pb-2">
                 <div className="flex items-center gap-2">
                   <div className="h-10 w-10 rounded overflow-hidden">
-                    <img src={item.image || item.image_url || "/placeholder.svg"} alt={item.name} className="h-full w-full object-cover" />
+                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                   </div>
                   <div>
                     <p className="font-medium">{item.name}</p>

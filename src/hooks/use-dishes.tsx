@@ -3,73 +3,33 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dish } from "@/types/dish";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
   const { toast } = useToast();
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchDishes();
-    if (user) {
-      fetchUserFavorites();
-    } else {
-      // Load favorites from local storage for non-authenticated users
-      const savedFavorites = localStorage.getItem('dish_favorites');
-      if (savedFavorites) {
-        try {
-          setFavorites(JSON.parse(savedFavorites));
-        } catch {
-          setFavorites([]);
-        }
-      }
+    // Load favorites from local storage if available
+    const savedFavorites = localStorage.getItem('dish_favorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
     }
-  }, [user]);
-
-  const fetchUserFavorites = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('dish_id')
-        .eq('user_id', user.id);
-      
-      if (error) {
-        console.error("Error fetching user favorites:", error);
-        return;
-      }
-      
-      if (data) {
-        const favoriteIds = data.map(fav => fav.dish_id);
-        setFavorites(favoriteIds);
-      }
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
-    }
-  };
+  }, []);
 
   const fetchDishes = async () => {
     try {
       setLoading(true);
       console.log("Fetching dishes from Supabase...");
       
-      // Fetch products from Supabase with category information
+      // Fetch products from Supabase with specified relationship to fix the SQL error
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select(`
-          *,
-          categories (
-            id,
-            name
-          )
-        `);
+        .select('*, categories!fk_product_category(id, name)');
       
       if (productsError) {
-        console.error("Error fetching products:", productsError);
         throw productsError;
       }
       
@@ -85,6 +45,7 @@ export const useDishes = () => {
       
       if (promotionsError) {
         console.error("Error fetching promotions:", promotionsError);
+        // Continue without promotions
       }
       
       console.log("Fetched promotions:", promotionsData);
@@ -109,11 +70,13 @@ export const useDishes = () => {
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
           
           if (product.categories && typeof product.categories === 'object') {
-            const categoryName = product.categories.name?.toLowerCase() || '';
+            // Safely access the name property with type checking
+            const categoryObj = product.categories as { name?: string } | null;
+            const categoryName = categoryObj?.name?.toLowerCase() || '';
             
-            if (categoryName.includes('entrada') || categoryName.includes('appetizer')) {
+            if (categoryName.includes('entrada')) {
               category = 'appetizer';
-            } else if (categoryName.includes('sobremesa') || categoryName.includes('doce') || categoryName.includes('dessert')) {
+            } else if (categoryName.includes('sobremesa') || categoryName.includes('doce')) {
               category = 'dessert';
             } else {
               category = 'main';
@@ -137,7 +100,7 @@ export const useDishes = () => {
             price: price,
             image_url: product.image_url || '/placeholder.svg',
             category,
-            popular: Math.random() > 0.7, // Random for demo
+            popular: Math.random() > 0.7, // Random for demo, ideally this would be a field in the database
             tags: [],
             promotion
           };
@@ -150,6 +113,7 @@ export const useDishes = () => {
         // Fallback to static data if no products found
         setDishes(getFallbackDishes());
         
+        // Show a toast to inform the user
         toast({
           title: "Dados de demonstração",
           description: "Usando dados de exemplo. Adicione produtos no painel de administração.",
@@ -160,6 +124,7 @@ export const useDishes = () => {
       // Fallback to static data in case of error
       setDishes(getFallbackDishes());
       
+      // Show a toast to inform the user
       toast({
         title: "Erro ao carregar produtos",
         description: "Usando dados de exemplo. Verifique a conexão com o banco de dados.",
@@ -203,6 +168,24 @@ export const useDishes = () => {
         category: "main",
         tags: ["Churrasco"],
         popular: true
+      },
+      {
+        id: "4",
+        name: "Coxinha",
+        description: "Tradicional salgado brasileiro recheado com frango desfiado",
+        price: 3.5,
+        image_url: "/placeholder.svg",
+        category: "appetizer",
+        tags: ["Salgados"]
+      },
+      {
+        id: "5",
+        name: "Mousse de Maracujá",
+        description: "Sobremesa cremosa de maracujá com calda fresca",
+        price: 6.9,
+        image_url: "/placeholder.svg",
+        category: "dessert",
+        tags: ["Doces"]
       }
     ];
   };
@@ -211,64 +194,17 @@ export const useDishes = () => {
   
   const isFavorite = (dishId: string) => favorites.includes(dishId);
   
-  const toggleFavorite = async (dishId: string) => {
-    if (user) {
-      // For authenticated users, save to database
-      try {
-        if (favorites.includes(dishId)) {
-          // Remove from favorites
-          const { error } = await supabase
-            .from('favorites')
-            .delete()
-            .eq('user_id', user.id)
-            .eq('dish_id', dishId);
-          
-          if (error) throw error;
-          
-          setFavorites(prev => prev.filter(id => id !== dishId));
-          
-          toast({
-            title: "Removido dos favoritos",
-            description: "Item removido dos seus favoritos.",
-            variant: "default"
-          });
-        } else {
-          // Add to favorites
-          const { error } = await supabase
-            .from('favorites')
-            .insert([{ user_id: user.id, dish_id: dishId }]);
-          
-          if (error) throw error;
-          
-          setFavorites(prev => [...prev, dishId]);
-          
-          toast({
-            title: "Adicionado aos favoritos",
-            description: "Item adicionado aos seus favoritos.",
-            variant: "default"
-          });
-        }
-      } catch (error) {
-        console.error("Error toggling favorite:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível atualizar favoritos.",
-          variant: "destructive"
-        });
-      }
+  const toggleFavorite = (dishId: string) => {
+    let newFavorites: string[];
+    if (favorites.includes(dishId)) {
+      newFavorites = favorites.filter(id => id !== dishId);
     } else {
-      // For non-authenticated users, save to localStorage
-      let newFavorites: string[];
-      if (favorites.includes(dishId)) {
-        newFavorites = favorites.filter(id => id !== dishId);
-      } else {
-        newFavorites = [...favorites, dishId];
-      }
-      setFavorites(newFavorites);
-      
-      // Save to localStorage for persistence
-      localStorage.setItem('dish_favorites', JSON.stringify(newFavorites));
+      newFavorites = [...favorites, dishId];
     }
+    setFavorites(newFavorites);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('dish_favorites', JSON.stringify(newFavorites));
   };
 
   return { 

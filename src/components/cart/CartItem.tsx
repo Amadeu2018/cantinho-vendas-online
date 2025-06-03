@@ -6,11 +6,11 @@ import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 
 type CartItemProps = {
-  id: string;
+  id: number;
   name: string;
   price: number;
   quantity: number;
-  image?: string;
+  image: string;
 };
 
 const CartItem = ({ id, name, price, quantity, image }: CartItemProps) => {
@@ -38,7 +38,7 @@ const CartItem = ({ id, name, price, quantity, image }: CartItemProps) => {
     <div className={`flex flex-col sm:flex-row border-b py-4 last:border-b-0 last:pb-0 transition-opacity duration-200 ${isUpdating ? 'opacity-60' : 'opacity-100'}`}>
       <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden mb-4 sm:mb-0">
         <img
-          src={image || "/placeholder.svg"}
+          src={image}
           alt={name}
           className="w-full h-full object-cover"
         />

@@ -1,14 +1,9 @@
-import * as React from "react";
+import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast";
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast";
-
-const TOAST_LIMIT = 5;
+const TOAST_LIMIT = 10;
 const TOAST_REMOVE_DELAY = 1000000;
 
-type ToasterToast = ToastProps & {
+type ToasterToast = Toast & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -25,7 +20,7 @@ const actionTypes = {
 let count = 0;
 
 function genId() {
-  count = (count + 1) % Number.MAX_VALUE;
+  count = (count + 1) % Number.MAX_SAFE_INTEGER;
   return count.toString();
 }
 
@@ -169,9 +164,9 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
-  const [state, setState] = React.useState<State>(memoryState);
+  const [state, setState] = useState<State>(memoryState);
 
-  React.useEffect(() => {
+  useEffect(() => {
     listeners.push(setState);
     return () => {
       const index = listeners.indexOf(setState);
@@ -189,3 +184,5 @@ function useToast() {
 }
 
 export { useToast, toast };
+
+import { useState, useEffect } from "react";

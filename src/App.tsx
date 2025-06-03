@@ -17,7 +17,6 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import EventAdmin from "./pages/EventAdmin";
-import Sobre from "./pages/Sobre";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +39,6 @@ const App = () => (
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/register" element={<Register />} />
               <Route path="/perfil" element={<Profile />} />
-              <Route path="/sobre" element={<Sobre />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -1,5 +1,5 @@
 
-import { Order, OrderStatus, PaymentStatus } from "@/contexts/CartContext";
+import { Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -20,7 +20,7 @@ const formatPrice = (price: number): string => {
 };
 
 // Helper for getting status badge color
-const getStatusBadgeColor = (status: OrderStatus) => {
+const getStatusBadgeColor = (status: Order["status"]) => {
   switch (status) {
     case "pending":
       return "bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200";
@@ -40,15 +40,15 @@ const getStatusBadgeColor = (status: OrderStatus) => {
 };
 
 // Helper for getting payment status badge color
-const getPaymentBadgeColor = (status: PaymentStatus) => {
+const getPaymentBadgeColor = (status: "pending" | "completed") => {
   return status === "completed" 
     ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-200" 
     : "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
 };
 
 // Helper for formatting status names
-const formatStatus = (status: OrderStatus) => {
-  const statusMap: Record<OrderStatus, string> = {
+const formatStatus = (status: Order["status"]) => {
+  const statusMap: Record<Order["status"], string> = {
     pending: "Pendente",
     confirmed: "Confirmado",
     preparing: "Em Preparo",
@@ -61,7 +61,7 @@ const formatStatus = (status: OrderStatus) => {
 };
 
 // Helper for formatting payment status
-const formatPaymentStatus = (status: PaymentStatus) => {
+const formatPaymentStatus = (status: "pending" | "completed") => {
   return status === "completed" ? "Pago" : "Pendente";
 };
 

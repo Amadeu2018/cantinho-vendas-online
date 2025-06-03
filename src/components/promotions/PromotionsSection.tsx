@@ -22,7 +22,7 @@ const PromotionsSection = () => {
     promotion.dishes.forEach(dish => {
       const discountedPrice = Math.round(dish.price * (100 - promotion.discountPercentage) / 100);
       addItem({
-        id: dish.id,
+        id: parseInt(dish.id), // Convert UUID to number for cart compatibility
         name: dish.name,
         price: discountedPrice,
         image: dish.image_url

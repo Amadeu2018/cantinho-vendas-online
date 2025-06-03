@@ -1,198 +1,129 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User, AuthError } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
-// Types for the auth context
-interface UserWithRole extends User {
-  role?: string;
-}
-
-interface AuthContextType {
-  user: UserWithRole | null;
+type AuthContextType = {
   session: Session | null;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<void>;
+  user: User | null;
   loading: boolean;
-  checkAdminStatus: () => Promise<boolean>;
-}
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+};
 
-// Create the context
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider component
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserWithRole | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Get current session first
-    const initializeAuth = async () => {
-      try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-        
-        console.log('Initial session:', currentSession?.user?.id);
-        setSession(currentSession);
-        
-        if (currentSession?.user) {
-          await setUserWithRole(currentSession.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Verificar sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-    // Set up auth state listener
+    // Escutar mudanças na autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.user?.id);
-        setSession(newSession);
-        
-        if (newSession?.user) {
-          await setUserWithRole(newSession.user);
-        } else {
-          setUser(null);
-        }
-        
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
         setLoading(false);
       }
     );
 
-    initializeAuth();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
-
-  const setUserWithRole = async (authUser: User) => {
-    try {
-      // Get user role from profiles table
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', authUser.id)
-        .maybeSingle();
-      
-      if (!error && data) {
-        const userWithRole = { 
-          ...authUser,
-          role: data.role
-        };
-        setUser(userWithRole);
-        console.log('User with role set:', userWithRole);
-      } else {
-        console.log('No profile found, setting user without role');
-        setUser(authUser);
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setUser(authUser);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
-      });
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       
-      console.log('Sign in result:', { data: data?.user?.id, error });
-      return { error };
+      if (error) {
+        toast({
+          title: "Erro ao fazer login",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
+      });
     } catch (error) {
-      console.error('Sign in error:', error);
-      return { error: error as AuthError };
+      console.error('Erro ao fazer login:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
-        }
-      });
+      setLoading(true);
+      const { error } = await supabase.auth.signUp({ email, password });
       
-      console.log('Sign up result:', { data: data?.user?.id, error });
-      return { error };
+      if (error) {
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Verifique seu email para confirmar sua conta.",
+      });
     } catch (error) {
-      console.error('Sign up error:', error);
-      return { error: error as AuthError };
+      console.error('Erro ao criar conta:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error);
-      } else {
-        setUser(null);
-        setSession(null);
-        console.log('Signed out successfully');
-      }
+      setLoading(true);
+      await supabase.auth.signOut();
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado.",
+      });
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('Erro ao fazer logout:', error);
+      toast({
+        title: "Erro ao fazer logout",
+        description: "Ocorreu um erro ao tentar desconectar.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const checkAdminStatus = async () => {
-    if (!user) return false;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Error checking admin status:", error);
-        return false;
-      }
-      
-      const isAdmin = data && data.role === 'admin';
-      console.log('Admin check result:', isAdmin);
-      return isAdmin;
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      return false;
-    }
-  };
-
-  const value = {
-    user,
-    session,
-    signIn,
-    signUp,
-    signOut,
-    loading,
-    checkAdminStatus
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Hook to use the auth context
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };

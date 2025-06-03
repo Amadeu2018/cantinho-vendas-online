@@ -1,192 +1,230 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCart, Order } from "@/contexts/CartContext";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CircleCheck, Clock, Truck, ChefHat, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
 
-interface OrderStatusProps {
-  orderId: string;
-  onBackToShopping: () => void;
-}
+type OrderStatusProps = {
+  orderId: string | null;
+  onBackToShopping: () => void;  // Sem parâmetros
+};
 
 const OrderStatus = ({ orderId, onBackToShopping }: OrderStatusProps) => {
   const { getOrderById } = useCart();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [order, setOrder] = useState<Order | undefined>(orderId ? getOrderById(orderId) : undefined);
+  const { toast } = useToast();
+  
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        setLoading(true);
-        const orderData = await getOrderById(orderId);
-        if (orderData) {
-          setOrder(orderData);
-        }
-      } catch (error) {
-        console.error("Error fetching order:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [orderId, getOrderById]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <Loader2 className="h-16 w-16 text-cantinho-navy animate-spin mb-4" />
-        <p className="text-lg font-medium text-cantinho-navy">Carregando informações do pedido...</p>
-      </div>
-    );
-  }
-
+    if (!orderId) return;
+    
+    const intervalId = setInterval(() => {
+      const updatedOrder = getOrderById(orderId);
+      setOrder(updatedOrder);
+    }, 10000);
+    
+    return () => clearInterval(intervalId);
+  }, [getOrderById, orderId]);
+  
   if (!order) {
     return (
-      <div className="text-center py-16">
-        <p className="text-xl font-medium mb-4">Pedido não encontrado</p>
-        <Button onClick={onBackToShopping} className="bg-cantinho-navy hover:bg-cantinho-navy/90">
-          Voltar ao Menu
+      <div className="text-center py-16 bg-muted/30 rounded-lg">
+        <AlertCircle className="mx-auto h-16 w-16 text-red-500 mb-4" />
+        <h2 className="text-2xl font-medium mb-2">Pedido não encontrado</h2>
+        <p className="text-muted-foreground mb-6">
+          Não conseguimos encontrar o pedido com o ID especificado.
+        </p>
+        <Button 
+          onClick={onBackToShopping}  // Sem argumentos
+          className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+        >
+          Voltar para as Compras
         </Button>
       </div>
     );
   }
-
-  const getStatusInfo = () => {
+  
+  const getOrderIcon = () => {
     switch (order.status) {
       case "pending":
-        return {
-          title: "Pedido Recebido",
-          description: "Estamos processando seu pedido. Aguarde a confirmação.",
-          icon: <Clock className="h-16 w-16 text-yellow-500" />,
-          color: "text-yellow-600",
-        };
+        return <Clock className="h-16 w-16 text-yellow-500" />;
       case "confirmed":
-        return {
-          title: "Pedido Confirmado",
-          description: "Seu pedido foi confirmado e está sendo preparado.",
-          icon: <CheckCircle className="h-16 w-16 text-blue-500" />,
-          color: "text-blue-600",
-        };
+        return <CircleCheck className="h-16 w-16 text-blue-500" />;
       case "preparing":
-        return {
-          title: "Em Preparo",
-          description: "Nossos cozinheiros estão preparando seu pedido com carinho.",
-          icon: <Loader2 className="h-16 w-16 text-indigo-500 animate-spin" />,
-          color: "text-indigo-600",
-        };
+        return <ChefHat className="h-16 w-16 text-indigo-500" />;
       case "delivering":
-        return {
-          title: "Em Entrega",
-          description: `Seu pedido está a caminho! Tempo estimado de entrega: ${order.location.estimatedTime}.`,
-          icon: <Loader2 className="h-16 w-16 text-purple-500 animate-spin" />,
-          color: "text-purple-600",
-        };
+        return <Truck className="h-16 w-16 text-purple-500" />;
       case "completed":
-        return {
-          title: "Pedido Entregue",
-          description: "Seu pedido foi entregue com sucesso. Bom apetite!",
-          icon: <CheckCircle className="h-16 w-16 text-green-500" />,
-          color: "text-green-600",
-        };
+        return <CircleCheck className="h-16 w-16 text-green-500" />;
       case "cancelled":
-        return {
-          title: "Pedido Cancelado",
-          description: "Seu pedido foi cancelado.",
-          icon: <Clock className="h-16 w-16 text-red-500" />,
-          color: "text-red-600",
-        };
+        return <AlertCircle className="h-16 w-16 text-red-500" />;
       default:
-        return {
-          title: "Status Desconhecido",
-          description: "Não foi possível determinar o status do seu pedido.",
-          icon: <Clock className="h-16 w-16 text-gray-500" />,
-          color: "text-gray-600",
-        };
+        return <Clock className="h-16 w-16 text-yellow-500" />;
+    }
+  };
+  
+  const getStatusText = () => {
+    switch (order.status) {
+      case "pending":
+        return "Aguardando Confirmação";
+      case "confirmed":
+        return "Pedido Confirmado";
+      case "preparing":
+        return "Preparando Seu Pedido";
+      case "delivering":
+        return "Saiu para Entrega";
+      case "completed":
+        return "Pedido Entregue";
+      case "cancelled":
+        return "Pedido Cancelado";
+      default:
+        return "Processando Pedido";
+    }
+  };
+  
+  const getStatusDescription = () => {
+    switch (order.status) {
+      case "pending":
+        return "Seu pedido foi recebido e está aguardando confirmação do restaurante.";
+      case "confirmed":
+        return "Seu pedido foi confirmado e logo entrará em preparo.";
+      case "preparing":
+        return "Estamos preparando seu pedido com todo cuidado.";
+      case "delivering":
+        return `Seu pedido está a caminho! Tempo estimado de entrega: ${order.location.estimatedTime}`;
+      case "completed":
+        return "Seu pedido foi entregue. Esperamos que tenha gostado!";
+      case "cancelled":
+        return "Lamentamos, mas seu pedido foi cancelado.";
+      default:
+        return "Estamos processando seu pedido.";
+    }
+  };
+  
+  const handlePaymentInstructions = () => {
+    if (order.paymentMethod.id === "transfer") {
+      toast({
+        title: "Instruções de Pagamento",
+        description: "Transfira o valor para: Banco XYZ, Conta: 1234-5, Nome: Cantinho, IBAN: AO..."
+      });
+    } else if (order.paymentMethod.id === "multicaixa") {
+      toast({
+        title: "Instruções de Pagamento",
+        description: "Use o Multicaixa Express para pagar no número 9XX XXX XXX com referência: " + order.id
+      });
     }
   };
 
-  const statusInfo = getStatusInfo();
+  const stepStatuses = {
+    pending: order.status !== "cancelled",
+    confirmed: ["confirmed", "preparing", "delivering", "completed"].includes(order.status),
+    preparing: ["preparing", "delivering", "completed"].includes(order.status),
+    delivering: ["delivering", "completed"].includes(order.status),
+    completed: order.status === "completed"
+  };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b">
-          <div className="flex justify-between items-center">
-            <CardTitle>Pedido #{orderId.substring(0, 8)}</CardTitle>
-            <span className="text-sm text-gray-500">
-              {new Date(order.createdAt).toLocaleString('pt-BR')}
-            </span>
+    <div className="max-w-3xl mx-auto text-center">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="p-6">
+          <div className="mx-auto mb-6">
+            {getOrderIcon()}
           </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="mb-4">{statusInfo.icon}</div>
-            <h2 className={`text-2xl font-bold ${statusInfo.color} mb-2`}>{statusInfo.title}</h2>
-            <p className="text-gray-600">{statusInfo.description}</p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-3 border-b pb-2">Resumo do Pedido</h3>
-              <div className="space-y-2">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex justify-between">
-                    <span>
-                      {item.quantity}x {item.name}
-                    </span>
-                    <span>{formatCurrency(item.price * item.quantity)}</span>
+          
+          <h2 className="text-2xl font-bold mb-1">{getStatusText()}</h2>
+          <p className="text-muted-foreground mb-4">
+            {getStatusDescription()}
+          </p>
+          
+          {order.status === "cancelled" ? (
+            <div className="bg-red-50 border border-red-100 p-4 rounded-md mb-6">
+              <p className="text-red-800">
+                Se você tiver dúvidas sobre o cancelamento, entre em contato conosco.
+              </p>
+            </div>
+          ) : (
+            <div className="mb-8">
+              <div className="relative">
+                <div className="h-2 bg-gray-200 rounded-full mb-6">
+                  <div 
+                    className="h-2 bg-cantinho-terracotta rounded-full transition-all" 
+                    style={{ 
+                      width: order.status === "pending" ? "20%" :
+                             order.status === "confirmed" ? "40%" :
+                             order.status === "preparing" ? "60%" :
+                             order.status === "delivering" ? "80%" :
+                             order.status === "completed" ? "100%" : "0%" 
+                    }}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-5 gap-2 text-xs text-center">
+                  <div className={stepStatuses.pending ? "text-cantinho-terracotta" : "text-gray-500"}>
+                    Recebido
                   </div>
-                ))}
-              </div>
-              <Separator className="my-4" />
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>{formatCurrency(order.subtotal)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Taxa de Entrega</span>
-                  <span>{formatCurrency(order.deliveryFee)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>{formatCurrency(order.total)}</span>
+                  <div className={stepStatuses.confirmed ? "text-cantinho-terracotta" : "text-gray-500"}>
+                    Confirmado
+                  </div>
+                  <div className={stepStatuses.preparing ? "text-cantinho-terracotta" : "text-gray-500"}>
+                    Em Preparo
+                  </div>
+                  <div className={stepStatuses.delivering ? "text-cantinho-terracotta" : "text-gray-500"}>
+                    Em Entrega
+                  </div>
+                  <div className={stepStatuses.completed ? "text-cantinho-terracotta" : "text-gray-500"}>
+                    Entregue
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div>
-              <h3 className="font-semibold text-lg mb-3 border-b pb-2">Detalhes da Entrega</h3>
-              <div className="space-y-1">
-                <p>
-                  <span className="font-medium">Nome:</span> {order.customerInfo.name}
-                </p>
-                <p>
-                  <span className="font-medium">Endereço:</span> {order.customerInfo.address}
-                </p>
-                <p>
-                  <span className="font-medium">Telefone:</span> {order.customerInfo.phone}
-                </p>
-                <p>
-                  <span className="font-medium">Localização:</span> {order.location.name}
-                </p>
-                <p>
-                  <span className="font-medium">Método de Pagamento:</span> {order.paymentMethod.name}
-                </p>
-              </div>
+          )}
+          
+          <div className="bg-muted/10 p-4 rounded-md mb-6">
+            <div className="flex justify-between mb-2">
+              <span className="font-medium">Número do Pedido:</span>
+              <span className="font-mono">{order.id}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Total:</span>
+              <span className="font-bold">{formatCurrency(order.total)}</span>
             </div>
           </div>
-        </CardContent>
-        <CardFooter className="bg-gray-50 border-t p-6">
-          <Button onClick={onBackToShopping} className="bg-cantinho-navy hover:bg-cantinho-navy/90 w-full">
-            Voltar ao Menu
-          </Button>
-        </CardFooter>
-      </Card>
+          
+          {order.status !== "cancelled" && order.paymentStatus === "pending" && (
+            <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4 mb-6">
+              <h3 className="font-medium mb-2">Pagamento Pendente</h3>
+              <p className="text-sm text-yellow-800 mb-3">
+                Para concluir seu pedido, finalize o pagamento através do método selecionado.
+              </p>
+              <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                {order.paymentMethod.name}
+              </Badge>
+              {(order.paymentMethod.id === "transfer" || order.paymentMethod.id === "multicaixa") && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-3 w-full"
+                  onClick={handlePaymentInstructions}
+                >
+                  Ver Instruções de Pagamento
+                </Button>
+              )}
+            </div>
+          )}
+          
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button 
+              onClick={onBackToShopping}  // Sem argumentos
+              className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+            >
+              Voltar às Compras
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

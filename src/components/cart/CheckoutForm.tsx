@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useCart, CustomerInfo } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -41,11 +40,11 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
 
   const getPaymentIcon = (iconName: string) => {
     switch (iconName) {
-      case "cash":
+      case "banknote":
         return <Banknote className="h-5 w-5" />;
       case "credit-card":
         return <CreditCard className="h-5 w-5" />;
-      case "bank":
+      case "landmark":
         return <Landmark className="h-5 w-5" />;
       default:
         return <CreditCard className="h-5 w-5" />;
@@ -80,7 +79,6 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       toast({
         title: "Pedido enviado com sucesso!",
         description: `Seu pedido #${orderId.substring(0, 8)} foi registrado. Aguarde a confirmação.`,
-        variant: "default"
       });
       onSuccess(orderId);
     } catch (error) {
@@ -143,47 +141,45 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
           
           <div>
             <label htmlFor="notes" className="block mb-1 text-sm font-medium">
-              Observações (opcional)
+              Notas Adicionais (opcional)
             </label>
             <Textarea
               id="notes"
               name="notes"
-              value={customerInfo.notes || ""}
+              value={customerInfo.notes}
               onChange={handleChange}
-              placeholder="Instruções especiais para entrega ou preparo"
-              rows={3}
+              placeholder="Instruções especiais para entrega ou preparo..."
+              rows={2}
             />
           </div>
         </div>
       </div>
       
       <div>
-        <h3 className="text-lg font-medium mb-3">Localização de Entrega</h3>
+        <h3 className="text-lg font-medium mb-3">Localização para Entrega</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {deliveryLocations.map((location) => (
             <div
               key={location.id}
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
+              className={`border rounded-md p-3 cursor-pointer transition-colors ${
                 selectedLocation?.id === location.id
-                  ? "border-cantinho-navy bg-cantinho-navy/5"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-cantinho-terracotta bg-cantinho-terracotta/10"
+                  : "border-gray-200 hover:border-cantinho-terracotta/50"
               }`}
               onClick={() => setSelectedLocation(location)}
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">{location.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {location.estimatedTime ? `${location.estimatedTime} de entrega` : "Tempo estimado indisponível"}
-                  </p>
-                </div>
-                <p className="font-medium">
-                  +{new Intl.NumberFormat("pt-AO", {
+              <div className="flex justify-between">
+                <div className="font-medium">{location.name}</div>
+                <div className="text-cantinho-navy font-bold">
+                  {new Intl.NumberFormat("pt-AO", {
                     style: "currency",
                     currency: "AOA",
                     minimumFractionDigits: 0,
                   }).format(location.fee)}
-                </p>
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">
+                Tempo estimado: {location.estimatedTime}
               </div>
             </div>
           ))}
@@ -196,31 +192,41 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
           {paymentMethods.map((method) => (
             <div
               key={method.id}
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
+              className={`border rounded-md p-3 cursor-pointer transition-colors ${
                 selectedPaymentMethod?.id === method.id
-                  ? "border-cantinho-navy bg-cantinho-navy/5"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-cantinho-terracotta bg-cantinho-terracotta/10"
+                  : "border-gray-200 hover:border-cantinho-terracotta/50"
               }`}
               onClick={() => setSelectedPaymentMethod(method)}
             >
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
-                  {getPaymentIcon(method.icon)}
-                </div>
-                <p className="font-medium">{method.name}</p>
+                {getPaymentIcon(method.icon)}
+                <span className="ml-2 font-medium">{method.name}</span>
               </div>
             </div>
           ))}
         </div>
+        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm">
+          <p className="text-yellow-800">
+            Para sua comodidade, o pagamento será processado conforme o método selecionado após a confirmação do pedido.
+          </p>
+        </div>
       </div>
       
-      <Button 
+      <Button
         type="submit"
+        className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+        size="lg"
         disabled={loading}
-        className="w-full bg-cantinho-navy hover:bg-cantinho-navy/90"
       >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {loading ? "Processando..." : "Finalizar Pedido"}
+        {loading ? (
+          <span className="flex items-center">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Processando...
+          </span>
+        ) : (
+          "Enviar Pedido"
+        )}
       </Button>
     </form>
   );

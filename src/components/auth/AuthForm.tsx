@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Mail, Loader2 } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type AuthFormProps = {
@@ -22,97 +22,22 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       setIsSubmitting(true);
       
       if (mode === "login") {
-        console.log("Attempting login with:", email);
-        const { error } = await signIn(email, password);
-        
-        if (error) {
-          console.error("Login error:", error);
-          let errorMessage = "Não foi possível fazer login. Tente novamente.";
-          
-          if (error.message === "Invalid login credentials") {
-            errorMessage = "Email ou senha incorretos.";
-          } else if (error.message?.includes("Email not confirmed")) {
-            errorMessage = "Por favor, confirme seu email antes de fazer login.";
-          }
-          
-          toast({
-            title: "Erro no login",
-            description: errorMessage,
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        console.log("Login successful");
-        toast({
-          title: "Login realizado",
-          description: "Bem-vindo de volta!",
-          variant: "default"
-        });
-        
+        await signIn(email, password);
         navigate("/");
       } else {
-        console.log("Attempting signup with:", email);
-        const { error } = await signUp(email, password);
-        
-        if (error) {
-          console.error("Signup error:", error);
-          
-          let errorMessage = "Não foi possível criar a conta. Tente novamente.";
-          
-          if (error.message?.includes("already registered")) {
-            errorMessage = "Este email já está cadastrado. Tente fazer login.";
-          } else if (error.message?.includes("Password")) {
-            errorMessage = "A senha deve ter pelo menos 6 caracteres.";
-          }
-          
-          toast({
-            title: "Erro no cadastro",
-            description: errorMessage,
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        console.log("Signup successful");
+        await signUp(email, password);
+        // Não navegar automaticamente após o registro, pois pode precisar verificar o email
         toast({
-          title: "Conta criada com sucesso!",
-          description: "Você já pode fazer login com suas credenciais.",
-          variant: "default"
+          title: "Verifique seu email",
+          description: "Enviamos um link de confirmação para o seu email.",
         });
-        
-        // Redirect to login page after successful registration
-        navigate("/auth/login");
       }
-    } catch (error: any) {
-      console.error("Authentication error:", error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
-        variant: "destructive"
-      });
+    } catch (error) {
+      console.error("Erro na autenticação:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +74,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                   className="pl-10"
                   placeholder="seu@email.com"
                   required
-                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -166,7 +90,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                 placeholder="••••••••"
                 required
                 minLength={6}
-                disabled={isSubmitting}
               />
             </div>
             
@@ -175,14 +98,11 @@ const AuthForm = ({ mode }: AuthFormProps) => {
               className="w-full bg-cantinho-navy hover:bg-cantinho-navy/90"
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                mode === "login" ? "Entrar" : "Criar conta"
-              )}
+              {isSubmitting 
+                ? "Processando..." 
+                : mode === "login" 
+                  ? "Entrar" 
+                  : "Criar conta"}
             </Button>
           </form>
           

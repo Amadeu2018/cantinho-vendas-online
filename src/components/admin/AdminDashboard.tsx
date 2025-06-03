@@ -6,6 +6,7 @@ import AdminProducts from "@/components/admin/AdminProducts";
 import AdminFinance from "@/components/admin/AdminFinance";
 import AdminInventory from "@/components/admin/AdminInventory";
 import AdminReports from "@/components/admin/AdminReports";
+import AdminHeaderActions from "@/components/admin/AdminHeaderActions";
 import { Order as CartOrder } from "@/contexts/CartContext";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, Wallet, CalendarDays, Users, ArrowUp, ArrowDown, Plus, CalendarPlus } from "lucide-react";
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
 
 interface AdminDashboardProps {
   orders: CartOrder[];
@@ -31,7 +31,6 @@ const AdminDashboard = ({
   onLogout 
 }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("orders");
-  const navigate = useNavigate();
 
   // Calculate summary statistics
   const totalRevenue = orders.reduce((sum, order) => 
@@ -56,8 +55,8 @@ const AdminDashboard = ({
           <Button variant="outline" className="flex items-center">
             <Plus className="mr-2 h-4 w-4" /> Novo Pedido
           </Button>
-          <Button className="bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] hover:opacity-90 flex items-center">
-            <CalendarPlus className="mr-2 h-4 w-4" onClick={() => navigate('/admin/eventos')} /> Agendar Evento
+          <Button className="bg-gradient-to-br from-cantinho-navy to-cantinho-navy/90 flex items-center">
+            <CalendarPlus className="mr-2 h-4 w-4" /> Agendar Evento
           </Button>
         </div>
       </div>
@@ -147,7 +146,7 @@ const AdminDashboard = ({
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-800">Pedidos Recentes</h2>
-          <Button variant="link" className="text-sm text-[#4f46e5]">
+          <Button variant="link" className="text-sm text-cantinho-navy">
             Ver todos
           </Button>
         </div>
@@ -171,7 +170,7 @@ const AdminDashboard = ({
                       minimumFractionDigits: 0,
                     }).format(order.total)}
                   </p>
-                  <p className="text-sm text-gray-500">{order.type || "Pedido"}</p>
+                  <p className="text-sm text-gray-500">{order.deliveryMethod}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-2">
@@ -201,31 +200,31 @@ const AdminDashboard = ({
             <TabsList className="bg-transparent h-14 w-full justify-start rounded-none pl-4 pt-2">
               <TabsTrigger 
                 value="orders" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#4f46e5] data-[state=active]:text-[#4f46e5] rounded-none bg-transparent h-12"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-cantinho-navy data-[state=active]:text-cantinho-navy rounded-none bg-transparent h-12"
               >
                 Pedidos
               </TabsTrigger>
               <TabsTrigger 
                 value="products"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#4f46e5] data-[state=active]:text-[#4f46e5] rounded-none bg-transparent h-12"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-cantinho-navy data-[state=active]:text-cantinho-navy rounded-none bg-transparent h-12"
               >
                 Produtos
               </TabsTrigger>
               <TabsTrigger 
                 value="finance"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#4f46e5] data-[state=active]:text-[#4f46e5] rounded-none bg-transparent h-12"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-cantinho-navy data-[state=active]:text-cantinho-navy rounded-none bg-transparent h-12"
               >
                 Finanças
               </TabsTrigger>
               <TabsTrigger 
                 value="inventory"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#4f46e5] data-[state=active]:text-[#4f46e5] rounded-none bg-transparent h-12"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-cantinho-navy data-[state=active]:text-cantinho-navy rounded-none bg-transparent h-12"
               >
                 Estoque
               </TabsTrigger>
               <TabsTrigger 
                 value="reports"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#4f46e5] data-[state=active]:text-[#4f46e5] rounded-none bg-transparent h-12"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-cantinho-navy data-[state=active]:text-cantinho-navy rounded-none bg-transparent h-12"
               >
                 Relatórios
               </TabsTrigger>

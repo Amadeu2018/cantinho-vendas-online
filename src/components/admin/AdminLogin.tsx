@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 type AdminLoginProps = {
-  onLogin: () => Promise<boolean>;
+  onLogin: (isAdmin: boolean) => void;
 };
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
@@ -22,12 +23,22 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(email, password);
+      await signIn(email, password);
       
-      if (error) throw error;
+      // Verificar se o usuário é admin
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
       
-      const success = await onLogin();
-      if (!success) {
+      if (error) {
+        throw error;
+      }
+      
+      if (data.role === 'admin') {
+        onLogin(true);
+      } else {
         toast({
           title: "Acesso negado",
           description: "Você não tem permissões de administrador.",

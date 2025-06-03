@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Mail } from "lucide-react";
+import { Lock, Mail, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type AuthFormProps = {
@@ -22,22 +22,87 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!email || !password) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
       
       if (mode === "login") {
-        await signIn(email, password);
+        const { error } = await signIn(email, password);
+        
+        if (error) {
+          console.error("Login error:", error);
+          toast({
+            title: "Erro no login",
+            description: error.message === "Invalid login credentials" 
+              ? "Email ou senha incorretos." 
+              : "Não foi possível fazer login. Tente novamente.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        toast({
+          title: "Login realizado",
+          description: "Bem-vindo de volta!",
+          variant: "default"
+        });
+        
         navigate("/");
       } else {
-        await signUp(email, password);
-        // Não navegar automaticamente após o registro, pois pode precisar verificar o email
+        const { error } = await signUp(email, password);
+        
+        if (error) {
+          console.error("Signup error:", error);
+          
+          if (error.message?.includes("already registered")) {
+            toast({
+              title: "Erro no cadastro",
+              description: "Este email já está cadastrado. Tente fazer login.",
+              variant: "destructive"
+            });
+          } else {
+            toast({
+              title: "Erro no cadastro",
+              description: "Não foi possível criar a conta. Tente novamente.",
+              variant: "destructive"
+            });
+          }
+          return;
+        }
+        
         toast({
-          title: "Verifique seu email",
-          description: "Enviamos um link de confirmação para o seu email.",
+          title: "Conta criada com sucesso!",
+          description: "Você já pode fazer login com suas credenciais.",
+          variant: "default"
         });
+        
+        // Redirect to login page after successful registration
+        navigate("/auth/login");
       }
-    } catch (error) {
-      console.error("Erro na autenticação:", error);
+    } catch (error: any) {
+      console.error("Authentication error:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -74,6 +139,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                   className="pl-10"
                   placeholder="seu@email.com"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -90,6 +156,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                 placeholder="••••••••"
                 required
                 minLength={6}
+                disabled={isSubmitting}
               />
             </div>
             
@@ -98,11 +165,14 @@ const AuthForm = ({ mode }: AuthFormProps) => {
               className="w-full bg-cantinho-navy hover:bg-cantinho-navy/90"
               disabled={isSubmitting}
             >
-              {isSubmitting 
-                ? "Processando..." 
-                : mode === "login" 
-                  ? "Entrar" 
-                  : "Criar conta"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                mode === "login" ? "Entrar" : "Criar conta"
+              )}
             </Button>
           </form>
           

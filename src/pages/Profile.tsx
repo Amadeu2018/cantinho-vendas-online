@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -73,9 +74,9 @@ const Profile = () => {
     if (!user) return;
     
     const { data, error } = await supabase
-      .from('addresses')
+      .from('delivery_addresses')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('profile_id', user.id)
       .order('is_default', { ascending: false });
       
     if (error) {
@@ -91,7 +92,7 @@ const Profile = () => {
   const loadFavorites = async () => {
     if (!user) return;
     
-    // Get user's favorite dish IDs
+    // Get user's favorite product IDs
     const { data: favoritesData, error: favoritesError } = await supabase
       .from('favorites')
       .select('dish_id')
@@ -103,32 +104,29 @@ const Profile = () => {
     }
     
     if (favoritesData && favoritesData.length > 0) {
-      // Get dish details for each favorite
+      // Get product details for each favorite
       const dishIds = favoritesData.map(fav => fav.dish_id);
       
-      const { data: dishesData, error: dishesError } = await supabase
-        .from('dishes')
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
         .select('*')
         .in('id', dishIds);
         
-      if (dishesError) {
-        console.error("Erro ao carregar pratos favoritos:", dishesError);
+      if (productsError) {
+        console.error("Erro ao carregar produtos favoritos:", productsError);
         return;
       }
       
-      if (dishesData) {
-        // Convert to Dish type
-        const formattedFavorites: Dish[] = dishesData.map(dish => ({
-          id: dish.id,
-          name: dish.name,
-          price: dish.price,
-          description: dish.description || '',
-          image_url: dish.image_url || '',
-          category: dish.category_id ? 'Categoria' : '', // We would need to fetch category name
-          available: dish.stock_quantity > 0,
-          featured: false,
-          rating: 0,
-          reviews_count: 0
+      if (productsData) {
+        // Convert products to Dish type
+        const formattedFavorites: Dish[] = productsData.map(product => ({
+          id: product.id,
+          name: product.name,
+          price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+          description: product.description || '',
+          image_url: product.image_url || '/placeholder.svg',
+          category: 'main' as const, // Default category
+          tags: []
         }));
         
         setFavorites(formattedFavorites);
@@ -142,7 +140,7 @@ const Profile = () => {
     const { data, error } = await supabase
       .from('orders')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('customer_id', user.id)
       .order('created_at', { ascending: false });
       
     if (error) {
@@ -158,7 +156,7 @@ const Profile = () => {
   const removeAddress = async (addressId: string) => {
     try {
       const { error } = await supabase
-        .from('addresses')
+        .from('delivery_addresses')
         .delete()
         .eq('id', addressId);
         
@@ -212,13 +210,13 @@ const Profile = () => {
     try {
       // First, set all addresses to not default
       await supabase
-        .from('addresses')
+        .from('delivery_addresses')
         .update({ is_default: false })
-        .eq('user_id', user?.id);
+        .eq('profile_id', user?.id);
       
       // Then set the selected address as default
       const { error } = await supabase
-        .from('addresses')
+        .from('delivery_addresses')
         .update({ is_default: true })
         .eq('id', addressId);
         
@@ -289,10 +287,10 @@ const Profile = () => {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] flex items-center justify-center text-white text-2xl font-semibold mr-4">
-                  {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                  {profile?.company_name ? profile.company_name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">{profile?.name || 'Usuário'}</h2>
+                  <h2 className="text-xl font-semibold">{profile?.company_name || 'Usuário'}</h2>
                   <p className="text-gray-600">{user.email}</p>
                 </div>
                 <Button variant="outline" className="ml-auto">
@@ -305,7 +303,7 @@ const Profile = () => {
                   <User className="h-5 w-5 mr-2 text-gray-500 mt-0.5" />
                   <div>
                     <h3 className="font-medium">Nome</h3>
-                    <p className="text-gray-600">{profile?.name || 'Não informado'}</p>
+                    <p className="text-gray-600">{profile?.company_name || 'Não informado'}</p>
                   </div>
                 </div>
                 
@@ -372,14 +370,9 @@ const Profile = () => {
                             <Badge className="mb-2 bg-[#4f46e5]">Endereço padrão</Badge>
                           )}
                           
-                          <h3 className="font-semibold mb-1">{address.name}</h3>
-                          <p className="text-gray-600 text-sm">{address.street}, {address.number}</p>
-                          <p className="text-gray-600 text-sm">{address.neighborhood}, {address.city} - {address.state}</p>
+                          <p className="text-gray-600 text-sm">{address.street}</p>
+                          <p className="text-gray-600 text-sm">{address.city} - {address.state}</p>
                           <p className="text-gray-600 text-sm">CEP: {address.postal_code}</p>
-                          
-                          {address.complement && (
-                            <p className="text-gray-600 text-sm">Complemento: {address.complement}</p>
-                          )}
                         </div>
                         
                         <div className="border-t p-2 flex justify-end space-x-2">
@@ -488,11 +481,7 @@ const Profile = () => {
                         
                         <div className="flex justify-between text-sm text-gray-600 mb-3">
                           <span>Data: {new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
-                          <span>Total: {new Intl.NumberFormat('pt-AO', { 
-                            style: 'currency', 
-                            currency: 'AOA',
-                            minimumFractionDigits: 0
-                          }).format(order.total)}</span>
+                          <span>Total: {formatPrice(order.total)}</span>
                         </div>
                         
                         <Button variant="outline" size="sm" className="w-full">

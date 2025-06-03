@@ -5,7 +5,6 @@ import { useCart } from '@/contexts/CartContext';
 import { Dish } from '@/types/dish';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import DishImage from './DishImage';
 import DishDetails from './DishDetails';
 import { formatPrice } from '@/utils/formatter';
@@ -26,31 +25,6 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   useEffect(() => {
     setIsLiked(isFavorite);
   }, [isFavorite]);
-
-  useEffect(() => {
-    if (!onToggleFavorite) {
-      const checkIfLiked = async () => {
-        if (!user) return;
-        
-        try {
-          const { data, error } = await supabase
-            .from('favorites')
-            .select('dish_id')
-            .eq('user_id', user.id)
-            .eq('dish_id', dish.id)
-            .single();
-          
-          if (!error && data) {
-            setIsLiked(true);
-          }
-        } catch (error) {
-          console.error('Erro ao verificar favorito:', error);
-        }
-      };
-      
-      checkIfLiked();
-    }
-  }, [dish.id, user, onToggleFavorite]);
 
   const handleAddToCart = () => {
     addItem({
@@ -74,51 +48,14 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
       return;
     }
     
+    // If no onToggleFavorite function is provided, just update local state
+    setIsLiked(!isLiked);
+    
     if (!user) {
       toast({
-        title: "Não autenticado",
-        description: "Faça login para adicionar aos favoritos.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      if (isLiked) {
-        // Remove from favorites
-        await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('dish_id', dish.id);
-          
-        setIsLiked(false);
-        toast({
-          title: "Removido dos favoritos",
-          description: `${dish.name} foi removido dos seus favoritos.`,
-          variant: "default"
-        });
-      } else {
-        // Add to favorites
-        await supabase
-          .from('favorites')
-          .insert([
-            { user_id: user.id, dish_id: dish.id }
-          ]);
-          
-        setIsLiked(true);
-        toast({
-          title: "Adicionado aos favoritos",
-          description: `${dish.name} foi adicionado aos seus favoritos.`,
-          variant: "default"
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar favorito:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar seus favoritos.",
-        variant: "destructive"
+        title: "Salvo localmente",
+        description: `${dish.name} foi ${!isLiked ? 'adicionado aos' : 'removido dos'} favoritos.`,
+        variant: "default"
       });
     }
   };

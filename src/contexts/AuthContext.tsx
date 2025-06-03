@@ -31,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.id);
         setSession(newSession);
         
         if (newSession?.user) {
@@ -40,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .from('profiles')
               .select('role')
               .eq('id', newSession.user.id)
-              .single();
+              .maybeSingle();
             
             if (!error && data) {
               const userWithRole = { 
@@ -48,7 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 role: data.role
               };
               setUser(userWithRole);
+              console.log('User with role set:', userWithRole);
             } else {
+              console.log('No profile found, setting user without role');
               setUser(newSession.user);
             }
           } catch (error) {
@@ -58,32 +61,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUser(null);
         }
+        
+        setLoading(false);
       }
     );
 
-    // Get current session
+    // Get current session on initialization
     const initializeAuth = async () => {
-      setLoading(true);
-      
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Initial session:', currentSession?.user?.id);
         setSession(currentSession);
         
         if (currentSession?.user) {
           // Get user role from profiles table
-          const { data, error } = await supabase
+          const { data, error: profileError } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', currentSession.user.id)
-            .single();
+            .maybeSingle();
           
-          if (!error && data) {
+          if (!profileError && data) {
             const userWithRole = { 
               ...currentSession.user,
               role: data.role
             };
             setUser(userWithRole);
+            console.log('Initial user with role set:', userWithRole);
           } else {
+            console.log('No initial profile found, setting user without role');
             setUser(currentSession.user);
           }
         } else {
@@ -104,19 +117,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const response = await supabase.auth.signInWithPassword({ email, password });
-    return { error: response.error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      console.log('Sign in result:', { data: data?.user?.id, error });
+      return { error };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { error: error as AuthError };
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    const response = await supabase.auth.signUp({ email, password });
-    return { error: response.error };
+    try {
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      console.log('Sign up result:', { data: data?.user?.id, error });
+      return { error };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { error: error as AuthError };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      } else {
+        setUser(null);
+        setSession(null);
+        console.log('Signed out successfully');
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   const checkAdminStatus = async () => {
@@ -127,11 +172,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error checking admin status:", error);
+        return false;
+      }
       
-      return data && data.role === 'admin';
+      const isAdmin = data && data.role === 'admin';
+      console.log('Admin check result:', isAdmin);
+      return isAdmin;
     } catch (error) {
       console.error("Error checking admin status:", error);
       return false;

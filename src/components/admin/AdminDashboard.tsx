@@ -170,7 +170,7 @@ const AdminDashboard = ({
                       minimumFractionDigits: 0,
                     }).format(order.total)}
                   </p>
-                  <p className="text-sm text-gray-500">{order.deliveryMethod}</p>
+                  <p className="text-sm text-gray-500">{order.status}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-2">
@@ -253,7 +253,7 @@ const AdminDashboard = ({
             </TabsContent>
             
             <TabsContent value="reports" className="m-0 focus:outline-none">
-              <AdminReports orders={orders} />
+              <AdminReports />
             </TabsContent>
           </div>
         </Tabs>

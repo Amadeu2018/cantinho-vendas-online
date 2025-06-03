@@ -20,8 +20,8 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
   const { toast } = useToast();
 
-  // Convert string price to number if necessary
-  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+  // Ensure price is always a number
+  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) || 0 : Number(dish.price) || 0;
   
   // Count how many of this dish is in the cart
   const itemInCart = items.find((item) => item.id === dish.id);
@@ -116,7 +116,9 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
           {dish.description}
         </p>
         <div className="flex justify-between items-center">
-          <span className="font-semibold text-cantinho-navy">{dishPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
+          <span className="font-semibold text-cantinho-navy">
+            {dishPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+          </span>
           <div className="flex items-center gap-2">
             {quantity > 0 && (
               <>

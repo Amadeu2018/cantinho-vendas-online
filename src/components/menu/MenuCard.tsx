@@ -20,8 +20,8 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
   const { toast } = useToast();
 
-  // Ensure price is always a number - dish.price is already a number according to Dish type
-  const dishPrice = dish.price;
+  // Ensure price is always a number
+  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
   
   // Count how many of this dish is in the cart
   const itemInCart = items.find((item) => item.id === dish.id);
@@ -91,6 +91,10 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
           src={dish.image_url || "/placeholder.svg"}
           alt={dish.name}
           className="w-full h-48 object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = "/placeholder.svg";
+          }}
         />
         <button
           onClick={handleToggleFavorite}

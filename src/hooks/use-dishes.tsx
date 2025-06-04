@@ -91,13 +91,25 @@ export const useDishes = () => {
           const promotion = product.id && promotionsMap[product.id] 
             ? promotionsMap[product.id] 
             : undefined;
+
+          // Better image URL handling
+          let imageUrl = '/placeholder.svg';
+          if (product.image_url) {
+            // If it's a full URL, use it directly
+            if (product.image_url.startsWith('http')) {
+              imageUrl = product.image_url;
+            } else {
+              // If it's a relative path, assume it's from Supabase storage
+              imageUrl = product.image_url;
+            }
+          }
           
           return {
             id: product.id || '',
             name: product.name || 'Produto sem nome',
             description: product.description || '',
             price: price,
-            image_url: product.image_url || '/placeholder.svg',
+            image_url: imageUrl,
             category,
             popular: Math.random() > 0.7, // Random for demo, ideally this would be a field in the database
             tags: [],
@@ -141,8 +153,8 @@ export const useDishes = () => {
         id: "1",
         name: "Feijoada Completa",
         description: "Tradicional feijoada brasileira com todas as carnes e acompanhamentos",
-        price: 15.9,
-        image_url: "/placeholder.svg",
+        price: 3500,
+        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
         category: "main",
         tags: ["Brasileiro", "Tradicional"],
         popular: true,
@@ -152,8 +164,8 @@ export const useDishes = () => {
         id: "2",
         name: "Moqueca de Peixe",
         description: "Peixe fresco preparado com leite de coco, dendê, tomate e pimentão",
-        price: 18.5,
-        image_url: "/placeholder.svg",
+        price: 4200,
+        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
         category: "main",
         tags: ["Frutos do Mar", "Especialidade"],
         popular: true
@@ -162,8 +174,8 @@ export const useDishes = () => {
         id: "3",
         name: "Picanha na Brasa",
         description: "Corte nobre de picanha grelhada, acompanhada de vinagrete e farofa",
-        price: 24.9,
-        image_url: "/placeholder.svg",
+        price: 5500,
+        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
         category: "main",
         tags: ["Churrasco"],
         popular: true
@@ -172,8 +184,8 @@ export const useDishes = () => {
         id: "4",
         name: "Coxinha",
         description: "Tradicional salgado brasileiro recheado com frango desfiado",
-        price: 3.5,
-        image_url: "/placeholder.svg",
+        price: 800,
+        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
         category: "appetizer",
         tags: ["Salgados"]
       },
@@ -181,8 +193,8 @@ export const useDishes = () => {
         id: "5",
         name: "Mousse de Maracujá",
         description: "Sobremesa cremosa de maracujá com calda fresca",
-        price: 6.9,
-        image_url: "/placeholder.svg",
+        price: 1200,
+        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
         category: "dessert",
         tags: ["Doces"]
       }

@@ -24,10 +24,10 @@ export const useDishes = () => {
       setLoading(true);
       console.log("Fetching dishes from Supabase...");
       
-      // Fetch products from Supabase with better error handling
+      // First fetch products without categories to avoid the relationship error
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*, categories(id, name)');
+        .select('*');
       
       if (productsError) {
         console.error("Error fetching products:", productsError);
@@ -35,6 +35,21 @@ export const useDishes = () => {
       }
       
       console.log("Fetched products:", productsData);
+
+      // If we have products, try to fetch categories separately
+      let categoriesData: any[] = [];
+      if (productsData && productsData.length > 0) {
+        const { data: categories, error: categoriesError } = await supabase
+          .from('categories')
+          .select('*');
+        
+        if (categoriesError) {
+          console.error("Error fetching categories:", categoriesError);
+          // Continue without categories
+        } else {
+          categoriesData = categories || [];
+        }
+      }
       
       // Fetch active promotions
       const now = new Date().toISOString();
@@ -63,6 +78,14 @@ export const useDishes = () => {
           }
         });
       }
+
+      // Create a map of category_id to category
+      const categoriesMap: Record<string, any> = {};
+      categoriesData.forEach((category: any) => {
+        if (category && category.id) {
+          categoriesMap[category.id] = category;
+        }
+      });
       
       if (productsData && Array.isArray(productsData) && productsData.length > 0) {
         // Map to the Dish format with proper null checks
@@ -70,12 +93,12 @@ export const useDishes = () => {
           // Determine category from categories relation or fallback
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
           
-          if (product.categories && typeof product.categories === 'object' && product.categories !== null) {
-            const categoryName = (product.categories.name || '').toLowerCase();
+          if (product.category_id && categoriesMap[product.category_id]) {
+            const categoryName = (categoriesMap[product.category_id].name || '').toLowerCase();
             
-            if (categoryName.includes('entrada')) {
+            if (categoryName.includes('entrada') || categoryName.includes('appetizer')) {
               category = 'appetizer';
-            } else if (categoryName.includes('sobremesa') || categoryName.includes('doce')) {
+            } else if (categoryName.includes('sobremesa') || categoryName.includes('doce') || categoryName.includes('dessert')) {
               category = 'dessert';
             } else {
               category = 'main';
@@ -92,14 +115,14 @@ export const useDishes = () => {
             ? promotionsMap[product.id] 
             : undefined;
 
-          // Better image URL handling
+          // Better image URL handling with fallback to placeholder
           let imageUrl = '/placeholder.svg';
           if (product.image_url) {
             // If it's a full URL, use it directly
             if (product.image_url.startsWith('http')) {
               imageUrl = product.image_url;
             } else {
-              // If it's a relative path, assume it's from Supabase storage
+              // If it's a relative path or filename, use it as is
               imageUrl = product.image_url;
             }
           }

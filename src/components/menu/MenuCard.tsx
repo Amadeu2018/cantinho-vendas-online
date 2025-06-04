@@ -21,7 +21,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   const { toast } = useToast();
 
   // Ensure price is always a number
-  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
+  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : Number(dish.price);
   
   // Count how many of this dish is in the cart
   const itemInCart = items.find((item) => item.id === dish.id);

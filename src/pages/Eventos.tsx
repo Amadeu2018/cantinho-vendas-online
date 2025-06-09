@@ -5,8 +5,57 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import EventForm from "@/components/eventos/EventForm";
+import { useEvent } from "@/contexts/EventContext";
 
 const Eventos = () => {
+  const { setSelectedPackage } = useEvent();
+
+  const packages = [
+    {
+      id: 'essencial',
+      name: 'Pacote Essencial',
+      price: 25000,
+      description: 'Menu de entrada, prato principal e sobremesa',
+      features: [
+        'Menu de entrada, prato principal e sobremesa',
+        'Águas e refrigerantes incluídos',
+        'Equipe de serviço básica',
+        'Material de serviço padrão'
+      ]
+    },
+    {
+      id: 'premium',
+      name: 'Pacote Premium',
+      price: 35000,
+      description: 'Menu gourmet de 4 tempos',
+      features: [
+        'Menu gourmet de 4 tempos',
+        'Open bar de bebidas não alcoólicas',
+        'Equipe completa de serviço',
+        'Material de serviço premium',
+        'Mesa de sobremesas especiais'
+      ]
+    },
+    {
+      id: 'exclusivo',
+      name: 'Pacote Exclusivo',
+      price: 50000,
+      description: 'Menu degustação de luxo personalizado',
+      features: [
+        'Menu degustação de luxo personalizado',
+        'Open bar completo de bebidas',
+        'Estações gastronômicas ao vivo',
+        'Decoração de mesas temática',
+        'Consultoria de evento completa'
+      ]
+    }
+  ];
+
+  const handleSelectPackage = (packageData: any) => {
+    setSelectedPackage(packageData);
+    document.getElementById('solicitar-evento')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -156,8 +205,11 @@ const Eventos = () => {
                       <span>Material de serviço padrão</span>
                     </li>
                   </ul>
-                  <Button className="w-full mt-6 bg-cantinho-navy hover:bg-cantinho-navy/90" onClick={() => document.getElementById('solicitar-evento')?.scrollIntoView({ behavior: 'smooth' })}>
-                    Solicitar Orçamento
+                  <Button 
+                    className="w-full mt-6 bg-cantinho-navy hover:bg-cantinho-navy/90" 
+                    onClick={() => handleSelectPackage(packages[0])}
+                  >
+                    Solicitar Este Pacote
                   </Button>
                 </CardContent>
               </Card>
@@ -193,8 +245,11 @@ const Eventos = () => {
                       <span>Mesa de sobremesas especiais</span>
                     </li>
                   </ul>
-                  <Button className="w-full mt-6 bg-cantinho-terracotta hover:bg-cantinho-terracotta/90" onClick={() => document.getElementById('solicitar-evento')?.scrollIntoView({ behavior: 'smooth' })}>
-                    Solicitar Orçamento
+                  <Button 
+                    className="w-full mt-6 bg-cantinho-terracotta hover:bg-cantinho-terracotta/90" 
+                    onClick={() => handleSelectPackage(packages[1])}
+                  >
+                    Solicitar Este Pacote
                   </Button>
                 </CardContent>
               </Card>
@@ -227,8 +282,11 @@ const Eventos = () => {
                       <span>Consultoria de evento completa</span>
                     </li>
                   </ul>
-                  <Button className="w-full mt-6 bg-cantinho-navy hover:bg-cantinho-navy/90" onClick={() => document.getElementById('solicitar-evento')?.scrollIntoView({ behavior: 'smooth' })}>
-                    Solicitar Orçamento
+                  <Button 
+                    className="w-full mt-6 bg-cantinho-navy hover:bg-cantinho-navy/90" 
+                    onClick={() => handleSelectPackage(packages[2])}
+                  >
+                    Solicitar Este Pacote
                   </Button>
                 </CardContent>
               </Card>

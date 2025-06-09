@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useEvent } from "@/contexts/EventContext";
 import EventConfirmation from "./EventConfirmation";
+import SelectedPackageDisplay from "./SelectedPackageDisplay";
 
 const EventForm = () => {
   const { toast } = useToast();
+  const { selectedPackage } = useEvent();
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -26,6 +29,19 @@ const EventForm = () => {
     localizacao: "",
     mensagem: "",
   });
+
+  // Auto-fill form when package is selected
+  useEffect(() => {
+    if (selectedPackage) {
+      setFormData(prev => ({
+        ...prev,
+        mensagem: `Solicitação de orçamento para: ${selectedPackage.name}\n\n${selectedPackage.description}\n\nPreço estimado: ${selectedPackage.price.toLocaleString('pt-AO', { 
+          style: 'currency', 
+          currency: 'AOA' 
+        })} por pessoa\n\nInclui:\n${selectedPackage.features.map(f => `• ${f}`).join('\n')}\n\nDetalhes adicionais:`
+      }));
+    }
+  }, [selectedPackage]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -48,20 +64,28 @@ const EventForm = () => {
         }
       }
       
+      // Include selected package information in the request
+      const requestData = {
+        nome: formData.nome,
+        email: formData.email,
+        telefone: formData.telefone,
+        tipo_evento: formData.tipoEvento,
+        data_evento: formData.dataEvento,
+        num_convidados: Number(formData.numConvidados),
+        localizacao: formData.localizacao,
+        mensagem: formData.mensagem,
+        status: 'pendente',
+        // Add package information if selected
+        ...(selectedPackage && {
+          pacote_selecionado: selectedPackage.name,
+          preco_estimado_por_pessoa: selectedPackage.price
+        })
+      };
+      
       // Enviar dados para o Supabase
       const { data, error } = await supabase
         .from('event_requests')
-        .insert({
-          nome: formData.nome,
-          email: formData.email,
-          telefone: formData.telefone,
-          tipo_evento: formData.tipoEvento,
-          data_evento: formData.dataEvento, // Ensure this is a valid date string (YYYY-MM-DD)
-          num_convidados: Number(formData.numConvidados),
-          localizacao: formData.localizacao,
-          mensagem: formData.mensagem,
-          status: 'pendente'
-        })
+        .insert(requestData)
         .select('id')
         .single();
       
@@ -110,169 +134,174 @@ const EventForm = () => {
   }
 
   return (
-    <Card className="p-6 shadow-lg">
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="nome" className="block mb-2 font-medium">
-              Nome Completo
-            </label>
-            <Input
-              id="nome"
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-              placeholder="Seu nome completo"
-              required
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block mb-2 font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Seu endereço de email"
-              required
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="telefone" className="block mb-2 font-medium">
-              Telefone
-            </label>
-            <Input
-              id="telefone"
-              name="telefone"
-              value={formData.telefone}
-              onChange={handleChange}
-              placeholder="Seu número de telefone"
-              required
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="tipoEvento" className="block mb-2 font-medium">
-              Tipo de Evento
-            </label>
-            <select
-              id="tipoEvento"
-              name="tipoEvento"
-              value={formData.tipoEvento}
-              onChange={handleChange}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-              required
-            >
-              <option value="" disabled>Selecione o tipo de evento</option>
-              <option value="Casamento">Casamento</option>
-              <option value="Aniversário">Aniversário</option>
-              <option value="Corporativo">Evento Corporativo</option>
-              <option value="Outro">Outro</option>
-            </select>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="dataEvento" className="block mb-2 font-medium">
-              Data do Evento
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </div>
+    <div className="space-y-6">
+      {/* Display selected package if any */}
+      <SelectedPackageDisplay />
+      
+      <Card className="p-6 shadow-lg">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="nome" className="block mb-2 font-medium">
+                Nome Completo
+              </label>
               <Input
-                id="dataEvento"
-                name="dataEvento"
-                type="date"
-                value={formData.dataEvento}
+                id="nome"
+                name="nome"
+                value={formData.nome}
                 onChange={handleChange}
-                className="pl-10"
+                placeholder="Seu nome completo"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="email" className="block mb-2 font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Seu endereço de email"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="telefone" className="block mb-2 font-medium">
+                Telefone
+              </label>
+              <Input
+                id="telefone"
+                name="telefone"
+                value={formData.telefone}
+                onChange={handleChange}
+                placeholder="Seu número de telefone"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="tipoEvento" className="block mb-2 font-medium">
+                Tipo de Evento
+              </label>
+              <select
+                id="tipoEvento"
+                name="tipoEvento"
+                value={formData.tipoEvento}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                required
+              >
+                <option value="" disabled>Selecione o tipo de evento</option>
+                <option value="Casamento">Casamento</option>
+                <option value="Aniversário">Aniversário</option>
+                <option value="Corporativo">Evento Corporativo</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="dataEvento" className="block mb-2 font-medium">
+                Data do Evento
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="dataEvento"
+                  name="dataEvento"
+                  type="date"
+                  value={formData.dataEvento}
+                  onChange={handleChange}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="numConvidados" className="block mb-2 font-medium">
+                Número de Convidados
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="numConvidados"
+                  name="numConvidados"
+                  type="number"
+                  min="1"
+                  value={formData.numConvidados}
+                  onChange={handleChange}
+                  placeholder="Quantidade estimada"
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="localizacao" className="block mb-2 font-medium">
+                Localização do Evento
+              </label>
+              <Input
+                id="localizacao"
+                name="localizacao"
+                value={formData.localizacao}
+                onChange={handleChange}
+                placeholder="Endereço do evento"
                 required
               />
             </div>
           </div>
           
           <div>
-            <label htmlFor="numConvidados" className="block mb-2 font-medium">
-              Número de Convidados
+            <label htmlFor="mensagem" className="block mb-2 font-medium">
+              Detalhes Adicionais
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <Input
-                id="numConvidados"
-                name="numConvidados"
-                type="number"
-                min="1"
-                value={formData.numConvidados}
-                onChange={handleChange}
-                placeholder="Quantidade estimada"
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label htmlFor="localizacao" className="block mb-2 font-medium">
-              Localização do Evento
-            </label>
-            <Input
-              id="localizacao"
-              name="localizacao"
-              value={formData.localizacao}
+            <Textarea
+              id="mensagem"
+              name="mensagem"
+              value={formData.mensagem}
               onChange={handleChange}
-              placeholder="Endereço do evento"
-              required
+              placeholder="Conte-nos mais sobre seu evento, preferências de menu, necessidades especiais, etc."
+              rows={6}
             />
           </div>
-        </div>
-        
-        <div>
-          <label htmlFor="mensagem" className="block mb-2 font-medium">
-            Detalhes Adicionais
-          </label>
-          <Textarea
-            id="mensagem"
-            name="mensagem"
-            value={formData.mensagem}
-            onChange={handleChange}
-            placeholder="Conte-nos mais sobre seu evento, preferências de menu, necessidades especiais, etc."
-            rows={4}
-          />
-        </div>
-        
-        <Button
-          type="submit"
-          className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-          size="lg"
-          disabled={loading}
-        >
-          {loading ? (
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Enviando...
-            </span>
-          ) : (
-            <span className="flex items-center">
-              Solicitar Orçamento
-            </span>
-          )}
-        </Button>
-      </form>
-    </Card>
+          
+          <Button
+            type="submit"
+            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+            size="lg"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Enviando...
+              </span>
+            ) : (
+              <span className="flex items-center">
+                Solicitar Orçamento
+              </span>
+            )}
+          </Button>
+        </form>
+      </Card>
+    </div>
   );
 };
 

@@ -5,28 +5,39 @@ import { Calendar, Award, Utensils } from 'lucide-react';
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-gradient-to-br from-cantinho-navy via-cantinho-navy to-cantinho-terracotta text-white py-20 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-cantinho-navy via-cantinho-navy to-cantinho-terracotta text-white py-32 overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1721322800607-8c38375eef04"
+          alt="Ambiente elegante do restaurante"
+          className="w-full h-full object-cover opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-cantinho-navy/90 via-cantinho-navy/80 to-cantinho-terracotta/90"></div>
+      </div>
+      
       <div className="container mx-auto px-4 text-center relative z-10">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-lg animate-fade-in">Cantinho Algarvio</h1>
-        <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in">
-          Mais de <span className="text-cantinho-sand font-semibold">8 anos</span> oferecendo sabor, tradição e excelência em alimentação e catering em Angola!
+        <h1 className="text-6xl md:text-7xl font-bold mb-8 drop-shadow-2xl animate-fade-in">
+          Cantinho Algarvio
+        </h1>
+        <p className="text-2xl md:text-3xl mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in font-light">
+          Mais de <span className="text-cantinho-sand font-bold text-4xl">8 anos</span> oferecendo sabor, tradição e excelência em alimentação e catering em Angola!
         </p>
-        <div className="flex flex-wrap justify-center gap-4 animate-fade-in">
-          <Badge className="bg-cantinho-sand text-cantinho-navy px-4 py-2 text-sm flex items-center gap-1 animate-scale-in">
-            <Calendar className="w-4 h-4 mr-1" />
+        <div className="flex flex-wrap justify-center gap-6 animate-fade-in">
+          <Badge className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2 animate-scale-in shadow-lg">
+            <Calendar className="w-5 h-5" />
             Desde 2014
           </Badge>
-          <Badge className="bg-cantinho-sand text-cantinho-navy px-4 py-2 text-sm flex items-center gap-1 animate-scale-in">
-            <Award className="w-4 h-4 mr-1" />
+          <Badge className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2 animate-scale-in shadow-lg">
+            <Award className="w-5 h-5" />
             HACCP Certificado
           </Badge>
-          <Badge className="bg-cantinho-sand text-cantinho-navy px-4 py-2 text-sm flex items-center gap-1 animate-scale-in">
-            <Utensils className="w-4 h-4 mr-1" />
+          <Badge className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2 animate-scale-in shadow-lg">
+            <Utensils className="w-5 h-5" />
             Culinária Nacional e Internacional
           </Badge>
         </div>
       </div>
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-cantinho-terracotta/5 via-transparent to-cantinho-navy/20 pointer-events-none z-0" />
     </section>
   );
 };

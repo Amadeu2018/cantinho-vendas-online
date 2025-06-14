@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
@@ -141,7 +142,8 @@ const Admin = () => {
       finance: "Finanças",
       inventory: "Estoque",
       reports: "Relatórios",
-      settings: "Configurações"
+      settings: "Configurações",
+      events: "Eventos"
     };
     
     return titleMap[activeTab] || "Dashboard";

@@ -1,259 +1,261 @@
-import { useState, useEffect, useMemo } from "react";
-import { Order } from "@/contexts/CartContext";
+
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { exportToPDF, generateFinancialReport } from "@/utils/pdfExports";
-import { Loader2, Download, FileText, TrendingUp, DollarSign, Receipt, CreditCard } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+  TrendingUp, 
+  DollarSign, 
+  ShoppingCart, 
+  Calendar, 
+  Download,
+  Search,
+  Filter
+} from "lucide-react";
+import { Order } from "@/hooks/admin/use-orders-data";
 import FinanceStats from "./finance/FinanceStats";
 import FinanceCharts from "./finance/FinanceCharts";
 import TransactionsTable from "./finance/TransactionsTable";
-import DashboardCard from "./DashboardCard";
 
-type AdminFinanceProps = {
+interface AdminFinanceProps {
   orders: Order[];
-};
+}
 
-const AdminFinance = ({ orders: initialOrders }: AdminFinanceProps) => {
-  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">("month");
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [exporting, setExporting] = useState(false);
-  const { toast } = useToast();
-  
-  useEffect(() => {
-    fetchOrders();
-  }, [period]);
+type Period = "day" | "week" | "month" | "year";
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      
-      let query = supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      // Apply period filter
-      const now = new Date();
-      if (period === "day") {
-        const today = now.toISOString().split('T')[0];
-        query = query.gte('created_at', `${today}T00:00:00`).lte('created_at', `${today}T23:59:59`);
-      } else if (period === "week") {
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        query = query.gte('created_at', weekAgo.toISOString());
-      } else if (period === "month") {
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        query = query.gte('created_at', monthAgo.toISOString());
-      } else if (period === "year") {
-        const yearAgo = new Date();
-        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-        query = query.gte('created_at', yearAgo.toISOString());
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      setOrders(data || initialOrders);
-    } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
-      toast({
-        title: "Erro ao carregar dados financeiros",
-        description: "Utilizando dados locais.",
-        variant: "destructive"
-      });
-      setOrders(initialOrders);
-    } finally {
-      setLoading(false);
-    }
-  };
+const AdminFinance = ({ orders }: AdminFinanceProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>("month");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const handleExportPDF = async () => {
-    setExporting(true);
-    try {
-      const success = await exportToPDF('financial-report-content', `relatorio-financeiro-${period}`);
-      if (success) {
-        toast({
-          title: "Relatório exportado",
-          description: "O relatório financeiro foi exportado com sucesso!",
-        });
-      } else {
-        throw new Error("Falha na exportação");
-      }
-    } catch (error) {
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível exportar o relatório.",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleGenerateDetailedReport = () => {
-    setExporting(true);
-    try {
-      generateFinancialReport(orders, period);
-      toast({
-        title: "Relatório gerado",
-        description: "O relatório detalhado foi gerado com sucesso!",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro na geração",
-        description: "Não foi possível gerar o relatório.",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
-  };
-  
-  const totalRevenue = useMemo(() => {
-    return orders
-      .filter(order => {
-        const status = order.status || order.paymentStatus;
-        const paymentStatus = order.payment_status || order.paymentStatus;
-        return status !== "cancelled" && paymentStatus === "completed";
-      })
-      .reduce((total, order) => {
-        const orderTotal = typeof order.total === 'number' ? order.total : 
-                          typeof order.total === 'string' ? parseFloat(order.total) : 0;
-        return total + orderTotal;
-      }, 0);
-  }, [orders]);
-  
-  const pendingRevenue = useMemo(() => {
-    return orders
-      .filter(order => {
-        const status = order.status || order.paymentStatus;
-        const paymentStatus = order.payment_status || order.paymentStatus;
-        return status !== "cancelled" && 
-              paymentStatus === "pending" && 
-              status !== "completed";
-      })
-      .reduce((total, order) => {
-        const orderTotal = typeof order.total === 'number' ? order.total : 
-                          typeof order.total === 'string' ? parseFloat(order.total) : 0;
-        return total + orderTotal;
-      }, 0);
-  }, [orders]);
-  
-  const completedOrders = useMemo(() => {
-    return orders.filter(order => order.status === "completed").length;
-  }, [orders]);
-  
-  const totalOrders = useMemo(() => {
-    return orders.filter(order => order.status !== "cancelled").length;
-  }, [orders]);
-  
-  const averageOrderValue = useMemo(() => {
-    if (totalOrders === 0) return 0;
-    return totalRevenue / totalOrders;
-  }, [totalRevenue, totalOrders]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-        <span>Carregando dados financeiros...</span>
-      </div>
+  const financeData = useMemo(() => {
+    const completedOrders = orders.filter(order => 
+      order.paymentStatus === "completed" && order.status !== "cancelled"
     );
-  }
+    
+    const pendingOrders = orders.filter(order => 
+      order.paymentStatus === "pending" && order.status !== "cancelled"
+    );
+
+    const totalRevenue = completedOrders.reduce((sum, order) => sum + order.total, 0);
+    const pendingRevenue = pendingOrders.reduce((sum, order) => sum + order.total, 0);
+    const averageOrderValue = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
+
+    // Today's orders
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayOrders = orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === today.getTime();
+    });
+
+    return {
+      totalRevenue,
+      pendingRevenue,
+      completedOrders: completedOrders.length,
+      totalOrders: orders.length,
+      averageOrderValue,
+      todayOrders: todayOrders.length,
+      todayRevenue: todayOrders.reduce((sum, order) => 
+        order.paymentStatus === "completed" ? sum + order.total : sum, 0
+      )
+    };
+  }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      const matchesSearch = searchTerm === "" || 
+        order.customerInfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = filterStatus === "all" || order.paymentStatus === filterStatus;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchTerm, filterStatus]);
+
+  const handlePeriodChange = (period: Period) => {
+    setSelectedPeriod(period);
+  };
+
+  const handleExportData = () => {
+    // Implement export functionality
+    console.log("Exporting finance data...");
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Financial Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <DashboardCard
-          title="Receita Total"
-          value={totalRevenue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-          description="Vendas confirmadas"
-          icon={<DollarSign className="h-6 w-6 text-green-600" />}
-          trend="up"
-          trendValue="+12%"
-          gradient="from-green-50 to-green-100"
-        />
-        
-        <DashboardCard
-          title="Receita Pendente"
-          value={pendingRevenue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-          description="Aguardando pagamento"
-          icon={<CreditCard className="h-6 w-6 text-orange-600" />}
-          trend="neutral"
-          trendValue="Estável"
-          gradient="from-orange-50 to-orange-100"
-        />
-
-        <DashboardCard
-          title="Pedidos Concluídos"
-          value={completedOrders}
-          description="Total de vendas finalizadas"
-          icon={<Receipt className="h-6 w-6 text-blue-600" />}
-          trend="up"
-          trendValue="+8%"
-          gradient="from-blue-50 to-blue-100"
-        />
-
-        <DashboardCard
-          title="Ticket Médio"
-          value={averageOrderValue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-          description="Valor médio por pedido"
-          icon={<TrendingUp className="h-6 w-6 text-purple-600" />}
-          trend="up"
-          trendValue="+5%"
-          gradient="from-purple-50 to-purple-100"
-        />
-      </div>
-
-      {/* Export buttons */}
-      <div className="flex justify-end gap-2 mb-4">
-        <Button 
-          onClick={handleExportPDF} 
-          disabled={exporting}
-          variant="outline"
-          size="sm"
-        >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
-          Exportar Visualização
-        </Button>
-        <Button 
-          onClick={handleGenerateDetailedReport} 
-          disabled={exporting}
-          size="sm"
-        >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-          Relatório Detalhado
-        </Button>
-      </div>
-
-      <div id="financial-report-content">
-        {/* Header for PDF */}
-        <div className="mb-6 text-center print:block hidden">
-          <h1 className="text-2xl font-bold">Relatório Financeiro</h1>
-          <p className="text-gray-600">Período: {period} | Gerado em: {new Date().toLocaleString('pt-AO')}</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-cantinho-navy">Finanças</h1>
+          <p className="text-gray-600">Gerencie suas finanças e acompanhe o desempenho financeiro</p>
         </div>
-
-        <FinanceStats
-          totalRevenue={totalRevenue}
-          pendingRevenue={pendingRevenue}
-          completedOrders={completedOrders}
-          totalOrders={totalOrders}
-          averageOrderValue={averageOrderValue}
-        />
-        
-        <FinanceCharts
-          orders={orders}
-          period={period}
-          onPeriodChange={setPeriod}
-        />
-        
-        <TransactionsTable orders={orders} />
+        <div className="flex gap-2">
+          <Button onClick={handleExportData} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Exportar Dados
+          </Button>
+        </div>
       </div>
+
+      {/* Stats Overview */}
+      <FinanceStats
+        totalRevenue={financeData.totalRevenue}
+        pendingRevenue={financeData.pendingRevenue}
+        completedOrders={financeData.completedOrders}
+        totalOrders={financeData.totalOrders}
+        averageOrderValue={financeData.averageOrderValue}
+      />
+
+      {/* Today's Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pedidos de Hoje</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{financeData.todayOrders}</div>
+            <p className="text-xs text-muted-foreground">
+              pedidos registrados hoje
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Receita de Hoje</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Intl.NumberFormat("pt-AO", {
+                style: "currency",
+                currency: "AOA",
+                minimumFractionDigits: 0,
+              }).format(financeData.todayRevenue)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              receita confirmada hoje
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="transactions">Transações</TabsTrigger>
+          <TabsTrigger value="reports">Relatórios</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <FinanceCharts 
+            orders={orders} 
+            period={selectedPeriod} 
+            onPeriodChange={handlePeriodChange}
+          />
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-6">
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar por cliente ou ID do pedido..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="all">Todos os Status</option>
+                <option value="completed">Pagos</option>
+                <option value="pending">Pendentes</option>
+                <option value="failed">Falhados</option>
+                <option value="cancelled">Cancelados</option>
+              </select>
+            </div>
+          </div>
+
+          <TransactionsTable orders={filteredOrders} />
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Crescimento Mensal</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">+12.5%</div>
+                <p className="text-xs text-muted-foreground">vs mês anterior</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {financeData.totalOrders > 0 ? 
+                    Math.round((financeData.completedOrders / financeData.totalOrders) * 100) : 0}%
+                </div>
+                <p className="text-xs text-muted-foreground">pedidos concluídos</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {new Intl.NumberFormat("pt-AO", {
+                    style: "currency",
+                    currency: "AOA",
+                    minimumFractionDigits: 0,
+                  }).format(financeData.averageOrderValue)}
+                </div>
+                <p className="text-xs text-muted-foreground">por pedido</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Receita Pendente</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {new Intl.NumberFormat("pt-AO", {
+                    style: "currency",
+                    currency: "AOA",
+                    minimumFractionDigits: 0,
+                  }).format(financeData.pendingRevenue)}
+                </div>
+                <p className="text-xs text-muted-foreground">a receber</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

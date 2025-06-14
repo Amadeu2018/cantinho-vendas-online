@@ -9,7 +9,7 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'delivered' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'completed' | 'failed' | 'cancelled';
   paymentMethod: {
     id: string;
@@ -81,13 +81,31 @@ export const useOrdersData = () => {
           console.error('Error parsing customer info:', e);
         }
 
+        // Map database status to compatible status
+        let mappedStatus: Order['status'] = 'pending';
+        switch (order.status) {
+          case 'pending':
+          case 'confirmed':
+          case 'preparing':
+          case 'delivered':
+          case 'completed':
+          case 'cancelled':
+            mappedStatus = order.status;
+            break;
+          case 'ready':
+            mappedStatus = 'preparing';
+            break;
+          default:
+            mappedStatus = 'pending';
+        }
+
         return {
           id: order.id,
           items: order.items || [],
           subtotal: Number(order.subtotal) || 0,
           deliveryFee: Number(order.delivery_fee) || 0,
           total: Number(order.total) || 0,
-          status: order.status || 'pending',
+          status: mappedStatus,
           paymentStatus: order.payment_status || 'pending',
           paymentMethod: { 
             id: 'payment-' + order.id,

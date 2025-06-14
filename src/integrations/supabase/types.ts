@@ -243,10 +243,12 @@ export type Database = {
           customer_id: string | null
           customer_info: Json
           delivery_address_id: string | null
+          delivery_fee: number | null
           delivery_status: string | null
           estimated_delivery: string | null
           id: string
           items: Json
+          notes: string | null
           payment_details: Json | null
           payment_method: string | null
           payment_reference: string | null
@@ -254,6 +256,7 @@ export type Database = {
           processing_notes: string[] | null
           processing_status: string | null
           status: string
+          subtotal: number | null
           total: number
           tracking_code: string | null
           updated_at: string
@@ -263,10 +266,12 @@ export type Database = {
           customer_id?: string | null
           customer_info?: Json
           delivery_address_id?: string | null
+          delivery_fee?: number | null
           delivery_status?: string | null
           estimated_delivery?: string | null
           id?: string
           items?: Json
+          notes?: string | null
           payment_details?: Json | null
           payment_method?: string | null
           payment_reference?: string | null
@@ -274,6 +279,7 @@ export type Database = {
           processing_notes?: string[] | null
           processing_status?: string | null
           status?: string
+          subtotal?: number | null
           total: number
           tracking_code?: string | null
           updated_at?: string
@@ -283,10 +289,12 @@ export type Database = {
           customer_id?: string | null
           customer_info?: Json
           delivery_address_id?: string | null
+          delivery_fee?: number | null
           delivery_status?: string | null
           estimated_delivery?: string | null
           id?: string
           items?: Json
+          notes?: string | null
           payment_details?: Json | null
           payment_method?: string | null
           payment_reference?: string | null
@@ -294,6 +302,7 @@ export type Database = {
           processing_notes?: string[] | null
           processing_status?: string | null
           status?: string
+          subtotal?: number | null
           total?: number
           tracking_code?: string | null
           updated_at?: string

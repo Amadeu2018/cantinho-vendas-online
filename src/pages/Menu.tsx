@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
@@ -54,7 +55,7 @@ const Menu = () => {
   });
 
   const featuredDishes = dishes.filter(dish => dish.rating >= 4.5).slice(0, 3);
-  const popularDishes = dishes.filter(dish => dish.orders > 50).slice(0, 3);
+  const popularDishes = dishes.filter(dish => dish.rating >= 4.0).slice(0, 3);
 
   if (loading) {
     return (
@@ -132,8 +133,6 @@ const Menu = () => {
                   <MenuCard
                     key={dish.id}
                     dish={dish}
-                    isFavorite={isFavorite(dish.id)}
-                    onToggleFavorite={() => toggleFavorite(dish.id)}
                   />
                 ))}
               </div>
@@ -152,8 +151,6 @@ const Menu = () => {
                   <MenuCard
                     key={dish.id}
                     dish={dish}
-                    isFavorite={isFavorite(dish.id)}
-                    onToggleFavorite={() => toggleFavorite(dish.id)}
                   />
                 ))}
               </div>
@@ -180,8 +177,6 @@ const Menu = () => {
                   <MenuCard
                     key={dish.id}
                     dish={dish}
-                    isFavorite={isFavorite(dish.id)}
-                    onToggleFavorite={() => toggleFavorite(dish.id)}
                   />
                 ))}
               </div>

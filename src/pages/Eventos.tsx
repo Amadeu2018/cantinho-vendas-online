@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -92,6 +91,7 @@ const Eventos = () => {
 
             {/* Info Section */}
             <div className="space-y-8">
+              
               <Card className="border-0 bg-gradient-to-br from-cantinho-navy to-cantinho-cornflower text-white">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">

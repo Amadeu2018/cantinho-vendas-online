@@ -140,7 +140,8 @@ const Admin = () => {
       customers: "Clientes",
       finance: "Finanças",
       inventory: "Estoque",
-      reports: "Relatórios"
+      reports: "Relatórios",
+      settings: "Configurações"
     };
     
     return titleMap[activeTab] || "Dashboard";

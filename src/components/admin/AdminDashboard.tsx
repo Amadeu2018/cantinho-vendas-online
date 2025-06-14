@@ -4,9 +4,15 @@ import { Order } from "@/hooks/admin/use-orders-data";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import DashboardStatsGrid from "./dashboard/DashboardStatsGrid";
 import DashboardCharts from "./dashboard/DashboardCharts";
-import DashboardTabs from "./dashboard/DashboardTabs";
 import DashboardContent from "./dashboard/DashboardContent";
 import DashboardRefresh from "./dashboard/DashboardRefresh";
+import AdminOrdersList from "./AdminOrdersList";
+import AdminProducts from "./AdminProducts";
+import AdminFinance from "./AdminFinance";
+import AdminInventory from "./AdminInventory";
+import AdminReports from "./AdminReports";
+import AdminCustomers from "./AdminCustomers";
+import AdminSettings from "./AdminSettings";
 
 interface AdminDashboardProps {
   orders: Order[];
@@ -33,27 +39,47 @@ const AdminDashboard = ({
     }
   });
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case "orders":
+        return (
+          <AdminOrdersList 
+            orders={orders} 
+            onSelectOrder={onSelectOrder}
+            fetchingOrders={fetchingOrders}
+          />
+        );
+      case "products":
+        return <AdminProducts />;
+      case "customers":
+        return <AdminCustomers />;
+      case "finance":
+        return <AdminFinance orders={orders} />;
+      case "inventory":
+        return <AdminInventory />;
+      case "reports":
+        return <AdminReports />;
+      case "settings":
+        return <AdminSettings />;
+      case "dashboard":
+      default:
+        return (
+          <div className="space-y-8">
+            <DashboardHeader onRefresh={handleRefresh} isRefreshing={isRefreshing} />
+            <DashboardStatsGrid orders={orders} />
+            <DashboardCharts orders={orders} />
+            <DashboardContent 
+              orders={orders}
+              onSelectOrder={onSelectOrder}
+            />
+          </div>
+        );
+    }
+  };
+
   return (
-    <div className="space-y-8">
-      <DashboardHeader onRefresh={handleRefresh} isRefreshing={isRefreshing} />
-      
-      <DashboardStatsGrid orders={orders} />
-      
-      {activeTab === "dashboard" && (
-        <DashboardCharts orders={orders} />
-      )}
-      
-      <DashboardTabs
-        activeTab={activeTab}
-        orders={orders}
-        fetchingOrders={fetchingOrders}
-        onSelectOrder={onSelectOrder}
-      >
-        <DashboardContent 
-          orders={orders}
-          onSelectOrder={onSelectOrder}
-        />
-      </DashboardTabs>
+    <div className="space-y-6">
+      {renderContent()}
     </div>
   );
 };

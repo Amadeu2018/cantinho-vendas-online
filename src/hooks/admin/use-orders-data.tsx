@@ -9,12 +9,12 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total: number;
-  status: string;
-  paymentStatus: string;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'completed' | 'cancelled';
+  paymentStatus: 'pending' | 'completed' | 'failed' | 'cancelled';
   paymentMethod: {
+    id: string;
     name: string;
-    id?: string;
-    icon?: string;
+    icon: string;
   };
   customerInfo: {
     name: string;
@@ -22,7 +22,7 @@ export interface Order {
     phone: string;
   };
   createdAt: string;
-  notes?: string; // Make notes optional to match CartContext Order
+  notes: string;
   location: {
     id: number;
     name: string;
@@ -90,13 +90,13 @@ export const useOrdersData = () => {
           status: order.status || 'pending',
           paymentStatus: order.payment_status || 'pending',
           paymentMethod: { 
-            name: order.payment_method || 'Não informado',
             id: 'payment-' + order.id,
+            name: order.payment_method || 'Não informado',
             icon: 'credit-card'
           },
           customerInfo,
           createdAt: order.created_at,
-          notes: order.notes || '', // Provide default empty string
+          notes: order.notes || '',
           location: {
             id: 1,
             name: customerInfo.address,

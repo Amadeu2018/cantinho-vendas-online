@@ -1,337 +1,348 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useToast } from "@/hooks/use-toast";
-import { CalendarIcon, Users, MapPin, Clock, Package } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, Users, MapPin, Clock, Phone, Mail, User, Gift } from "lucide-react";
 import { useFirstOrder } from "@/hooks/use-first-order";
+import { toast } from "@/hooks/use-toast";
 
-interface EventPackage {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  includes: string[];
-  minGuests: number;
-  maxGuests: number;
+export interface EventFormProps {
+  onSubmit: (data: EventFormData) => void;
 }
 
-interface EventFormProps {
-  selectedPackage?: EventPackage;
-  onSubmit: (eventData: any) => void;
+export interface EventFormData {
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  eventType: string;
+  eventDate: string;
+  eventTime: string;
+  eventLocation: string;
+  guestCount: number;
+  specialRequests: string;
+  budget: number;
 }
 
-const EventForm = ({ selectedPackage, onSubmit }: EventFormProps) => {
-  const { toast } = useToast();
+const EventForm = ({ onSubmit }: EventFormProps) => {
   const { isFirstOrder, discount } = useFirstOrder();
-  const [date, setDate] = useState<Date>();
-  const [formData, setFormData] = useState({
+  
+  const [formData, setFormData] = useState<EventFormData>({
     clientName: "",
-    email: "",
-    phone: "",
+    clientEmail: "",
+    clientPhone: "",
     eventType: "",
-    guestCount: selectedPackage?.minGuests || 50,
-    location: "",
+    eventDate: "",
+    eventTime: "",
+    eventLocation: "",
+    guestCount: 0,
     specialRequests: "",
-    budget: selectedPackage?.price || 0
+    budget: 0,
   });
 
-  const eventPackages: EventPackage[] = [
-    {
-      id: "basic",
-      name: "Pacote Básico",
-      description: "Ideal para eventos pequenos e íntimos",
-      price: 50000,
-      includes: ["Muamba de galinha", "Arroz de coco", "Bebidas básicas"],
-      minGuests: 20,
-      maxGuests: 50
-    },
-    {
-      id: "standard",
-      name: "Pacote Standard",
-      description: "Perfeito para celebrações familiares",
-      price: 85000,
-      includes: ["Calulu de peixe", "Funge", "Muamba de galinha", "Bebidas variadas"],
-      minGuests: 50,
-      maxGuests: 100
-    },
-    {
-      id: "premium",
-      name: "Pacote Premium",
-      description: "Para eventos especiais e corporativos",
-      price: 150000,
-      includes: ["Menu completo", "Serviço de garçons", "Decoração básica", "Bebidas premium"],
-      minGuests: 100,
-      maxGuests: 200
-    }
-  ];
+  const [errors, setErrors] = useState<Partial<EventFormData>>({});
 
-  const currentPackage = selectedPackage || eventPackages.find(p => p.id === "premium") || eventPackages[0];
-  const finalPrice = isFirstOrder ? currentPackage.price * (1 - discount) : currentPackage.price;
-  const savings = currentPackage.price - finalPrice;
+  const validateForm = () => {
+    const newErrors: Partial<EventFormData> = {};
+
+    if (!formData.clientName.trim()) {
+      newErrors.clientName = "Nome é obrigatório";
+    }
+
+    if (!formData.clientEmail.trim()) {
+      newErrors.clientEmail = "Email é obrigatório";
+    } else if (!/\S+@\S+\.\S+/.test(formData.clientEmail)) {
+      newErrors.clientEmail = "Email inválido";
+    }
+
+    if (!formData.clientPhone.trim()) {
+      newErrors.clientPhone = "Telefone é obrigatório";
+    }
+
+    if (!formData.eventType.trim()) {
+      newErrors.eventType = "Tipo de evento é obrigatório";
+    }
+
+    if (!formData.eventDate) {
+      newErrors.eventDate = "Data é obrigatória";
+    }
+
+    if (!formData.eventTime) {
+      newErrors.eventTime = "Hora é obrigatória";
+    }
+
+    if (!formData.eventLocation.trim()) {
+      newErrors.eventLocation = "Local é obrigatório";
+    }
+
+    if (formData.guestCount <= 0) {
+      newErrors.guestCount = "Número de convidados deve ser maior que 0";
+    }
+
+    if (formData.budget <= 0) {
+      newErrors.budget = "Orçamento deve ser maior que 0";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!date) {
-      toast({
-        title: "Data necessária",
-        description: "Por favor, selecione a data do evento",
-        variant: "destructive"
+    if (validateForm()) {
+      // Apply first order discount if applicable
+      const finalBudget = isFirstOrder ? formData.budget * (1 - discount) : formData.budget;
+      
+      if (isFirstOrder) {
+        toast({
+          title: "Primeiro evento!",
+          description: `Você economizou ${(formData.budget - finalBudget).toLocaleString('pt-AO', { 
+            style: 'currency', 
+            currency: 'AOA' 
+          })} no seu primeiro evento! 🎉`,
+        });
+      }
+      
+      onSubmit({
+        ...formData,
+        budget: finalBudget
       });
-      return;
     }
-
-    const eventData = {
-      ...formData,
-      date: date.toISOString(),
-      package: currentPackage,
-      finalPrice,
-      savings: isFirstOrder ? savings : 0
-    };
-
-    onSubmit(eventData);
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: keyof EventFormData, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* First Order Discount Banner */}
-      {isFirstOrder && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-green-700">
-              <Package className="w-5 h-5" />
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-cantinho-terracotta" />
+          Solicitar Orçamento para Evento
+        </CardTitle>
+        {isFirstOrder && (
+          <Badge className="bg-green-500 text-white w-fit">
+            <Gift className="h-3 w-3 mr-1" />
+            10% de desconto no primeiro evento!
+          </Badge>
+        )}
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Client Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Informações do Cliente
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="font-semibold">🎉 Primeiro Evento - Desconto Especial!</p>
-                <p className="text-sm">
-                  Economize {(discount * 100).toFixed(0)}% no seu primeiro evento conosco
+                <Label htmlFor="clientName">Nome Completo *</Label>
+                <Input
+                  id="clientName"
+                  value={formData.clientName}
+                  onChange={(e) => handleInputChange('clientName', e.target.value)}
+                  className={errors.clientName ? 'border-red-500' : ''}
+                />
+                {errors.clientName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.clientName}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="clientPhone">Telefone *</Label>
+                <Input
+                  id="clientPhone"
+                  value={formData.clientPhone}
+                  onChange={(e) => handleInputChange('clientPhone', e.target.value)}
+                  className={errors.clientPhone ? 'border-red-500' : ''}
+                />
+                {errors.clientPhone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.clientPhone}</p>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="clientEmail">Email *</Label>
+              <Input
+                id="clientEmail"
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                className={errors.clientEmail ? 'border-red-500' : ''}
+              />
+              {errors.clientEmail && (
+                <p className="text-red-500 text-sm mt-1">{errors.clientEmail}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Event Details */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Detalhes do Evento
+            </h3>
+            
+            <div>
+              <Label htmlFor="eventType">Tipo de Evento *</Label>
+              <Input
+                id="eventType"
+                value={formData.eventType}
+                onChange={(e) => handleInputChange('eventType', e.target.value)}
+                placeholder="Ex: Casamento, Aniversário, Corporativo..."
+                className={errors.eventType ? 'border-red-500' : ''}
+              />
+              {errors.eventType && (
+                <p className="text-red-500 text-sm mt-1">{errors.eventType}</p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="eventDate">Data do Evento *</Label>
+                <Input
+                  id="eventDate"
+                  type="date"
+                  value={formData.eventDate}
+                  onChange={(e) => handleInputChange('eventDate', e.target.value)}
+                  className={errors.eventDate ? 'border-red-500' : ''}
+                />
+                {errors.eventDate && (
+                  <p className="text-red-500 text-sm mt-1">{errors.eventDate}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="eventTime">Hora do Evento *</Label>
+                <Input
+                  id="eventTime"
+                  type="time"
+                  value={formData.eventTime}
+                  onChange={(e) => handleInputChange('eventTime', e.target.value)}
+                  className={errors.eventTime ? 'border-red-500' : ''}
+                />
+                {errors.eventTime && (
+                  <p className="text-red-500 text-sm mt-1">{errors.eventTime}</p>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="eventLocation">Local do Evento *</Label>
+              <Input
+                id="eventLocation"
+                value={formData.eventLocation}
+                onChange={(e) => handleInputChange('eventLocation', e.target.value)}
+                className={errors.eventLocation ? 'border-red-500' : ''}
+              />
+              {errors.eventLocation && (
+                <p className="text-red-500 text-sm mt-1">{errors.eventLocation}</p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="guestCount">Número de Convidados *</Label>
+                <Input
+                  id="guestCount"
+                  type="number"
+                  min="1"
+                  value={formData.guestCount || ''}
+                  onChange={(e) => handleInputChange('guestCount', parseInt(e.target.value) || 0)}
+                  className={errors.guestCount ? 'border-red-500' : ''}
+                />
+                {errors.guestCount && (
+                  <p className="text-red-500 text-sm mt-1">{errors.guestCount}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="budget">Orçamento Estimado (AOA) *</Label>
+                <Input
+                  id="budget"
+                  type="number"
+                  min="1"
+                  value={formData.budget || ''}
+                  onChange={(e) => handleInputChange('budget', parseInt(e.target.value) || 0)}
+                  className={errors.budget ? 'border-red-500' : ''}
+                />
+                {errors.budget && (
+                  <p className="text-red-500 text-sm mt-1">{errors.budget}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Special Requests */}
+          <div>
+            <Label htmlFor="specialRequests">Pedidos Especiais</Label>
+            <Textarea
+              id="specialRequests"
+              value={formData.specialRequests}
+              onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+              placeholder="Descreva qualquer pedido especial, restrições alimentares, decoração específica..."
+              rows={4}
+            />
+          </div>
+
+          {/* First Order Discount Info */}
+          {isFirstOrder && formData.budget > 0 && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                <Gift className="h-4 w-4" />
+                Desconto do Primeiro Evento
+              </h4>
+              <div className="space-y-1 text-sm">
+                <p className="text-green-700">
+                  Orçamento original: {formData.budget.toLocaleString('pt-AO', { 
+                    style: 'currency', 
+                    currency: 'AOA' 
+                  })}
+                </p>
+                <p className="text-green-700">
+                  Desconto (10%): -{(formData.budget * discount).toLocaleString('pt-AO', { 
+                    style: 'currency', 
+                    currency: 'AOA' 
+                  })}
+                </p>
+                <p className="text-green-800 font-semibold">
+                  Valor final: {(formData.budget * (1 - discount)).toLocaleString('pt-AO', { 
+                    style: 'currency', 
+                    currency: 'AOA' 
+                  })}
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Package Summary */}
-        <Card className="lg:sticky lg:top-6 h-fit">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-cantinho-navy">
-              <Package className="w-5 h-5" />
-              Pacote Selecionado
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-bold text-lg">{currentPackage.name}</h3>
-              <p className="text-gray-600 text-sm">{currentPackage.description}</p>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="font-semibold">Inclui:</h4>
-              <ul className="space-y-1">
-                {currentPackage.includes.map((item, index) => (
-                  <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-cantinho-terracotta rounded-full"></span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Convidados:</span>
-                <span>{currentPackage.minGuests} - {currentPackage.maxGuests} pessoas</span>
-              </div>
-              
-              {isFirstOrder && savings > 0 ? (
-                <div className="space-y-2 pt-2 border-t">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Preço original:</span>
-                    <span className="text-sm line-through text-gray-500">
-                      {currentPackage.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-green-600">Desconto ({(discount * 100).toFixed(0)}%):</span>
-                    <span className="text-sm text-green-600 font-medium">
-                      -{savings.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg border-t pt-2">
-                    <span>Total:</span>
-                    <span className="text-cantinho-terracotta">
-                      {finalPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                  <span>Total:</span>
-                  <span className="text-cantinho-terracotta">
-                    {currentPackage.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-                  </span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Event Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-cantinho-navy">Detalhes do Evento</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-cantinho-navy">Informações de Contato</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="clientName">Nome Completo *</Label>
-                    <Input
-                      id="clientName"
-                      value={formData.clientName}
-                      onChange={(e) => handleInputChange('clientName', e.target.value)}
-                      placeholder="Seu nome completo"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="phone">Telefone *</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="+244 9XX XXX XXX"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="seu.email@exemplo.com"
-                  />
-                </div>
-              </div>
-
-              {/* Event Details */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-cantinho-navy">Detalhes do Evento</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="eventType">Tipo de Evento *</Label>
-                    <Input
-                      id="eventType"
-                      value={formData.eventType}
-                      onChange={(e) => handleInputChange('eventType', e.target.value)}
-                      placeholder="Ex: Casamento, Aniversário, Corporativo"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="guestCount">Número de Convidados *</Label>
-                    <Input
-                      id="guestCount"
-                      type="number"
-                      value={formData.guestCount}
-                      onChange={(e) => handleInputChange('guestCount', parseInt(e.target.value))}
-                      min={currentPackage.minGuests}
-                      max={currentPackage.maxGuests}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Data do Evento *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? format(date, "PPP", { locale: ptBR }) : "Selecionar data"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          disabled={(date) =>
-                            date < new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="location">Local do Evento *</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      placeholder="Endereço completo"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="specialRequests">Solicitações Especiais</Label>
-                  <Textarea
-                    id="specialRequests"
-                    value={formData.specialRequests}
-                    onChange={(e) => handleInputChange('specialRequests', e.target.value)}
-                    placeholder="Descreva qualquer solicitação especial, restrições alimentares, decoração específica, etc."
-                    rows={4}
-                  />
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 text-white py-3 text-lg font-semibold"
-              >
-                {isFirstOrder ? 'Solicitar Orçamento com Desconto' : 'Solicitar Orçamento'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          <Button 
+            type="submit" 
+            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+          >
+            Enviar Solicitação de Orçamento
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

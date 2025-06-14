@@ -141,13 +141,36 @@ const OrderTracker = ({ orderId }: OrderTrackerProps) => {
 
         const currentStepIndex = orderSteps.findIndex(step => step.id === data.status);
         
+        // Handle items properly - ensure it's always an array
+        let orderItems: Array<{ name: string; quantity: number; }> = [];
+        if (data.items) {
+          if (Array.isArray(data.items)) {
+            orderItems = data.items.map((item: any) => ({
+              name: item.name || 'Item',
+              quantity: item.quantity || 1
+            }));
+          } else if (typeof data.items === 'string') {
+            try {
+              const parsedItems = JSON.parse(data.items);
+              if (Array.isArray(parsedItems)) {
+                orderItems = parsedItems.map((item: any) => ({
+                  name: item.name || 'Item',
+                  quantity: item.quantity || 1
+                }));
+              }
+            } catch (e) {
+              console.error('Error parsing items:', e);
+            }
+          }
+        }
+        
         setOrder({
           id: data.id,
           status: data.status,
           estimatedDeliveryTime: calculateEstimatedTime(data.created_at, data.status),
           currentStep: currentStepIndex >= 0 ? currentStepIndex : 0,
           customerInfo,
-          items: data.items || []
+          items: orderItems
         });
       }
     } catch (error: any) {
@@ -164,7 +187,6 @@ const OrderTracker = ({ orderId }: OrderTrackerProps) => {
 
   const calculateEstimatedTime = (createdAt: string, status: string) => {
     const created = new Date(createdAt);
-    const now = new Date();
     
     // Base delivery time in minutes based on status
     const deliveryTimes = {

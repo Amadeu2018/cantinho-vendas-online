@@ -1,27 +1,24 @@
 
-import { useState, useEffect } from 'react';
-import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
 
 export const useFirstOrder = () => {
   const [isFirstOrder, setIsFirstOrder] = useState(false);
   const [discountApplied, setDiscountApplied] = useState(false);
-  const { items } = useCart();
-  const { toast } = useToast();
+  
+  const discount = 0.1; // 10% discount
 
   useEffect(() => {
-    // Check if this is a first order (no previous orders in localStorage)
-    const hasOrderedBefore = localStorage.getItem('has_ordered_before');
-    setIsFirstOrder(!hasOrderedBefore);
+    const hasOrdered = localStorage.getItem("cantinho-has-ordered");
+    const firstOrderApplied = localStorage.getItem("cantinho-first-order-applied");
+    
+    setIsFirstOrder(!hasOrdered);
+    setDiscountApplied(!!firstOrderApplied);
   }, []);
 
   const applyFirstOrderDiscount = () => {
-    if (isFirstOrder && items.length > 0 && !discountApplied) {
+    if (isFirstOrder && !discountApplied) {
       setDiscountApplied(true);
-      toast({
-        title: "Desconto aplicado!",
-        description: "10% de desconto no seu primeiro pedido foi aplicado. Use o código: PRIMEIRO10",
-      });
+      localStorage.setItem("cantinho-first-order-applied", "true");
       return true;
     }
     return false;
@@ -29,20 +26,20 @@ export const useFirstOrder = () => {
 
   const calculateDiscount = (subtotal: number) => {
     if (isFirstOrder && discountApplied) {
-      return subtotal * 0.1; // 10% discount
+      return subtotal * discount;
     }
     return 0;
   };
 
   const markAsOrdered = () => {
-    localStorage.setItem('has_ordered_before', 'true');
+    localStorage.setItem("cantinho-has-ordered", "true");
     setIsFirstOrder(false);
-    setDiscountApplied(false);
   };
 
   return {
     isFirstOrder,
     discountApplied,
+    discount,
     applyFirstOrderDiscount,
     calculateDiscount,
     markAsOrdered

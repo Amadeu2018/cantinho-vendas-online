@@ -14,9 +14,18 @@ const FeaturedDishes = () => {
 
   useEffect(() => {
     if (dishes) {
-      // Filter out popular dishes, or just take the first 3 if none are marked as popular
       const popular = dishes.filter((dish) => dish.popular);
-      setPopularDishes(popular.length ? popular.slice(0, 3) : dishes.slice(0, 3));
+      const mappedDishes = (popular.length ? popular.slice(0, 3) : dishes.slice(0, 3)).map(dish => ({
+        ...dish,
+        image: dish.image_url || dish.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+        rating: dish.rating || 4.5,
+        prepTime: dish.prepTime || '20-30 min',
+        serves: dish.serves || 2,
+        isSpicy: dish.isSpicy || false,
+        isVegetarian: dish.isVegetarian || false,
+        isPopular: dish.popular || dish.isPopular || false
+      }));
+      setPopularDishes(mappedDishes);
     }
   }, [dishes]);
 
@@ -81,11 +90,7 @@ const FeaturedDishes = () => {
                   className="animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <MenuCard 
-                    dish={dish}
-                    isFavorite={isFavorite(dish.id)}
-                    onToggleFavorite={() => toggleFavorite(dish.id)}
-                  />
+                  <MenuCard dish={dish} />
                 </div>
               ))}
             </div>

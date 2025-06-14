@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Users, MapPin, Clock, Phone, Mail, User, Gift } from "lucide-react";
 import { useFirstOrder } from "@/hooks/use-first-order";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export interface EventFormProps {
   onSubmit: (data: EventFormData) => void;
@@ -29,6 +29,7 @@ export interface EventFormData {
 
 const EventForm = ({ onSubmit }: EventFormProps) => {
   const { isFirstOrder, discount } = useFirstOrder();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState<EventFormData>({
     clientName: "",
@@ -94,7 +95,6 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Apply first order discount if applicable
       const finalBudget = isFirstOrder ? formData.budget * (1 - discount) : formData.budget;
       
       if (isFirstOrder) {
@@ -120,7 +120,6 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
       [field]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -267,7 +266,7 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
                   type="number"
                   min="1"
                   value={formData.guestCount || ''}
-                  onChange={(e) => handleInputChange('guestCount', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange('guestCount', Number(e.target.value) || 0)}
                   className={errors.guestCount ? 'border-red-500' : ''}
                 />
                 {errors.guestCount && (
@@ -282,7 +281,7 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
                   type="number"
                   min="1"
                   value={formData.budget || ''}
-                  onChange={(e) => handleInputChange('budget', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange('budget', Number(e.target.value) || 0)}
                   className={errors.budget ? 'border-red-500' : ''}
                 />
                 {errors.budget && (

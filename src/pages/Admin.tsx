@@ -10,7 +10,6 @@ import { Order as CartOrder } from "@/contexts/CartContext";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
 import { useToast } from "@/hooks/use-toast";
 
-// Converter o tipo Order de useAdminOrders para o tipo Order de CartContext
 const convertOrderType = (order: any): CartOrder => {
   return {
     ...order,
@@ -30,7 +29,6 @@ const Admin = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Use the custom hook for orders management
   const { 
     orders, 
     isLoading: fetchingOrders, 
@@ -41,7 +39,6 @@ const Admin = () => {
   
   useEffect(() => {
     if (user) {
-      // Initial loading is managed by the AdminAuthentication component
       setIsLoading(false);
     } else {
       setIsAuthenticated(false);
@@ -82,7 +79,6 @@ const Admin = () => {
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
   const convertedOrders = orders.map(order => convertOrderType(order));
 
-  // Wrapper functions that discard the boolean return value from the original functions
   const handleOrderStatusChange = async (orderId: string, status: string): Promise<void> => {
     try {
       await updateOrderStatus(orderId, status);
@@ -107,7 +103,6 @@ const Admin = () => {
     }
   };
 
-  // Define the title based on the current view
   const getTitle = () => {
     if (selectedOrder) {
       return `Pedido #${selectedOrder.id.slice(0, 8)}`;
@@ -118,7 +113,6 @@ const Admin = () => {
     return "Dashboard";
   };
 
-  // Render different content based on application state
   const renderContent = () => {
     if (!isAuthenticated) {
       return <AdminAuthentication onAuthenticated={handleAuthentication} />;
@@ -156,8 +150,12 @@ const Admin = () => {
     );
   };
 
+  if (!isAuthenticated) {
+    return renderContent();
+  }
+
   return (
-    <AdminLayout isLoading={isLoading} title={getTitle()}>
+    <AdminLayout onLogout={handleLogout} title={getTitle()}>
       {renderContent()}
     </AdminLayout>
   );

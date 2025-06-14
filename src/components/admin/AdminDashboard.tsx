@@ -342,7 +342,7 @@ const AdminDashboard = ({
                         <span className="text-sm font-medium">Taxa de conversão</span>
                         <span className="font-bold text-green-700">{orders.length > 0 ? Math.round((completedOrders / orders.length) * 100) : 0}%</span>
                       </div>
-                      <div className "flex justify-between items-center p-4 bg-purple-50 rounded-xl border border-purple-100">
+                      <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl border border-purple-100">
                         <span className="text-sm font-medium">Tempo médio preparo</span>
                         <span className="font-bold text-purple-700">18 min</span>
                       </div>

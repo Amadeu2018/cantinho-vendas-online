@@ -99,7 +99,6 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
       toast({
         title: "Adicionado ao carrinho!",
         description: "Lembre-se: use o código PRIMEIRO10 para 10% de desconto no seu primeiro pedido.",
-        duration: 4000,
       });
     }
   };

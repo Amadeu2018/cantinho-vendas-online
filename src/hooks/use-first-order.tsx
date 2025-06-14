@@ -21,7 +21,6 @@ export const useFirstOrder = () => {
       toast({
         title: "Desconto aplicado!",
         description: "10% de desconto no seu primeiro pedido foi aplicado. Use o código: PRIMEIRO10",
-        duration: 5000,
       });
       return true;
     }

@@ -71,7 +71,7 @@ const Contacto = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 animate-fade-in">
                 <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
                   <MessageCircle className="w-8 h-8 mx-auto mb-3 text-cantinho-sand" />
-                  <div className="text-2xl font-bold">< 2h</div>
+                  <div className="text-2xl font-bold">Menos de 2h</div>
                   <div className="text-sm text-white/80">Tempo de Resposta</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">

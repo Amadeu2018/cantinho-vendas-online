@@ -1,239 +1,215 @@
 
-import React, { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCart } from "@/contexts/CartContext";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Plus, Minus, Star, Clock, ChefHat } from "lucide-react";
-import { Dish } from "@/types/dish";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
 import { useFirstOrder } from "@/hooks/use-first-order";
+import { Heart, Plus, Star, Clock, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-type MenuCardProps = {
+export interface Dish {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  rating?: number;
+  prepTime?: string;
+  serves?: number;
+  isSpicy?: boolean;
+  isVegetarian?: boolean;
+  isPopular?: boolean;
+}
+
+interface MenuCardProps {
   dish: Dish;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-};
+}
 
-const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps) => {
-  const { user } = useAuth();
-  const { addItem, removeItem, items } = useCart();
-  const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
+const MenuCard = ({ dish }: MenuCardProps) => {
   const { toast } = useToast();
-  const { isFirstOrder } = useFirstOrder();
-
-  // Ensure price is always a number
-  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) || 0 : (dish.price || 0);
+  const { addItem, isFavorite, addToFavorites, removeFromFavorites } = useCart();
+  const { isFirstOrder, discount } = useFirstOrder();
   
-  // Count how many of this dish is in the cart
-  const itemInCart = items.find((item) => item.id === dish.id);
-  const quantity = itemInCart ? itemInCart.quantity : 0;
-
-  const handleToggleFavorite = async () => {
-    if (!user) {
-      toast({
-        title: "Login necessário",
-        description: "Você precisa estar logado para adicionar aos favoritos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (onToggleFavorite) {
-      onToggleFavorite();
-      return;
-    }
-
-    setIsAddingToFavorites(true);
-    try {
-      if (isFavorite) {
-        // Remove from favorites
-        const { error } = await supabase
-          .from("favorites")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("dish_id", dish.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Removido dos favoritos",
-          description: `${dish.name} foi removido dos seus favoritos`,
-        });
-      } else {
-        // Add to favorites
-        const { error } = await supabase.from("favorites").insert({
-          user_id: user.id,
-          dish_id: dish.id,
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Adicionado aos favoritos",
-          description: `${dish.name} foi adicionado aos seus favoritos`,
-        });
-      }
-    } catch (error: any) {
-      console.error("Erro ao modificar favoritos:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível modificar os favoritos. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAddingToFavorites(false);
-    }
-  };
+  const isFav = isFavorite(dish.id);
+  const finalPrice = isFirstOrder ? dish.price * (1 - discount) : dish.price;
+  const savings = dish.price - finalPrice;
 
   const handleAddToCart = () => {
     addItem({
       id: dish.id,
       name: dish.name,
-      price: dishPrice,
-      image: dish.image_url || "/placeholder.svg"
+      price: finalPrice,
+      image: dish.image,
     });
 
-    if (isFirstOrder && quantity === 0) {
+    if (isFirstOrder && savings > 0) {
       toast({
-        title: "Adicionado ao carrinho!",
-        description: "Lembre-se: use o código PRIMEIRO10 para 10% de desconto no seu primeiro pedido.",
+        title: "Primeiro pedido!",
+        description: `Você economizou ${savings.toLocaleString('pt-AO', { 
+          style: 'currency', 
+          currency: 'AOA' 
+        })} neste prato! 🎉`,
       });
     }
   };
 
+  const toggleFavorite = () => {
+    if (isFav) {
+      removeFromFavorites(dish.id);
+    } else {
+      addToFavorites(dish.id);
+    }
+  };
+
   return (
-    <div className="bg-white shadow-lg rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-gray-100">
-      <div className="relative">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] border-0 bg-white">
+      {/* Image Container */}
+      <div className="relative overflow-hidden">
         <img
-          src={dish.image_url || "/placeholder.svg"}
+          src={dish.image}
           alt={dish.name}
-          className="w-full h-56 object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "/placeholder.svg";
-          }}
+          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
-        {/* Overlay with quick info */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-4 left-4 text-white">
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="w-4 h-4" />
-              <span>15-20 min</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm mt-1">
-              <ChefHat className="w-4 h-4" />
-              <span>Receita tradicional</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Favorite button */}
-        <button
-          onClick={handleToggleFavorite}
-          disabled={isAddingToFavorites}
-          className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg transition-all duration-300 hover:bg-white hover:scale-110"
-          aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        >
-          <Heart
-            className={`h-5 w-5 transition-colors ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-400"
-            }`}
-          />
-        </button>
-
-        {/* Badges */}
+        {/* Overlay badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {dish.promotion && (
-            <Badge className="bg-red-500 text-white shadow-lg animate-pulse">
-              {dish.promotion.label || "Promoção"}
-            </Badge>
-          )}
-          {dish.popular && (
-            <Badge className="bg-cantinho-terracotta text-white shadow-lg">
-              <Star className="w-3 h-3 mr-1" />
-              Popular
+          {dish.isPopular && (
+            <Badge className="bg-red-500 text-white px-2 py-1 text-xs">
+              🔥 Popular
             </Badge>
           )}
           {isFirstOrder && (
-            <Badge className="bg-green-500 text-white shadow-lg">
-              10% OFF
+            <Badge className="bg-green-500 text-white px-2 py-1 text-xs animate-pulse">
+              -10% Primeiro Pedido
             </Badge>
           )}
         </div>
+
+        {/* Favorite button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-200"
+          onClick={toggleFavorite}
+        >
+          <Heart 
+            className={`h-4 w-4 transition-colors ${
+              isFav ? "fill-red-500 text-red-500" : "text-gray-600"
+            }`} 
+          />
+        </Button>
+
+        {/* Quick info overlay */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+          <div className="flex items-center justify-between text-white text-xs">
+            {dish.rating && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span>{dish.rating}</span>
+              </div>
+            )}
+            {dish.prepTime && (
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span>{dish.prepTime}</span>
+              </div>
+            )}
+            {dish.serves && (
+              <div className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                <span>{dish.serves} pessoas</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="p-6">
-        <div className="mb-3">
-          <h3 className="font-bold text-xl mb-2 text-cantinho-navy line-clamp-1">
-            {dish.name}
-          </h3>
-          <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-3">
-            {dish.description}
-          </p>
-          
-          {/* Tags */}
-          {dish.tags && dish.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {dish.tags.slice(0, 2).map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs bg-cantinho-cream/50 border-cantinho-terracotta/30">
-                  {tag}
-                </Badge>
-              ))}
+      <CardContent className="p-4 space-y-3">
+        {/* Title and category */}
+        <div className="space-y-1">
+          <div className="flex items-start justify-between">
+            <h3 className="font-bold text-lg text-cantinho-navy leading-tight group-hover:text-cantinho-terracotta transition-colors">
+              {dish.name}
+            </h3>
+            <div className="flex gap-1">
+              {dish.isSpicy && <span className="text-red-500 text-sm">🌶️</span>}
+              {dish.isVegetarian && <span className="text-green-500 text-sm">🌱</span>}
             </div>
-          )}
+          </div>
+          <Badge variant="outline" className="text-xs">
+            {dish.category}
+          </Badge>
         </div>
 
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="font-bold text-xl text-cantinho-navy">
-              {dishPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-            </span>
-            {isFirstOrder && (
-              <span className="text-sm text-green-600 font-medium">
-                Com desconto: {(dishPrice * 0.9).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
-              </span>
-            )}
-          </div>
+        {/* Description */}
+        <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+          {dish.description}
+        </p>
 
-          <div className="flex items-center gap-2">
-            {quantity > 0 && (
-              <>
-                <Button
-                  onClick={() => removeItem(dish.id)}
-                  size="sm"
-                  variant="outline"
-                  className="h-10 w-10 p-0 border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="font-bold text-lg w-8 text-center text-cantinho-navy">
-                  {quantity}
+        {/* Price and discount */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              {isFirstOrder && savings > 0 ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-green-600">
+                      {finalPrice.toLocaleString('pt-AO', { 
+                        style: 'currency', 
+                        currency: 'AOA' 
+                      })}
+                    </span>
+                    <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0.5">
+                      -10%
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-500 line-through">
+                    {dish.price.toLocaleString('pt-AO', { 
+                      style: 'currency', 
+                      currency: 'AOA' 
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-lg font-bold text-cantinho-navy">
+                  {dish.price.toLocaleString('pt-AO', { 
+                    style: 'currency', 
+                    currency: 'AOA' 
+                  })}
                 </span>
-              </>
-            )}
-            <Button
-              onClick={handleAddToCart}
-              size="sm"
-              className="h-10 w-10 p-0 bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+              )}
+            </div>
           </div>
+
+          {/* Add to cart button */}
+          <Button
+            onClick={handleAddToCart}
+            className="w-full bg-gradient-to-r from-cantinho-terracotta to-cantinho-terracotta/90 hover:from-cantinho-terracotta/90 hover:to-cantinho-terracotta text-white font-semibold py-2.5 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {isFirstOrder && savings > 0 ? 'Adicionar com Desconto' : 'Adicionar ao Carrinho'}
+          </Button>
         </div>
 
-        {/* First order message */}
-        {isFirstOrder && quantity === 0 && (
-          <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-xs text-green-700 text-center font-medium">
-              Primeiro pedido? Ganhe 10% de desconto!
+        {/* First order savings highlight */}
+        {isFirstOrder && savings > 0 && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+            <p className="text-green-700 text-sm font-medium">
+              🎉 Você economiza{' '}
+              <span className="font-bold">
+                {savings.toLocaleString('pt-AO', { 
+                  style: 'currency', 
+                  currency: 'AOA' 
+                })}
+              </span>
+              {' '}no seu primeiro pedido!
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

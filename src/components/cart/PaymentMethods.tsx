@@ -36,7 +36,6 @@ interface PaymentMethodsProps {
 const PaymentMethods = ({ selectedMethod, onMethodSelect, total }: PaymentMethodsProps) => {
   const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
 
   const paymentMethods: PaymentMethod[] = [
     {
@@ -110,8 +109,7 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, total }: PaymentMethod
     if (methodId === "multicaixa_express" || methodId.includes("money")) {
       toast({
         title: "Método selecionado",
-        description: "Você será redirecionado para completar o pagamento de forma segura.",
-        duration: 3000
+        description: "Você será redirecionado para completar o pagamento de forma segura."
       });
     }
   };

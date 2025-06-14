@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   LogOut, 
   Settings, 
-  Bell,
   Search,
   Menu,
   X,
@@ -19,7 +18,7 @@ import {
   CalendarDays,
   Home
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import NotificationsDropdown from "./NotificationsDropdown";
 
 interface AdminLayoutProps {
@@ -31,17 +30,28 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navigationItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, current: location.pathname === '/admin' },
-    { name: 'Pedidos', href: '/admin/orders', icon: ShoppingCart, current: location.pathname === '/admin/orders' },
-    { name: 'Produtos', href: '/admin/products', icon: Package, current: location.pathname === '/admin/products' },
+    { name: 'Pedidos', href: '/admin', icon: ShoppingCart, current: location.pathname === '/admin' && title === 'Pedidos' },
+    { name: 'Produtos', href: '/admin', icon: Package, current: location.pathname === '/admin' && title === 'Produtos' },
     { name: 'Eventos', href: '/event-admin', icon: CalendarDays, current: location.pathname === '/event-admin' },
-    { name: 'Clientes', href: '/admin/customers', icon: Users, current: location.pathname === '/admin/customers' },
-    { name: 'Relatórios', href: '/admin/reports', icon: BarChart3, current: location.pathname === '/admin/reports' },
-    { name: 'Finanças', href: '/admin/finance', icon: CreditCard, current: location.pathname === '/admin/finance' },
-    { name: 'Configurações', href: '/admin/settings', icon: Settings, current: location.pathname === '/admin/settings' },
+    { name: 'Clientes', href: '/admin', icon: Users, current: location.pathname === '/admin' && title === 'Clientes' },
+    { name: 'Relatórios', href: '/admin', icon: BarChart3, current: location.pathname === '/admin' && title === 'Relatórios' },
+    { name: 'Finanças', href: '/admin', icon: CreditCard, current: location.pathname === '/admin' && title === 'Finanças' },
+    { name: 'Configurações', href: '/admin', icon: Settings, current: location.pathname === '/admin' && title === 'Configurações' },
   ];
+
+  const handleNavigation = (item: typeof navigationItems[0]) => {
+    if (item.href === '/admin' && item.name !== 'Dashboard') {
+      // For admin sections, stay on /admin but change the tab
+      navigate('/admin', { state: { activeTab: item.name.toLowerCase() } });
+    } else {
+      navigate(item.href);
+    }
+    setSidebarOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 flex">
@@ -72,10 +82,10 @@ const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutPro
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
-                <Link
+                <button
                   key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  onClick={() => handleNavigation(item)}
+                  className={`w-full group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     item.current
                       ? 'bg-cantinho-terracotta text-white shadow-lg'
                       : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -86,7 +96,7 @@ const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutPro
                   {item.current && (
                     <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                   )}
-                </Link>
+                </button>
               );
             })}
           </div>

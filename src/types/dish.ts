@@ -5,7 +5,7 @@ export type Dish = {
   description: string;
   price: number;
   image_url: string;
-  image: string; // Add compatibility with MenuCard
+  image: string;
   category: 'appetizer' | 'main' | 'dessert';
   popular?: boolean;
   tags?: string[];

@@ -64,7 +64,6 @@ export const usePromotions = () => {
       }
     } catch (error) {
       console.error('Erro ao buscar promoções:', error);
-      // Fallback com dados mock
       setPromotions([]);
     } finally {
       setLoading(false);

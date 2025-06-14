@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminAuthentication from "@/components/admin/AdminAuthentication";
 import AdminDashboard from "@/components/admin/AdminDashboard";
@@ -26,8 +27,10 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const { user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
   
   const { 
     orders, 
@@ -39,12 +42,31 @@ const Admin = () => {
   
   useEffect(() => {
     if (user) {
+      setIsAuthenticated(true);
       setIsLoading(false);
     } else {
       setIsAuthenticated(false);
       setIsLoading(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    // Check if there's a state for activeTab from navigation
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
+
+  // Auto-refresh orders every 30 seconds
+  useEffect(() => {
+    if (isAuthenticated) {
+      const interval = setInterval(() => {
+        refreshOrders();
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, refreshOrders]);
 
   const handleAuthentication = (isAdmin: boolean) => {
     setIsAuthenticated(isAdmin);
@@ -110,7 +132,19 @@ const Admin = () => {
     if (selectedInvoiceOrder) {
       return "Fatura";
     }
-    return "Dashboard";
+    
+    // Map activeTab to title
+    const titleMap: { [key: string]: string } = {
+      dashboard: "Dashboard",
+      pedidos: "Pedidos",
+      produtos: "Produtos",
+      clientes: "Clientes",
+      finanças: "Finanças",
+      relatórios: "Relatórios",
+      configurações: "Configurações"
+    };
+    
+    return titleMap[activeTab] || "Dashboard";
   };
 
   const renderContent = () => {
@@ -146,6 +180,8 @@ const Admin = () => {
         onSelectOrder={orderId => handleSelectOrder(orderId)}
         onPrepareInvoice={handlePrepareInvoice}
         onLogout={handleLogout}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
     );
   };

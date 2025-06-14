@@ -1,93 +1,75 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Promotion } from '@/types/promotion';
-import { Dish } from '@/types/dish';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Dish } from "@/types/dish";
+
+export interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  discount: number;
+  validUntil: string;
+  dish: Dish;
+  isActive: boolean;
+}
 
 export const usePromotions = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
+
   const fetchPromotions = async () => {
     try {
       setLoading(true);
       
-      // Get current date in ISO format
-      const now = new Date().toISOString();
-      
-      // Fetch active promotions
-      const { data: promotionsData, error: promotionsError } = await supabase
+      const { data, error } = await supabase
         .from('promotions')
-        .select('*')
-        .gte('end_date', now);
-        
-      if (promotionsError) throw promotionsError;
-      
-      if (!promotionsData || promotionsData.length === 0) {
-        setPromotions([]);
-        return;
+        .select(`
+          *,
+          products:products!promotions_product_id_fkey(*)
+        `)
+        .gte('end_date', new Date().toISOString());
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedPromotions: Promotion[] = data.map((promo: any) => ({
+          id: promo.id,
+          title: `${promo.discount_percentage}% OFF`,
+          description: `Desconto especial em ${promo.products?.name || 'produto'}`,
+          discount: Number(promo.discount_percentage) || 0,
+          validUntil: promo.end_date,
+          isActive: new Date(promo.end_date) > new Date(),
+          dish: {
+            id: promo.products?.id || promo.id,
+            name: promo.products?.name || 'Produto',
+            description: promo.products?.description || 'Descrição não disponível',
+            price: Number(promo.products?.price) || 0,
+            image_url: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+            image: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+            category: "main",
+            rating: 4.5,
+            prepTime: '20-30 min',
+            serves: 2,
+            isSpicy: false,
+            isVegetarian: false,
+            isPopular: false
+          }
+        }));
+
+        setPromotions(formattedPromotions);
       }
-      
-      // For each promotion, fetch the associated product
-      const promotionsWithDishes = await Promise.all(
-        promotionsData.map(async (promotion: any) => {
-          if (!promotion.product_id) return null;
-          
-          // Get the actual product data
-          const { data: product, error: productError } = await supabase
-            .from('products')
-            .select('*')
-            .eq('id', promotion.product_id)
-            .single();
-            
-          if (productError) return null;
-          
-          // Convert product to dish format
-          const dish: Dish = {
-            id: product.id,
-            name: product.name,
-            description: product.description || '',
-            price: product.price,
-            image_url: product.image_url || 'https://source.unsplash.com/random/300x200/?food',
-            category: 'main' // Default category
-          };
-          
-          // Map to the expected Promotion type
-          return {
-            id: promotion.id,
-            title: promotion.title || `${product.name} em promoção!`,
-            description: promotion.description || `Aproveite ${promotion.discount_percentage}% de desconto`,
-            discountPercentage: promotion.discount_percentage,
-            validUntil: promotion.end_date,
-            image_url: promotion.image_url || product.image_url || 'https://source.unsplash.com/random/400x200/?promotion',
-            dishes: [dish]
-          } as Promotion;
-        })
-      );
-      
-      // Filter out null values (promotions with no dishes)
-      const filteredPromotions = promotionsWithDishes.filter(Boolean) as Promotion[];
-      setPromotions(filteredPromotions);
-    } catch (error: any) {
-      console.error('Error fetching promotions:', error);
-      toast({
-        title: 'Erro ao carregar promoções',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      console.error('Erro ao buscar promoções:', error);
+      // Fallback com dados mock
+      setPromotions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  return {
-    promotions,
-    loading,
-    fetchPromotions,
-  };
+  return { promotions, loading, refetch: fetchPromotions };
 };

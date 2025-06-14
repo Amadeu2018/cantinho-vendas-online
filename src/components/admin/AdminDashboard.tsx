@@ -6,6 +6,7 @@ import AdminProducts from "@/components/admin/AdminProducts";
 import AdminFinance from "@/components/admin/AdminFinance";
 import AdminInventory from "@/components/admin/AdminInventory";
 import AdminReports from "@/components/admin/AdminReports";
+import AdminCustomers from "./AdminCustomers";
 import { Order as CartOrder } from "@/contexts/CartContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -259,6 +260,7 @@ const AdminDashboard = ({
                 { value: "dashboard", label: "Dashboard" },
                 { value: "orders", label: "Pedidos" },
                 { value: "products", label: "Produtos" },
+                { value: "customers", label: "Clientes" },
                 { value: "finance", label: "Finanças" },
                 { value: "inventory", label: "Estoque" },
                 { value: "reports", label: "Relatórios" }
@@ -322,6 +324,10 @@ const AdminDashboard = ({
             
             <TabsContent value="products" className="m-0 focus:outline-none">
               <AdminProducts />
+            </TabsContent>
+
+            <TabsContent value="customers" className="m-0 focus:outline-none">
+              <AdminCustomers />
             </TabsContent>
             
             <TabsContent value="finance" className="m-0 focus:outline-none">

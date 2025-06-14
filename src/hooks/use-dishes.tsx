@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dish } from "@/types/dish";
 import { useToast } from "@/hooks/use-toast";
+import { Dish } from "@/types/dish";
 
 export const useDishes = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -12,243 +12,236 @@ export const useDishes = () => {
 
   useEffect(() => {
     fetchDishes();
-    // Load favorites from local storage if available
-    const savedFavorites = localStorage.getItem('dish_favorites');
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
-    }
+    fetchFavorites();
   }, []);
 
   const fetchDishes = async () => {
     try {
       setLoading(true);
-      console.log("Fetching dishes from Supabase...");
       
-      // First fetch products without categories to avoid the relationship error
-      const { data: productsData, error: productsError } = await supabase
+      const { data: products, error } = await supabase
         .from('products')
-        .select('*');
-      
-      if (productsError) {
-        console.error("Error fetching products:", productsError);
-        throw productsError;
-      }
-      
-      console.log("Fetched products:", productsData);
+        .select(`
+          *,
+          categories:categories!products_category_id_fkey(name),
+          promotions:promotions!promotions_product_id_fkey(discount_percentage, start_date, end_date)
+        `);
 
-      // If we have products, try to fetch categories separately
-      let categoriesData: any[] = [];
-      if (productsData && productsData.length > 0) {
-        const { data: categories, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*');
-        
-        if (categoriesError) {
-          console.error("Error fetching categories:", categoriesError);
-          // Continue without categories
-        } else {
-          categoriesData = categories || [];
-        }
-      }
-      
-      // Fetch active promotions
-      const now = new Date().toISOString();
-      const { data: promotionsData, error: promotionsError } = await supabase
-        .from('promotions')
-        .select('*')
-        .lte('start_date', now)
-        .gte('end_date', now);
-      
-      if (promotionsError) {
-        console.error("Error fetching promotions:", promotionsError);
-        // Continue without promotions
-      }
-      
-      console.log("Fetched promotions:", promotionsData);
-      
-      // Create a map of product_id to promotion
-      const promotionsMap: Record<string, { discount: number, label?: string }> = {};
-      if (promotionsData && Array.isArray(promotionsData)) {
-        promotionsData.forEach((promo: any) => {
-          if (promo && promo.product_id) {
-            promotionsMap[promo.product_id] = {
-              discount: Number(promo.discount_percentage) || 10,
-              label: `${promo.discount_percentage || 10}% OFF`
-            };
-          }
-        });
-      }
+      if (error) throw error;
 
-      // Create a map of category_id to category
-      const categoriesMap: Record<string, any> = {};
-      categoriesData.forEach((category: any) => {
-        if (category && category.id) {
-          categoriesMap[category.id] = category;
-        }
-      });
-      
-      if (productsData && Array.isArray(productsData) && productsData.length > 0) {
-        // Map to the Dish format with proper null checks
-        const mappedDishes: Dish[] = productsData.map((product: any) => {
-          // Determine category from categories relation or fallback
-          let category: 'appetizer' | 'main' | 'dessert' = 'main';
-          
-          if (product.category_id && categoriesMap[product.category_id]) {
-            const categoryName = (categoriesMap[product.category_id].name || '').toLowerCase();
-            
-            if (categoryName.includes('entrada') || categoryName.includes('appetizer')) {
-              category = 'appetizer';
-            } else if (categoryName.includes('sobremesa') || categoryName.includes('doce') || categoryName.includes('dessert')) {
-              category = 'dessert';
-            } else {
-              category = 'main';
-            }
-          }
-          
-          // Ensure price is always a number with null safety
-          const price = product.price ? 
-            (typeof product.price === 'string' ? parseFloat(product.price) : Number(product.price)) 
-            : 0;
-          
-          // Check if the product has a promotion
-          const promotion = product.id && promotionsMap[product.id] 
-            ? promotionsMap[product.id] 
-            : undefined;
+      if (products) {
+        const formattedDishes: Dish[] = products.map((product: any) => ({
+          id: product.id,
+          name: product.name || 'Produto sem nome',
+          description: product.description || 'Descrição não disponível',
+          price: Number(product.price) || 0,
+          image_url: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+          image: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+          category: mapCategory(product.categories?.name || 'main'),
+          popular: product.stock_quantity > 10,
+          tags: product.categories ? [product.categories.name] : [],
+          promotion: product.promotions && product.promotions.length > 0 ? {
+            discount: Number(product.promotions[0].discount_percentage) || 0,
+            label: `${product.promotions[0].discount_percentage}% OFF`
+          } : undefined,
+          rating: 4.5,
+          prepTime: '20-30 min',
+          serves: 2,
+          isSpicy: false,
+          isVegetarian: false,
+          isPopular: product.stock_quantity > 10
+        }));
 
-          // Better image URL handling with fallback to placeholder
-          let imageUrl = '/placeholder.svg';
-          if (product.image_url) {
-            // If it's a full URL, use it directly
-            if (product.image_url.startsWith('http')) {
-              imageUrl = product.image_url;
-            } else {
-              // If it's a relative path or filename, use it as is
-              imageUrl = product.image_url;
-            }
-          }
-          
-          return {
-            id: product.id || '',
-            name: product.name || 'Produto sem nome',
-            description: product.description || '',
-            price: price,
-            image_url: imageUrl,
-            category,
-            popular: Math.random() > 0.7, // Random for demo, ideally this would be a field in the database
-            tags: [],
-            promotion
-          };
-        });
-        
-        console.log("Mapped dishes:", mappedDishes);
-        setDishes(mappedDishes);
-      } else {
-        console.log("No products found, using fallback data");
-        // Fallback to static data if no products found
-        setDishes(getFallbackDishes());
-        
-        // Show a toast to inform the user
-        toast({
-          title: "Dados de demonstração",
-          description: "Usando dados de exemplo. Adicione produtos no painel de administração.",
-        });
+        setDishes(formattedDishes);
       }
     } catch (error: any) {
-      console.error("Error fetching dishes:", error);
-      // Fallback to static data in case of error
-      setDishes(getFallbackDishes());
+      console.error('Erro ao buscar pratos:', error);
       
-      // Show a toast to inform the user
+      // Fallback com dados mock
+      const mockDishes: Dish[] = [
+        {
+          id: "1",
+          name: "Bacalhau à Brás",
+          description: "Tradicional prato português com bacalhau desfiado, batata palha e ovos.",
+          price: 2500,
+          image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          category: "main",
+          tags: ["peixe", "tradicional"],
+          popular: true,
+          promotion: {
+            discount: 15
+          },
+          rating: 4.8,
+          prepTime: '25-30 min',
+          serves: 2,
+          isSpicy: false,
+          isVegetarian: false,
+          isPopular: true
+        },
+        {
+          id: "2",
+          name: "Francesinha",
+          description: "Sanduíche português com linguiça, presunto, carne e molho especial.",
+          price: 1800,
+          image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          category: "main",
+          tags: ["carne", "tradicional"],
+          popular: true,
+          rating: 4.6,
+          prepTime: '20-25 min',
+          serves: 1,
+          isSpicy: false,
+          isVegetarian: false,
+          isPopular: true
+        },
+        {
+          id: "3",
+          name: "Caldo Verde",
+          description: "Sopa tradicional portuguesa com couve, batata e chouriço.",
+          price: 800,
+          image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          category: "main",
+          tags: ["sopa", "tradicional"],
+          popular: true,
+          rating: 4.4,
+          prepTime: '15-20 min',
+          serves: 1,
+          isSpicy: false,
+          isVegetarian: false,
+          isPopular: true
+        },
+        {
+          id: "4",
+          name: "Pastéis de Nata",
+          description: "Deliciosos pastéis de nata com canela e açúcar em pó.",
+          price: 150,
+          image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          category: "appetizer",
+          tags: ["doce", "tradicional"],
+          rating: 4.9,
+          prepTime: '5 min',
+          serves: 1,
+          isSpicy: false,
+          isVegetarian: true,
+          isPopular: false
+        },
+        {
+          id: "5",
+          name: "Pudim Flan",
+          description: "Sobremesa cremosa com calda de caramelo.",
+          price: 450,
+          image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3",
+          category: "dessert",
+          tags: ["doce", "sobremesa"],
+          rating: 4.3,
+          prepTime: '10 min',
+          serves: 2,
+          isSpicy: false,
+          isVegetarian: true,
+          isPopular: false
+        }
+      ];
+      
+      setDishes(mockDishes);
+      
       toast({
-        title: "Erro ao carregar produtos",
-        description: "Usando dados de exemplo. Verifique a conexão com o banco de dados.",
-        variant: "destructive"
+        title: "Aviso",
+        description: "Carregando dados locais dos pratos.",
+        variant: "default",
       });
     } finally {
       setLoading(false);
     }
   };
-  
-  // Function to get fallback dishes in case of error
-  const getFallbackDishes = (): Dish[] => {
-    return [
-      {
-        id: "1",
-        name: "Feijoada Completa",
-        description: "Tradicional feijoada brasileira com todas as carnes e acompanhamentos",
-        price: 3500,
-        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
-        category: "main",
-        tags: ["Brasileiro", "Tradicional"],
-        popular: true,
-        promotion: { discount: 10 }
-      },
-      {
-        id: "2",
-        name: "Moqueca de Peixe",
-        description: "Peixe fresco preparado com leite de coco, dendê, tomate e pimentão",
-        price: 4200,
-        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
-        category: "main",
-        tags: ["Frutos do Mar", "Especialidade"],
-        popular: true
-      },
-      {
-        id: "3",
-        name: "Picanha na Brasa",
-        description: "Corte nobre de picanha grelhada, acompanhada de vinagrete e farofa",
-        price: 5500,
-        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
-        category: "main",
-        tags: ["Churrasco"],
-        popular: true
-      },
-      {
-        id: "4",
-        name: "Coxinha",
-        description: "Tradicional salgado brasileiro recheado com frango desfiado",
-        price: 800,
-        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
-        category: "appetizer",
-        tags: ["Salgados"]
-      },
-      {
-        id: "5",
-        name: "Mousse de Maracujá",
-        description: "Sobremesa cremosa de maracujá com calda fresca",
-        price: 1200,
-        image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400",
-        category: "dessert",
-        tags: ["Doces"]
-      }
-    ];
-  };
-  
-  const featuredDishes = dishes.filter(dish => dish.popular);
-  
-  const isFavorite = (dishId: string) => favorites.includes(dishId);
-  
-  const toggleFavorite = (dishId: string) => {
-    let newFavorites: string[];
-    if (favorites.includes(dishId)) {
-      newFavorites = favorites.filter(id => id !== dishId);
-    } else {
-      newFavorites = [...favorites, dishId];
+
+  const fetchFavorites = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('dish_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setFavorites(data?.map(fav => fav.dish_id) || []);
+    } catch (error) {
+      console.error('Erro ao buscar favoritos:', error);
     }
-    setFavorites(newFavorites);
-    
-    // Save to localStorage for persistence
-    localStorage.setItem('dish_favorites', JSON.stringify(newFavorites));
   };
 
-  return { 
-    dishes, 
-    featuredDishes, 
-    loading, 
-    isFavorite, 
+  const mapCategory = (categoryName: string): 'appetizer' | 'main' | 'dessert' => {
+    const lowerCategory = categoryName.toLowerCase();
+    if (lowerCategory.includes('entrada') || lowerCategory.includes('aperitivo')) return 'appetizer';
+    if (lowerCategory.includes('sobremesa') || lowerCategory.includes('doce')) return 'dessert';
+    return 'main';
+  };
+
+  const toggleFavorite = async (dishId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Login necessário",
+          description: "Faça login para adicionar favoritos",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const isFavorite = favorites.includes(dishId);
+
+      if (isFavorite) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('dish_id', dishId);
+
+        if (error) throw error;
+
+        setFavorites(prev => prev.filter(id => id !== dishId));
+        toast({
+          title: "Removido dos favoritos",
+          description: "Prato removido da sua lista de favoritos",
+        });
+      } else {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, dish_id: dishId });
+
+        if (error) throw error;
+
+        setFavorites(prev => [...prev, dishId]);
+        toast({
+          title: "Adicionado aos favoritos",
+          description: "Prato adicionado à sua lista de favoritos",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao alterar favorito:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível alterar o favorito",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const isFavorite = (dishId: string) => favorites.includes(dishId);
+
+  return {
+    dishes,
+    loading,
+    isFavorite,
     toggleFavorite,
     refetch: fetchDishes
   };
 };
-
-export default useDishes;

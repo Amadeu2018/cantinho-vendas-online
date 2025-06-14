@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
@@ -191,7 +190,12 @@ const Admin = () => {
   }
 
   return (
-    <AdminLayout onLogout={handleLogout} title={getTitle()}>
+    <AdminLayout 
+      onLogout={handleLogout} 
+      title={getTitle()}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
       {renderContent()}
     </AdminLayout>
   );

@@ -16,7 +16,9 @@ import {
   BarChart3,
   CreditCard,
   CalendarDays,
-  Home
+  Home,
+  Archive,
+  Utensils
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import NotificationsDropdown from "./NotificationsDropdown";
@@ -25,30 +27,39 @@ interface AdminLayoutProps {
   children: React.ReactNode;
   onLogout?: () => void;
   title?: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutProps) => {
+const AdminLayout = ({ 
+  children, 
+  onLogout, 
+  title = "Dashboard", 
+  activeTab = "dashboard",
+  onTabChange 
+}: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   const navigationItems = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, current: location.pathname === '/admin' },
-    { name: 'Pedidos', href: '/admin', icon: ShoppingCart, current: location.pathname === '/admin' && title === 'Pedidos' },
-    { name: 'Produtos', href: '/admin', icon: Package, current: location.pathname === '/admin' && title === 'Produtos' },
-    { name: 'Eventos', href: '/event-admin', icon: CalendarDays, current: location.pathname === '/event-admin' },
-    { name: 'Clientes', href: '/admin', icon: Users, current: location.pathname === '/admin' && title === 'Clientes' },
-    { name: 'Relatórios', href: '/admin', icon: BarChart3, current: location.pathname === '/admin' && title === 'Relatórios' },
-    { name: 'Finanças', href: '/admin', icon: CreditCard, current: location.pathname === '/admin' && title === 'Finanças' },
-    { name: 'Configurações', href: '/admin', icon: Settings, current: location.pathname === '/admin' && title === 'Configurações' },
+    { name: 'Dashboard', tab: 'dashboard', icon: LayoutDashboard },
+    { name: 'Pedidos', tab: 'orders', icon: ShoppingCart },
+    { name: 'Produtos', tab: 'products', icon: Package },
+    { name: 'Eventos', href: '/event-admin', icon: CalendarDays },
+    { name: 'Clientes', tab: 'customers', icon: Users },
+    { name: 'Estoque', tab: 'inventory', icon: Archive },
+    { name: 'Finanças', tab: 'finance', icon: CreditCard },
+    { name: 'Relatórios', tab: 'reports', icon: BarChart3 },
+    { name: 'Cardápio', tab: 'menu', icon: Utensils },
+    { name: 'Configurações', tab: 'settings', icon: Settings },
   ];
 
   const handleNavigation = (item: typeof navigationItems[0]) => {
-    if (item.href === '/admin' && item.name !== 'Dashboard') {
-      // For admin sections, stay on /admin but change the tab
-      navigate('/admin', { state: { activeTab: item.name.toLowerCase() } });
-    } else {
+    if (item.href) {
       navigate(item.href);
+    } else if (item.tab && onTabChange) {
+      onTabChange(item.tab);
     }
     setSidebarOpen(false);
   };
@@ -81,19 +92,23 @@ const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutPro
           <div className="space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
+              const isCurrentTab = item.tab === activeTab;
+              const isEventPage = item.href === '/event-admin' && location.pathname === '/event-admin';
+              const isCurrent = isCurrentTab || isEventPage;
+              
               return (
                 <button
                   key={item.name}
                   onClick={() => handleNavigation(item)}
                   className={`w-full group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    item.current
+                    isCurrent
                       ? 'bg-cantinho-terracotta text-white shadow-lg'
                       : 'text-white/80 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {item.name}
-                  {item.current && (
+                  {isCurrent && (
                     <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                   )}
                 </button>
@@ -157,6 +172,31 @@ const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutPro
               </div>
             </div>
 
+            {/* Center Navigation Tabs - Only show on larger screens */}
+            <div className="hidden xl:flex items-center gap-2 bg-gray-100 rounded-full p-1">
+              {navigationItems.slice(0, 6).map((item) => {
+                const Icon = item.icon;
+                const isCurrentTab = item.tab === activeTab;
+                const isEventPage = item.href === '/event-admin' && location.pathname === '/event-admin';
+                const isCurrent = isCurrentTab || isEventPage;
+                
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => handleNavigation(item)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      isCurrent
+                        ? 'bg-cantinho-terracotta text-white shadow-md'
+                        : 'text-gray-600 hover:text-cantinho-navy hover:bg-white/50'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="hidden 2xl:inline">{item.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Right section */}
             <div className="flex items-center gap-4">
               {/* Search */}
@@ -171,11 +211,6 @@ const AdminLayout = ({ children, onLogout, title = "Dashboard" }: AdminLayoutPro
 
               {/* Notifications */}
               <NotificationsDropdown />
-
-              {/* Settings */}
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
 
               {/* User Menu */}
               <div className="flex items-center gap-3 pl-3 border-l border-gray-200">

@@ -1,52 +1,39 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Gift } from "lucide-react";
-import { useFirstOrder } from "@/hooks/use-first-order";
-import { useToast } from "@/hooks/use-toast";
-import EventFormData from "./EventFormData";
-import EventDetails from "./EventDetails";
+import { Calendar, Users, MapPin, Clock, Phone, Mail, User } from "lucide-react";
+import { EventFormData } from "./EventFormData";
+import { toast } from "sonner";
 
-export interface EventFormProps {
-  onSubmit: (data: EventFormData) => void;
+interface EventFormProps {
+  selectedPackage: any;
+  onFormSubmit: (formData: EventFormData) => void;
+  onBack: () => void;
 }
 
-export interface EventFormData {
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  eventType: string;
-  eventDate: string;
-  eventTime: string;
-  eventLocation: string;
-  guestCount: number;
-  specialRequests: string;
-  budget: number;
-}
-
-const EventForm = ({ onSubmit }: EventFormProps) => {
-  const { isFirstOrder, discount } = useFirstOrder();
-  const { toast } = useToast();
-  
+const EventForm = ({ selectedPackage, onFormSubmit, onBack }: EventFormProps) => {
   const [formData, setFormData] = useState<EventFormData>({
     clientName: "",
     clientEmail: "",
     clientPhone: "",
-    eventType: "",
-    eventDate: "",
+    eventDate: null,
     eventTime: "",
-    eventLocation: "",
-    guestCount: 0,
-    specialRequests: "",
-    budget: 0,
+    venue: "",
+    guestCount: 1,
+    additionalRequests: "",
+    selectedPackageName: selectedPackage?.name || "Pacote Personalizado",
+    totalPrice: selectedPackage?.price || 0,
   });
 
-  const [errors, setErrors] = useState<Partial<EventFormData>>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const validateForm = () => {
-    const newErrors: Partial<EventFormData> = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.clientName.trim()) {
       newErrors.clientName = "Nome é obrigatório";
@@ -62,28 +49,20 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
       newErrors.clientPhone = "Telefone é obrigatório";
     }
 
-    if (!formData.eventType.trim()) {
-      newErrors.eventType = "Tipo de evento é obrigatório";
-    }
-
     if (!formData.eventDate) {
-      newErrors.eventDate = "Data é obrigatória";
+      newErrors.eventDate = "Data do evento é obrigatória";
     }
 
-    if (!formData.eventTime) {
-      newErrors.eventTime = "Hora é obrigatória";
+    if (!formData.eventTime.trim()) {
+      newErrors.eventTime = "Hora do evento é obrigatória";
     }
 
-    if (!formData.eventLocation.trim()) {
-      newErrors.eventLocation = "Local é obrigatório";
+    if (!formData.venue.trim()) {
+      newErrors.venue = "Local do evento é obrigatório";
     }
 
-    if (formData.guestCount <= 0) {
+    if (!formData.guestCount || formData.guestCount < 1) {
       newErrors.guestCount = "Número de convidados deve ser maior que 0";
-    }
-
-    if (formData.budget <= 0) {
-      newErrors.budget = "Orçamento deve ser maior que 0";
     }
 
     setErrors(newErrors);
@@ -94,112 +73,174 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
     e.preventDefault();
     
     if (validateForm()) {
-      const finalBudget = isFirstOrder ? formData.budget * (1 - discount) : formData.budget;
-      
-      if (isFirstOrder) {
-        toast({
-          title: "Primeiro evento!",
-          description: `Você economizou ${(formData.budget - finalBudget).toLocaleString('pt-AO', { 
-            style: 'currency', 
-            currency: 'AOA' 
-          })} no seu primeiro evento! 🎉`,
-        });
-      }
-      
-      onSubmit({
+      // Convert string values to numbers where needed
+      const processedFormData = {
         ...formData,
-        budget: finalBudget
-      });
+        guestCount: parseInt(formData.guestCount.toString()),
+        totalPrice: parseFloat(formData.totalPrice.toString())
+      };
+      
+      onFormSubmit(processedFormData);
+      toast.success("Pedido de evento enviado com sucesso!");
+    } else {
+      toast.error("Por favor, corrija os erros no formulário");
     }
   };
 
-  const handleInputChange = (field: keyof EventFormData, value: string | number) => {
-    let processedValue: string | number = value;
-    
-    // Convert string to number for numeric fields
-    if (field === 'guestCount' || field === 'budget') {
-      processedValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-    }
-    
-    setFormData(prev => ({
-      ...prev,
-      [field]: processedValue
-    }));
-    
+  const handleInputChange = (field: keyof EventFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
+      setErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-cantinho-terracotta" />
-          Solicitar Orçamento para Evento
-        </CardTitle>
-        {isFirstOrder && (
-          <Badge className="bg-green-500 text-white w-fit">
-            <Gift className="h-3 w-3 mr-1" />
-            10% de desconto no primeiro evento!
-          </Badge>
-        )}
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <EventFormData 
-            formData={formData}
-            errors={errors}
-            onInputChange={handleInputChange}
-          />
-          
-          <EventDetails 
-            formData={formData}
-            errors={errors}
-            onInputChange={handleInputChange}
-          />
-
-          {isFirstOrder && formData.budget > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
-                <Gift className="h-4 w-4" />
-                Desconto do Primeiro Evento
-              </h4>
-              <div className="space-y-1 text-sm">
-                <p className="text-green-700">
-                  Orçamento original: {formData.budget.toLocaleString('pt-AO', { 
-                    style: 'currency', 
-                    currency: 'AOA' 
-                  })}
-                </p>
-                <p className="text-green-700">
-                  Desconto (10%): -{(formData.budget * discount).toLocaleString('pt-AO', { 
-                    style: 'currency', 
-                    currency: 'AOA' 
-                  })}
-                </p>
-                <p className="text-green-800 font-semibold">
-                  Valor final: {(formData.budget * (1 - discount)).toLocaleString('pt-AO', { 
-                    style: 'currency', 
-                    currency: 'AOA' 
-                  })}
-                </p>
-              </div>
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-cantinho-navy">Detalhes do Evento</h2>
+        <p className="text-gray-600">
+          Preencha o formulário abaixo para solicitar um orçamento para o seu evento.
+        </p>
+        <Separator className="my-4" />
+        <Badge variant="secondary">
+          Pacote Selecionado: {selectedPackage?.name || "Personalizado"}
+        </Badge>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <Card className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="clientName" className="block text-sm font-medium text-gray-700">
+                <User className="inline-block h-4 w-4 mr-1" />
+                Nome Completo
+              </Label>
+              <Input
+                type="text"
+                id="clientName"
+                value={formData.clientName}
+                onChange={(e) => handleInputChange("clientName", e.target.value)}
+                className="mt-1"
+              />
+              {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
             </div>
-          )}
+            <div>
+              <Label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700">
+                <Mail className="inline-block h-4 w-4 mr-1" />
+                Email
+              </Label>
+              <Input
+                type="email"
+                id="clientEmail"
+                value={formData.clientEmail}
+                onChange={(e) => handleInputChange("clientEmail", e.target.value)}
+                className="mt-1"
+              />
+              {errors.clientEmail && <p className="text-red-500 text-xs mt-1">{errors.clientEmail}</p>}
+            </div>
+            <div>
+              <Label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700">
+                <Phone className="inline-block h-4 w-4 mr-1" />
+                Telefone
+              </Label>
+              <Input
+                type="tel"
+                id="clientPhone"
+                value={formData.clientPhone}
+                onChange={(e) => handleInputChange("clientPhone", e.target.value)}
+                className="mt-1"
+              />
+              {errors.clientPhone && <p className="text-red-500 text-xs mt-1">{errors.clientPhone}</p>}
+            </div>
+            <div>
+              <Label htmlFor="guestCount" className="block text-sm font-medium text-gray-700">
+                <Users className="inline-block h-4 w-4 mr-1" />
+                Número de Convidados
+              </Label>
+              <Input
+                type="number"
+                id="guestCount"
+                value={formData.guestCount}
+                onChange={(e) => handleInputChange("guestCount", e.target.value)}
+                className="mt-1"
+              />
+              {errors.guestCount && <p className="text-red-500 text-xs mt-1">{errors.guestCount}</p>}
+            </div>
+          </div>
+        </Card>
 
-          <Button 
-            type="submit" 
-            className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
-          >
-            Enviar Solicitação de Orçamento
+        <Card className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="eventDate" className="block text-sm font-medium text-gray-700">
+                <Calendar className="inline-block h-4 w-4 mr-1" />
+                Data do Evento
+              </Label>
+              <Input
+                type="date"
+                id="eventDate"
+                value={formData.eventDate || ""}
+                onChange={(e) => handleInputChange("eventDate", e.target.value)}
+                className="mt-1"
+              />
+              {errors.eventDate && <p className="text-red-500 text-xs mt-1">{errors.eventDate}</p>}
+            </div>
+            <div>
+              <Label htmlFor="eventTime" className="block text-sm font-medium text-gray-700">
+                <Clock className="inline-block h-4 w-4 mr-1" />
+                Hora do Evento
+              </Label>
+              <Input
+                type="time"
+                id="eventTime"
+                value={formData.eventTime}
+                onChange={(e) => handleInputChange("eventTime", e.target.value)}
+                className="mt-1"
+              />
+              {errors.eventTime && <p className="text-red-500 text-xs mt-1">{errors.eventTime}</p>}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Label htmlFor="venue" className="block text-sm font-medium text-gray-700">
+              <MapPin className="inline-block h-4 w-4 mr-1" />
+              Local do Evento
+            </Label>
+            <Input
+              type="text"
+              id="venue"
+              value={formData.venue}
+              onChange={(e) => handleInputChange("venue", e.target.value)}
+              className="mt-1"
+            />
+            {errors.venue && <p className="text-red-500 text-xs mt-1">{errors.venue}</p>}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div>
+            <Label htmlFor="additionalRequests" className="block text-sm font-medium text-gray-700">
+              Pedidos Adicionais
+            </Label>
+            <Textarea
+              id="additionalRequests"
+              rows={3}
+              value={formData.additionalRequests}
+              onChange={(e) => handleInputChange("additionalRequests", e.target.value)}
+              className="mt-1"
+            />
+          </div>
+        </Card>
+
+        <div className="flex justify-between">
+          <Button variant="secondary" onClick={onBack}>
+            Voltar
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+          <Button type="submit">Enviar Pedido</Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

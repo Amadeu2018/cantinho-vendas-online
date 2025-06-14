@@ -45,7 +45,6 @@ const AdminDashboard = ({
       
       <DashboardTabs
         activeTab={activeTab}
-        onTabChange={onTabChange}
         orders={orders}
         fetchingOrders={fetchingOrders}
         onSelectOrder={onSelectOrder}

@@ -12,6 +12,11 @@ interface EventDetailsProps {
 }
 
 const EventDetails = ({ formData, errors, onInputChange }: EventDetailsProps) => {
+  const handleNumberChange = (field: string, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    onInputChange(field, numValue);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -84,7 +89,7 @@ const EventDetails = ({ formData, errors, onInputChange }: EventDetailsProps) =>
             type="number"
             min="1"
             value={formData.guestCount || ''}
-            onChange={(e) => onInputChange('guestCount', Number(e.target.value) || 0)}
+            onChange={(e) => handleNumberChange('guestCount', e.target.value)}
             className={errors.guestCount ? 'border-red-500' : ''}
           />
           {errors.guestCount && (
@@ -99,7 +104,7 @@ const EventDetails = ({ formData, errors, onInputChange }: EventDetailsProps) =>
             type="number"
             min="1"
             value={formData.budget || ''}
-            onChange={(e) => onInputChange('budget', Number(e.target.value) || 0)}
+            onChange={(e) => handleNumberChange('budget', e.target.value)}
             className={errors.budget ? 'border-red-500' : ''}
           />
           {errors.budget && (

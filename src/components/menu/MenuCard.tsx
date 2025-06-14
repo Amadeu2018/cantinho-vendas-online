@@ -20,8 +20,8 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
   const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
   const { toast } = useToast();
 
-  // Ensure price is always a number - dish.price should already be a number per the Dish type
-  const dishPrice = Number(dish.price);
+  // Ensure price is always a number
+  const dishPrice = typeof dish.price === 'string' ? parseFloat(dish.price) : dish.price;
   
   // Count how many of this dish is in the cart
   const itemInCart = items.find((item) => item.id === dish.id);

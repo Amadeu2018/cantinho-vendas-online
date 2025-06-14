@@ -22,7 +22,7 @@ export interface Order {
     phone: string;
   };
   createdAt: string;
-  notes: string;
+  notes?: string; // Make notes optional to match CartContext Order
   location: {
     id: number;
     name: string;
@@ -96,7 +96,7 @@ export const useOrdersData = () => {
           },
           customerInfo,
           createdAt: order.created_at,
-          notes: order.notes || '',
+          notes: order.notes || '', // Provide default empty string
           location: {
             id: 1,
             name: customerInfo.address,

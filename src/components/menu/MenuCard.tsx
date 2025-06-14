@@ -24,14 +24,17 @@ export interface Dish {
 
 interface MenuCardProps {
   dish: Dish;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }
 
-const MenuCard = ({ dish }: MenuCardProps) => {
+const MenuCard = ({ dish, isFavorite: propIsFavorite, onToggleFavorite: propOnToggleFavorite }: MenuCardProps) => {
   const { toast } = useToast();
   const { addItem, isFavorite, addToFavorites, removeFromFavorites } = useCart();
   const { isFirstOrder, discount } = useFirstOrder();
   
-  const isFav = isFavorite(parseInt(dish.id));
+  // Use prop values if provided, otherwise use cart context
+  const isFav = propIsFavorite !== undefined ? propIsFavorite : isFavorite(parseInt(dish.id));
   const finalPrice = isFirstOrder ? dish.price * (1 - discount) : dish.price;
   const savings = dish.price - finalPrice;
 
@@ -55,10 +58,14 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   };
 
   const toggleFavorite = () => {
-    if (isFav) {
-      removeFromFavorites(parseInt(dish.id));
+    if (propOnToggleFavorite) {
+      propOnToggleFavorite();
     } else {
-      addToFavorites(parseInt(dish.id));
+      if (isFav) {
+        removeFromFavorites(parseInt(dish.id));
+      } else {
+        addToFavorites(parseInt(dish.id));
+      }
     }
   };
 

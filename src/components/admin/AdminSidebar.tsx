@@ -22,7 +22,11 @@ import {
   BarChart, 
   Users, 
   Settings, 
-  LogOut 
+  LogOut,
+  Package,
+  TrendingUp,
+  CreditCard,
+  Archive
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -77,8 +81,17 @@ const AdminSidebar = () => {
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive("/admin/products")}>
                 <Link to="/admin">
-                  <Utensils className="h-5 w-5" />
-                  <span>Cardápio</span>
+                  <Package className="h-5 w-5" />
+                  <span>Produtos</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive("/admin/inventory")}>
+                <Link to="/admin">
+                  <Archive className="h-5 w-5" />
+                  <span>Estoque</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -92,6 +105,15 @@ const AdminSidebar = () => {
               <SidebarMenuButton asChild isActive={isActive("/admin/finance")}>
                 <Link to="/admin">
                   <Wallet className="h-5 w-5" />
+                  <span>Finanças</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive("/admin/payments")}>
+                <Link to="/admin">
+                  <CreditCard className="h-5 w-5" />
                   <span>Pagamentos</span>
                 </Link>
               </SidebarMenuButton>
@@ -114,17 +136,35 @@ const AdminSidebar = () => {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive("/admin/analytics")}>
+                <Link to="/admin">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Analytics</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
         
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-300">Configurações</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-300">Gestão</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive("/admin/customers")}>
                 <Link to="/admin">
                   <Users className="h-5 w-5" />
                   <span>Clientes</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive("/admin/menu")}>
+                <Link to="/admin">
+                  <Utensils className="h-5 w-5" />
+                  <span>Cardápio</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

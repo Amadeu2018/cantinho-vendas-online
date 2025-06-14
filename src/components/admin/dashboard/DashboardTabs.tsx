@@ -8,12 +8,12 @@ import AdminFinance from "@/components/admin/AdminFinance";
 import AdminInventory from "@/components/admin/AdminInventory";
 import AdminReports from "@/components/admin/AdminReports";
 import AdminCustomers from "../AdminCustomers";
-import { Order as CartOrder } from "@/contexts/CartContext";
+import { Order } from "@/hooks/admin/use-orders-data";
 
 interface DashboardTabsProps {
   activeTab: string;
   onTabChange?: (tab: string) => void;
-  orders: CartOrder[];
+  orders: Order[];
   fetchingOrders: boolean;
   onSelectOrder: (orderId: string) => void;
   children: React.ReactNode;
@@ -36,6 +36,17 @@ const DashboardTabs = ({
     { value: "inventory", label: "Estoque" },
     { value: "reports", label: "Relatórios" }
   ];
+
+  // Convert orders to CartOrder format for components that need it
+  const cartOrders = orders.map(order => ({
+    ...order,
+    notes: order.notes || "",
+    paymentMethod: {
+      id: order.paymentMethod?.id || 'default-id',
+      name: order.paymentMethod?.name || 'Método de pagamento',
+      icon: order.paymentMethod?.icon || 'credit-card'
+    }
+  }));
 
   return (
     <Card className="overflow-hidden shadow-2xl border-0">
@@ -61,7 +72,7 @@ const DashboardTabs = ({
           
           <TabsContent value="orders" className="m-0 focus:outline-none">
             <AdminOrdersList 
-              orders={orders} 
+              orders={cartOrders} 
               onSelectOrder={onSelectOrder}
               fetchingOrders={fetchingOrders}
             />
@@ -76,7 +87,7 @@ const DashboardTabs = ({
           </TabsContent>
           
           <TabsContent value="finance" className="m-0 focus:outline-none">
-            <AdminFinance orders={orders} />
+            <AdminFinance orders={cartOrders} />
           </TabsContent>
           
           <TabsContent value="inventory" className="m-0 focus:outline-none">

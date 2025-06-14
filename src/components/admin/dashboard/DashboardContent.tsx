@@ -1,12 +1,12 @@
 
 import React from "react";
-import { Order as CartOrder } from "@/contexts/CartContext";
+import { Order } from "@/hooks/admin/use-orders-data";
 import DashboardCard from "../DashboardCard";
 import RecentOrders from "./RecentOrders";
 import { TrendingUp } from "lucide-react";
 
 interface DashboardContentProps {
-  orders: CartOrder[];
+  orders: Order[];
   onSelectOrder: (orderId: string) => void;
 }
 
@@ -16,11 +16,22 @@ const DashboardContent = ({ orders, onSelectOrder }: DashboardContentProps) => {
   
   const completedOrders = orders.filter(order => order.status === "completed").length;
 
+  // Convert orders to CartOrder format for RecentOrders component
+  const cartOrders = orders.map(order => ({
+    ...order,
+    notes: order.notes || "",
+    paymentMethod: {
+      id: order.paymentMethod?.id || 'default-id',
+      name: order.paymentMethod?.name || 'Método de pagamento',
+      icon: order.paymentMethod?.icon || 'credit-card'
+    }
+  }));
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
       <div className="xl:col-span-3">
         <RecentOrders 
-          orders={orders}
+          orders={cartOrders}
           onSelectOrder={onSelectOrder}
         />
       </div>

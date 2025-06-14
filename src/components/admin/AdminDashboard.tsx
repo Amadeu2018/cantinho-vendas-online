@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Order as CartOrder } from "@/contexts/CartContext";
+import { Order } from "@/hooks/admin/use-orders-data";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import DashboardStatsGrid from "./dashboard/DashboardStatsGrid";
 import DashboardCharts from "./dashboard/DashboardCharts";
@@ -9,10 +9,10 @@ import DashboardContent from "./dashboard/DashboardContent";
 import DashboardRefresh from "./dashboard/DashboardRefresh";
 
 interface AdminDashboardProps {
-  orders: CartOrder[];
+  orders: Order[];
   fetchingOrders: boolean;
   onSelectOrder: (orderId: string) => void;
-  onPrepareInvoice: (order: CartOrder) => void;
+  onPrepareInvoice: (order: Order) => void;
   onLogout: () => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;

@@ -8,12 +8,13 @@ import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminOrderView from "@/components/admin/AdminOrderView";
 import AdminInvoiceView from "@/components/admin/AdminInvoiceView";
 import { Order as CartOrder } from "@/contexts/CartContext";
-import { useAdminOrders } from "@/hooks/use-admin-orders";
+import { useAdminOrders, Order } from "@/hooks/use-admin-orders";
 import { useToast } from "@/hooks/use-toast";
 
-const convertOrderType = (order: any): CartOrder => {
+const convertOrderType = (order: Order): CartOrder => {
   return {
     ...order,
+    notes: order.notes || "",
     paymentMethod: {
       id: order.paymentMethod?.id || 'default-id',
       name: order.paymentMethod?.name || 'Método de pagamento',
@@ -99,7 +100,6 @@ const Admin = () => {
   };
   
   const selectedOrder = selectedOrderId ? getOrderById(selectedOrderId) : null;
-  const convertedOrders = orders.map(order => convertOrderType(order));
 
   const handleOrderStatusChange = async (orderId: string, status: string): Promise<void> => {
     try {
@@ -136,12 +136,12 @@ const Admin = () => {
     // Map activeTab to title
     const titleMap: { [key: string]: string } = {
       dashboard: "Dashboard",
-      pedidos: "Pedidos",
-      produtos: "Produtos",
-      clientes: "Clientes",
-      finanças: "Finanças",
-      relatórios: "Relatórios",
-      configurações: "Configurações"
+      orders: "Pedidos",
+      products: "Produtos",
+      customers: "Clientes",
+      finance: "Finanças",
+      inventory: "Estoque",
+      reports: "Relatórios"
     };
     
     return titleMap[activeTab] || "Dashboard";
@@ -175,10 +175,10 @@ const Admin = () => {
 
     return (
       <AdminDashboard 
-        orders={convertedOrders}
+        orders={orders}
         fetchingOrders={fetchingOrders}
         onSelectOrder={orderId => handleSelectOrder(orderId)}
-        onPrepareInvoice={handlePrepareInvoice}
+        onPrepareInvoice={(order: Order) => handlePrepareInvoice(convertOrderType(order))}
         onLogout={handleLogout}
         activeTab={activeTab}
         onTabChange={setActiveTab}

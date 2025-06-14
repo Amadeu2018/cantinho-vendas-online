@@ -114,9 +114,16 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
   };
 
   const handleInputChange = (field: keyof EventFormData, value: string | number) => {
+    let processedValue: string | number = value;
+    
+    // Convert string to number for numeric fields
+    if (field === 'guestCount' || field === 'budget') {
+      processedValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
     
     if (errors[field]) {

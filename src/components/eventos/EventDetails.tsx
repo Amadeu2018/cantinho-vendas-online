@@ -84,7 +84,7 @@ const EventDetails = ({ formData, errors, onInputChange }: EventDetailsProps) =>
             type="number"
             min="1"
             value={formData.guestCount || ''}
-            onChange={(e) => onInputChange('guestCount', parseInt(e.target.value) || 0)}
+            onChange={(e) => onInputChange('guestCount', Number(e.target.value) || 0)}
             className={errors.guestCount ? 'border-red-500' : ''}
           />
           {errors.guestCount && (
@@ -99,7 +99,7 @@ const EventDetails = ({ formData, errors, onInputChange }: EventDetailsProps) =>
             type="number"
             min="1"
             value={formData.budget || ''}
-            onChange={(e) => onInputChange('budget', parseInt(e.target.value) || 0)}
+            onChange={(e) => onInputChange('budget', Number(e.target.value) || 0)}
             className={errors.budget ? 'border-red-500' : ''}
           />
           {errors.budget && (

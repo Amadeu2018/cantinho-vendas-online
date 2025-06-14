@@ -8,8 +8,11 @@ export interface Promotion {
   title: string;
   description: string;
   discount: number;
+  discountPercentage: number;
   validUntil: string;
+  image_url: string;
   dish: Dish;
+  dishes: Dish[];
   isActive: boolean;
 }
 
@@ -36,29 +39,36 @@ export const usePromotions = () => {
       if (error) throw error;
 
       if (data) {
-        const formattedPromotions: Promotion[] = data.map((promo: any) => ({
-          id: promo.id,
-          title: `${promo.discount_percentage}% OFF`,
-          description: `Desconto especial em ${promo.products?.name || 'produto'}`,
-          discount: Number(promo.discount_percentage) || 0,
-          validUntil: promo.end_date,
-          isActive: new Date(promo.end_date) > new Date(),
-          dish: {
+        const formattedPromotions: Promotion[] = data.map((promo: any) => {
+          const dish: Dish = {
             id: promo.products?.id || promo.id,
             name: promo.products?.name || 'Produto',
             description: promo.products?.description || 'Descrição não disponível',
             price: Number(promo.products?.price) || 0,
             image_url: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
             image: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
-            category: "main",
+            category: "main" as const,
             rating: 4.5,
             prepTime: '20-30 min',
             serves: 2,
             isSpicy: false,
             isVegetarian: false,
             isPopular: false
-          }
-        }));
+          };
+
+          return {
+            id: promo.id,
+            title: `${promo.discount_percentage}% OFF`,
+            description: `Desconto especial em ${promo.products?.name || 'produto'}`,
+            discount: Number(promo.discount_percentage) || 0,
+            discountPercentage: Number(promo.discount_percentage) || 0,
+            validUntil: promo.end_date,
+            image_url: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
+            isActive: new Date(promo.end_date) > new Date(),
+            dish,
+            dishes: [dish]
+          };
+        });
 
         setPromotions(formattedPromotions);
       }

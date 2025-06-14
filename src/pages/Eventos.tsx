@@ -1,10 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import EventForm from "@/components/eventos/EventForm";
 import EventConfirmation from "@/components/eventos/EventConfirmation";
-import { useEventContext } from "@/contexts/EventContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -19,14 +18,20 @@ import {
 } from "lucide-react";
 
 const Eventos = () => {
-  const { eventRequest, submitEventRequest } = useEventContext();
+  const [eventRequest, setEventRequest] = useState<any>(null);
 
   const handleFormSubmit = (formData: any) => {
-    submitEventRequest(formData);
+    setEventRequest(formData);
   };
 
   if (eventRequest) {
-    return <EventConfirmation />;
+    return (
+      <EventConfirmation 
+        requestId="temp-id"
+        formData={eventRequest}
+        onClose={() => setEventRequest(null)}
+      />
+    );
   }
 
   return (

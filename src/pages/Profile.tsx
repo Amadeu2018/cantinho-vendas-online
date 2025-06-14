@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -130,6 +129,7 @@ const Profile = () => {
             description: product.description || '',
             price: Number(product.price) || 0,
             image_url: product.image_url || '/placeholder.svg',
+            image: product.image_url || '/placeholder.svg',
             category,
             popular: false,
             tags: [],
@@ -370,8 +370,6 @@ const Profile = () => {
                 <MenuCard 
                   key={dish.id} 
                   dish={dish} 
-                  isFavorite={true}
-                  onToggleFavorite={fetchFavorites}
                 />
               ))}
             </div>

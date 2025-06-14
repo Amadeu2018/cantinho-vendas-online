@@ -6,8 +6,10 @@ export type Promotion = {
   title: string;
   description: string;
   discount: number;
+  discountPercentage: number;
   validUntil: string;
   image_url: string;
   dish: Dish;
+  dishes: Dish[];
   isActive: boolean;
 };

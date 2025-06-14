@@ -18,20 +18,18 @@ const PromotionsSection = () => {
     const promotion = promotions.find(p => p.id === promotionId);
     if (!promotion) return;
     
-    // Add each dish to cart with applied discount
-    promotion.dishes.forEach(dish => {
-      const discountedPrice = Math.round(dish.price * (100 - promotion.discountPercentage) / 100);
-      addItem({
-        id: parseInt(dish.id), // Convert UUID to number for cart compatibility
-        name: dish.name,
-        price: discountedPrice,
-        image: dish.image_url
-      });
+    // Add the dish to cart with applied discount
+    const discountedPrice = Math.round(promotion.dish.price * (100 - promotion.discount) / 100);
+    addItem({
+      id: parseInt(promotion.dish.id),
+      name: promotion.dish.name,
+      price: discountedPrice,
+      image: promotion.dish.image_url
     });
 
     // Show success toast
     toast.success("Promoção adicionada ao carrinho!", {
-      description: `${promotion.dishes.length} itens adicionados com ${promotion.discountPercentage}% de desconto`
+      description: `Item adicionado com ${promotion.discount}% de desconto`
     });
   };
 
@@ -65,13 +63,13 @@ const PromotionsSection = () => {
           <Card key={promo.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="h-40 overflow-hidden relative">
               <img 
-                src={promo.image_url} 
+                src={promo.dish.image_url} 
                 alt={promo.title} 
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-2 right-2">
                 <Badge className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 text-white">
-                  <BadgePercent className="mr-1 h-3 w-3" /> {promo.discountPercentage}% OFF
+                  <BadgePercent className="mr-1 h-3 w-3" /> {promo.discount}% OFF
                 </Badge>
               </div>
             </div>
@@ -102,20 +100,16 @@ const PromotionsSection = () => {
               
               {activePromotion === promo.id && (
                 <div className="mt-4 pt-4 border-t text-sm">
-                  <p className="font-medium mb-2">Itens incluídos:</p>
-                  <ul className="space-y-2">
-                    {promo.dishes.map((dish) => (
-                      <li key={dish.id} className="flex justify-between">
-                        <span>{dish.name}</span>
-                        <div>
-                          <span className="line-through text-gray-400 mr-2">{formatCurrency(dish.price)}</span>
-                          <span className="font-medium text-cantinho-terracotta">
-                            {formatCurrency(Math.round(dish.price * (100 - promo.discountPercentage) / 100))}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="font-medium mb-2">Item incluído:</p>
+                  <div className="flex justify-between">
+                    <span>{promo.dish.name}</span>
+                    <div>
+                      <span className="line-through text-gray-400 mr-2">{formatCurrency(promo.dish.price)}</span>
+                      <span className="font-medium text-cantinho-terracotta">
+                        {formatCurrency(Math.round(promo.dish.price * (100 - promo.discount) / 100))}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>

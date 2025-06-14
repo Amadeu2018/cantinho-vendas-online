@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Heart, Plus, Star, Clock, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface Dish {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -31,13 +32,13 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   const { addItem, isFavorite, addToFavorites, removeFromFavorites } = useCart();
   const { isFirstOrder, discount } = useFirstOrder();
   
-  const isFav = isFavorite(dish.id);
+  const isFav = isFavorite(parseInt(dish.id));
   const finalPrice = isFirstOrder ? dish.price * (1 - discount) : dish.price;
   const savings = dish.price - finalPrice;
 
   const handleAddToCart = () => {
     addItem({
-      id: dish.id,
+      id: parseInt(dish.id),
       name: dish.name,
       price: finalPrice,
       image: dish.image,
@@ -56,9 +57,9 @@ const MenuCard = ({ dish }: MenuCardProps) => {
 
   const toggleFavorite = () => {
     if (isFav) {
-      removeFromFavorites(dish.id);
+      removeFromFavorites(parseInt(dish.id));
     } else {
-      addToFavorites(dish.id);
+      addToFavorites(parseInt(dish.id));
     }
   };
 

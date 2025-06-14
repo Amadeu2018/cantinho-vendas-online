@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import EventAdmin from "./pages/EventAdmin";
 import Sobre from "./pages/Sobre";
+import FirstOrder from "./pages/FirstOrder";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/menu" element={<Menu />} />
+                <Route path="/primeiro-pedido" element={<FirstOrder />} />
                 <Route path="/contacto" element={<Contacto />} />
                 <Route path="/eventos" element={<Eventos />} />
                 <Route path="/carrinho" element={<Carrinho />} />

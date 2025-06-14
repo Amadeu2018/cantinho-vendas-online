@@ -140,8 +140,7 @@ const MenuCard = ({ dish, isFavorite = false, onToggleFavorite }: MenuCardProps)
                 id: parseInt(dish.id),
                 name: dish.name,
                 price: dishPrice,
-                image: dish.image_url || "/placeholder.svg",
-                quantity: 1,
+                image: dish.image_url || "/placeholder.svg"
               })}
               className="bg-cantinho-navy text-white p-1 rounded-full"
             >

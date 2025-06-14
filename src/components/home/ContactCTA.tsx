@@ -43,13 +43,13 @@ const ContactCTA = () => {
         {/* Enhanced call-to-action buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12 animate-fade-in">
           <Button asChild className="bg-cantinho-sand text-cantinho-navy hover:bg-white transition-all duration-300 px-8 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105">
-            <Link to="/menu" className="flex items-center gap-3">
+            <Link to="/primeiro-pedido" className="flex items-center gap-3">
               <Utensils className="w-5 h-5" />
-              <span>Explorar Menu</span>
+              <span>Fazer Primeiro Pedido</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-2 border-cantinho-sand text-cantinho-sand hover:bg-cantinho-sand hover:text-cantinho-navy transition-all duration-300 px-8 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105">
-            <Link to="/eventos" className="flex items-center gap-3">
+            <Link to="/eventos?package=premium" className="flex items-center gap-3">
               <Calendar className="w-5 h-5" />
               <span>Catering Premium</span>
             </Link>
@@ -66,7 +66,7 @@ const ContactCTA = () => {
               </div>
               <div>
                 <p className="font-semibold">Telefone</p>
-                <p className="text-white/80">+244 XXX XXX XXX</p>
+                <p className="text-white/80">+244 924 678 544 / +244 934 625 513</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

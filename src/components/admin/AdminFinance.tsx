@@ -1,14 +1,14 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Order } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { exportToPDF, generateFinancialReport } from "@/utils/pdfExports";
-import { Loader2, Download, FileText } from "lucide-react";
+import { Loader2, Download, FileText, TrendingUp, DollarSign, Receipt, CreditCard } from "lucide-react";
 import FinanceStats from "./finance/FinanceStats";
 import FinanceCharts from "./finance/FinanceCharts";
 import TransactionsTable from "./finance/TransactionsTable";
+import DashboardCard from "./DashboardCard";
 
 type AdminFinanceProps = {
   orders: Order[];
@@ -166,7 +166,50 @@ const AdminFinance = ({ orders: initialOrders }: AdminFinanceProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Financial Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <DashboardCard
+          title="Receita Total"
+          value={totalRevenue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+          description="Vendas confirmadas"
+          icon={<DollarSign className="h-6 w-6 text-green-600" />}
+          trend="up"
+          trendValue="+12%"
+          gradient="from-green-50 to-green-100"
+        />
+        
+        <DashboardCard
+          title="Receita Pendente"
+          value={pendingRevenue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+          description="Aguardando pagamento"
+          icon={<CreditCard className="h-6 w-6 text-orange-600" />}
+          trend="neutral"
+          trendValue="Estável"
+          gradient="from-orange-50 to-orange-100"
+        />
+
+        <DashboardCard
+          title="Pedidos Concluídos"
+          value={completedOrders}
+          description="Total de vendas finalizadas"
+          icon={<Receipt className="h-6 w-6 text-blue-600" />}
+          trend="up"
+          trendValue="+8%"
+          gradient="from-blue-50 to-blue-100"
+        />
+
+        <DashboardCard
+          title="Ticket Médio"
+          value={averageOrderValue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+          description="Valor médio por pedido"
+          icon={<TrendingUp className="h-6 w-6 text-purple-600" />}
+          trend="up"
+          trendValue="+5%"
+          gradient="from-purple-50 to-purple-100"
+        />
+      </div>
+
       {/* Export buttons */}
       <div className="flex justify-end gap-2 mb-4">
         <Button 

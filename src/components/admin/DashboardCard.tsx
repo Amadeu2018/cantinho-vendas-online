@@ -10,6 +10,7 @@ interface DashboardCardProps {
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
   className?: string;
+  gradient?: string;
 }
 
 const DashboardCard = ({
@@ -20,25 +21,37 @@ const DashboardCard = ({
   trend,
   trendValue,
   className,
+  gradient = "from-blue-50 to-blue-100"
 }: DashboardCardProps) => {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn(
+      "overflow-hidden hover:shadow-lg transition-all duration-300 border-0", 
+      `bg-gradient-to-br ${gradient}`,
+      className
+    )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
+        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
+        {icon && (
+          <div className="p-2 rounded-lg bg-white/50 backdrop-blur-sm">
+            {icon}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
-        {trend && (
-          <div className="flex items-center mt-2">
+        <div className="text-3xl font-bold text-gray-800 mb-1">{value}</div>
+        {description && <p className="text-xs text-gray-600 mb-2">{description}</p>}
+        {trend && trendValue && (
+          <div className="flex items-center">
             <span
-              className={cn("text-xs font-medium", {
-                "text-green-500": trend === "up",
-                "text-red-500": trend === "down",
-                "text-gray-500": trend === "neutral",
+              className={cn("text-xs font-medium flex items-center gap-1", {
+                "text-green-600": trend === "up",
+                "text-red-600": trend === "down",
+                "text-gray-600": trend === "neutral",
               })}
             >
+              {trend === "up" && "↗"}
+              {trend === "down" && "↘"}
+              {trend === "neutral" && "→"}
               {trendValue}
             </span>
           </div>

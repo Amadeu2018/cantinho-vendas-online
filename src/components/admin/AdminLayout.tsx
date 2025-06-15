@@ -27,13 +27,15 @@ const AdminLayout = ({
           onTabChange={onTabChange || (() => {})}
           onLogout={onLogout || (() => {})}
         />
-        <SidebarInset>
+        <SidebarInset className="flex-1 w-full">
           <AdminHeader
             onLogout={onLogout}
             title={title}
           />
-          <main className="p-6 flex-1">
-            {children}
+          <main className="p-3 sm:p-4 lg:p-6 flex-1 bg-gray-50 min-h-screen">
+            <div className="max-w-full">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </div>

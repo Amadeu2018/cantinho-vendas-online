@@ -73,9 +73,11 @@ const AdminDashboard = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 md:px-0">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 sm:p-6">
-        {renderTabContent()}
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6 w-full max-w-full overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 sm:p-4 lg:p-6 w-full">
+        <div className="w-full overflow-hidden">
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   );

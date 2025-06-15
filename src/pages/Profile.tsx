@@ -79,12 +79,12 @@ const Profile = () => {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentActivity activities={recentActivities} />
-            <OrderTracking userId={user.id} />
+            <OrderTracking orders={orders} />
           </div>
         </TabsContent>
 
         <TabsContent value="tracking">
-          <OrderTracking userId={user.id} />
+          <OrderTracking orders={orders} />
         </TabsContent>
 
         <TabsContent value="profile">

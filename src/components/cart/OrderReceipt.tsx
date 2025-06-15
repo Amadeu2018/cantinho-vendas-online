@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle, Clock, CreditCard, Building2, Phone, FileText } from "lucide-react";
-import { useCompanySettings } from "@/hooks/use-company-settings";
+import { useCompanySettings } from "@/hooks/company/use-company-settings";
+import { useBankAccounts } from "@/hooks/company/use-bank-accounts";
+import { useMulticaixaAccounts } from "@/hooks/company/use-multicaixa-accounts";
 
 interface OrderReceiptProps {
   order: {
@@ -35,6 +37,8 @@ interface OrderReceiptProps {
 
 const OrderReceipt = ({ order }: OrderReceiptProps) => {
   const { settings: companySettings, loading: loadingSettings } = useCompanySettings();
+  const { accounts: bankAccounts } = useBankAccounts();
+  const { accounts: multicaixaAccounts } = useMulticaixaAccounts();
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -66,6 +70,9 @@ const OrderReceipt = ({ order }: OrderReceiptProps) => {
     }
   };
 
+  const primaryBankAccount = bankAccounts.find(acc => acc.is_primary && acc.is_active) || bankAccounts.find(acc => acc.is_active);
+  const primaryMulticaixaAccount = multicaixaAccounts.find(acc => acc.is_primary && acc.is_active) || multicaixaAccounts.find(acc => acc.is_active);
+
   const renderPaymentInfo = () => {
     if (!order.payment_method) return null;
 
@@ -96,7 +103,7 @@ const OrderReceipt = ({ order }: OrderReceiptProps) => {
           </div>
 
           {/* Informações de Transferência Bancária */}
-          {order.payment_method === 'bank_transfer' && companySettings.bank_account_iban && (
+          {order.payment_method === 'bank_transfer' && primaryBankAccount && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <h4 className="font-semibold text-blue-900 flex items-center gap-2 mb-3">
                 <Building2 className="h-4 w-4" />
@@ -105,18 +112,20 @@ const OrderReceipt = ({ order }: OrderReceiptProps) => {
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="text-gray-600">IBAN:</span>
-                  <span className="ml-2 font-mono font-semibold">{companySettings.bank_account_iban}</span>
+                  <span className="ml-2 font-mono font-semibold">{primaryBankAccount.account_iban}</span>
                 </div>
-                {companySettings.bank_account_name && (
+                <div>
+                  <span className="text-gray-600">Titular:</span>
+                  <span className="ml-2 font-semibold">{primaryBankAccount.account_name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Banco:</span>
+                  <span className="ml-2">{primaryBankAccount.bank_name}</span>
+                </div>
+                {primaryBankAccount.swift_code && (
                   <div>
-                    <span className="text-gray-600">Titular:</span>
-                    <span className="ml-2 font-semibold">{companySettings.bank_account_name}</span>
-                  </div>
-                )}
-                {companySettings.bank_name && (
-                  <div>
-                    <span className="text-gray-600">Banco:</span>
-                    <span className="ml-2">{companySettings.bank_name}</span>
+                    <span className="text-gray-600">SWIFT:</span>
+                    <span className="ml-2 font-mono">{primaryBankAccount.swift_code}</span>
                   </div>
                 )}
               </div>
@@ -124,7 +133,7 @@ const OrderReceipt = ({ order }: OrderReceiptProps) => {
           )}
 
           {/* Informações Multicaixa Express */}
-          {order.payment_method === 'multicaixa' && companySettings.multicaixa_phone && (
+          {order.payment_method === 'multicaixa' && primaryMulticaixaAccount && (
             <div className="mt-4 p-4 bg-green-50 rounded-lg">
               <h4 className="font-semibold text-green-900 flex items-center gap-2 mb-3">
                 <Phone className="h-4 w-4" />
@@ -133,14 +142,12 @@ const OrderReceipt = ({ order }: OrderReceiptProps) => {
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="text-gray-600">Número:</span>
-                  <span className="ml-2 font-mono font-semibold">{companySettings.multicaixa_phone}</span>
+                  <span className="ml-2 font-mono font-semibold">{primaryMulticaixaAccount.phone_number}</span>
                 </div>
-                {companySettings.multicaixa_name && (
-                  <div>
-                    <span className="text-gray-600">Titular:</span>
-                    <span className="ml-2 font-semibold">{companySettings.multicaixa_name}</span>
-                  </div>
-                )}
+                <div>
+                  <span className="text-gray-600">Titular:</span>
+                  <span className="ml-2 font-semibold">{primaryMulticaixaAccount.account_name}</span>
+                </div>
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { ProfileStats, RecentActivity } from "./useProfileData";
+import { ProfileStats, RecentActivity } from "./profile/use-profile-stats";
 
 interface UseProfileStatsProps {
   orders: any[];
@@ -105,3 +105,5 @@ export const useProfileStats = ({
     }
   }, [orders, favorites, setStats, setRecentActivities]);
 };
+
+export { ProfileStats, RecentActivity } from "./profile/use-profile-stats";

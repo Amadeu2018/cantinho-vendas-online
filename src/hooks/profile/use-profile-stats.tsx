@@ -1,6 +1,12 @@
 
 import { useMemo } from 'react';
-import { ProfileStats } from '../useProfileData';
+
+export interface ProfileStats {
+  totalOrders: number;
+  pendingOrders: number;
+  completedOrders: number;
+  favoriteCount: number;
+}
 
 export const useProfileStats = (orders: any[], favorites: any[]) => {
   return useMemo((): ProfileStats => {

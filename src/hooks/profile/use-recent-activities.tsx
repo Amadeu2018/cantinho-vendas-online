@@ -1,6 +1,16 @@
 
 import { useMemo } from 'react';
-import { RecentActivity } from '../useProfileData';
+
+export interface RecentActivity {
+  id: string;
+  type: 'order' | 'favorite';
+  title: string;
+  description: string;
+  timestamp: string;
+  status?: string;
+  total?: number;
+  itemsCount?: number;
+}
 
 export const useRecentActivities = (orders: any[], favorites: any[]) => {
   return useMemo((): RecentActivity[] => {

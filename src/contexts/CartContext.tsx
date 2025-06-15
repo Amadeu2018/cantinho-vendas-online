@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,19 +167,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Localização ou método de pagamento não selecionado");
     }
 
-    // Generate a proper UUID for the order ID
-    const { data: uuidData } = await supabase.rpc('gen_random_uuid');
-    const orderId = uuidData || crypto.randomUUID();
+    // Generate a proper UUID for the order ID using crypto.randomUUID()
+    const orderId = crypto.randomUUID();
     
     const orderData = {
-      id: orderId, // Use proper UUID
+      id: orderId,
       items: items,
-      customer_info: JSON.stringify(customerInfo),
+      customer_info: customerInfo,
       subtotal: subtotal,
       delivery_fee: selectedLocation.fee,
       total: subtotal + selectedLocation.fee,
-      status: "pending",
-      payment_status: "pending",
+      status: "pending" as const,
+      payment_status: "pending" as const,
       payment_method: selectedPaymentMethod.name,
       notes: customerInfo.notes || ""
     };

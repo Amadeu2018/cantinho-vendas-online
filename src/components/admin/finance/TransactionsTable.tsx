@@ -5,10 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Receipt, User, CreditCard, ArrowUp } from "lucide-react";
-import { SmoothScrollArea } from "@/components/ui/smooth-scroll-area";
-import { useScrollTransitions, useScrollToTop } from "@/hooks/use-scroll-transitions";
-import { Button } from "@/components/ui/button";
+import { Receipt, User, CreditCard } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TransactionsTableProps {
   orders: any[];
@@ -16,8 +14,6 @@ interface TransactionsTableProps {
 
 const TransactionsTable = ({ orders }: TransactionsTableProps) => {
   const isMobile = useIsMobile();
-  const { registerItem } = useScrollTransitions({ enableFadeTransitions: true });
-  const { scrollToTop } = useScrollToTop();
   
   const recentTransactions = orders
     .filter(order => order.status !== "cancelled")
@@ -45,23 +41,13 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Receipt className="h-5 w-5" />
-              Histórico de Transações
-            </CardTitle>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => scrollToTop()}
-              className="h-8 w-8 p-0"
-            >
-              <ArrowUp className="h-4 w-4" />
-            </Button>
-          </div>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Receipt className="h-5 w-5" />
+            Histórico de Transações
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-3">
-          <SmoothScrollArea className="h-96" showScrollbar={true} fadeEdges={true}>
+          <ScrollArea className="h-96">
             <div className="space-y-3 pr-2">
               {recentTransactions.map((order, index) => {
                 let customerName = "Cliente";
@@ -104,7 +90,6 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
                   <div 
                     key={order.id} 
                     className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-all duration-300 hover:shadow-sm transform hover:scale-[1.02]"
-                    ref={(el) => registerItem(`transaction-${index}`, el)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1 min-w-0">
@@ -139,7 +124,7 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
                 );
               })}
             </div>
-          </SmoothScrollArea>
+          </ScrollArea>
         </CardContent>
       </Card>
     );
@@ -149,23 +134,13 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5" />
-            Histórico de Transações
-          </CardTitle>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => scrollToTop()}
-            className="h-8 w-8 p-0"
-          >
-            <ArrowUp className="h-4 w-4" />
-          </Button>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Receipt className="h-5 w-5" />
+          Histórico de Transações
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <SmoothScrollArea className="h-96" showScrollbar={true} fadeEdges={true}>
+        <ScrollArea className="h-96">
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10 border-b">
               <TableRow>
@@ -218,7 +193,6 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
                   <TableRow 
                     key={order.id} 
                     className="hover:bg-muted/30 transition-all duration-200"
-                    ref={(el) => registerItem(`transaction-row-${index}`, el)}
                   >
                     <TableCell className="font-medium font-mono">#{orderId}</TableCell>
                     <TableCell>{format(new Date(createdAt), "dd/MM/yy HH:mm")}</TableCell>
@@ -239,7 +213,7 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
               })}
             </TableBody>
           </Table>
-        </SmoothScrollArea>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

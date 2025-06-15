@@ -1,9 +1,8 @@
 
 import { useState } from "react";
-import { ShoppingBag, Gift, MapPin, CreditCard, Truck, ArrowRight, Shield } from "lucide-react";
+import { ShoppingBag, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useFirstOrder } from "@/hooks/use-first-order";
@@ -12,8 +11,9 @@ import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 import CheckoutForm from "@/components/cart/CheckoutForm";
 import OrderStatus from "@/components/cart/OrderStatus";
-import { formatCurrency } from "@/lib/utils";
 import CartItem from "@/components/cart/CartItem";
+import CartHeader from "@/components/cart/cart-page/CartHeader";
+import OrderSummary from "@/components/cart/cart-page/OrderSummary";
 import { useNavigate } from "react-router-dom";
 
 const Carrinho = () => {
@@ -31,7 +31,6 @@ const Carrinho = () => {
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);
 
-  // Function that will be passed to CheckoutForm
   const handleCheckoutSuccess = (orderId: string) => {
     setCurrentOrderId(orderId);
     setCheckoutStep(3);
@@ -70,30 +69,7 @@ const Carrinho = () => {
             />
           ) : (
             <>
-              {/* Header with progress indicator */}
-              <div className="mb-8">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="flex items-center space-x-4">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${checkoutStep >= 1 ? 'bg-cantinho-terracotta text-white' : 'bg-gray-200 text-gray-500'}`}>
-                      <ShoppingBag className="w-5 h-5" />
-                    </div>
-                    <div className={`w-16 h-1 ${checkoutStep >= 2 ? 'bg-cantinho-terracotta' : 'bg-gray-200'}`} />
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${checkoutStep >= 2 ? 'bg-cantinho-terracotta text-white' : 'bg-gray-200 text-gray-500'}`}>
-                      <CreditCard className="w-5 h-5" />
-                    </div>
-                    <div className={`w-16 h-1 ${checkoutStep >= 3 ? 'bg-cantinho-terracotta' : 'bg-gray-200'}`} />
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${checkoutStep >= 3 ? 'bg-cantinho-terracotta text-white' : 'bg-gray-200 text-gray-500'}`}>
-                      <Truck className="w-5 h-5" />
-                    </div>
-                  </div>
-                </div>
-                <h1 className="text-4xl font-bold text-center mb-2 text-cantinho-navy">
-                  {checkoutStep === 1 ? "Seu Carrinho" : "Finalizar Pedido"}
-                </h1>
-                <p className="text-center text-gray-600">
-                  {checkoutStep === 1 ? "Revise seus itens antes de prosseguir" : "Complete seus dados para finalizar"}
-                </p>
-              </div>
+              <CartHeader checkoutStep={checkoutStep} />
 
               {items.length === 0 ? (
                 <Card className="text-center py-16 bg-white/80 backdrop-blur-sm border-0 shadow-xl">
@@ -145,14 +121,12 @@ const Carrinho = () => {
 
                         {/* Cart Items */}
                         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                          <CardHeader>
-                            <CardTitle className="flex items-center space-x-2">
+                          <CardContent className="p-6">
+                            <div className="flex items-center space-x-2 mb-4">
                               <ShoppingBag className="w-5 h-5 text-cantinho-terracotta" />
-                              <span>Itens do Carrinho</span>
+                              <span className="font-semibold">Itens do Carrinho</span>
                               <Badge variant="secondary">{items.length}</Badge>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
+                            </div>
                             <div className={`space-y-4 transition-opacity duration-300 ${isClearing ? 'opacity-50' : 'opacity-100'}`}>
                               {items.map((item) => (
                                 <CartItem 
@@ -192,96 +166,24 @@ const Carrinho = () => {
                         </Card>
                       </>
                     ) : (
-                      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                        <CardHeader>
-                          <CardTitle className="flex items-center space-x-2">
-                            <CreditCard className="w-5 h-5 text-cantinho-terracotta" />
-                            <span>Dados de Entrega</span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <CheckoutForm 
-                            onSuccess={handleCheckoutSuccess} 
-                          />
-                        </CardContent>
-                      </Card>
+                      <CheckoutForm 
+                        onSuccess={handleCheckoutSuccess} 
+                      />
                     )}
                   </div>
 
                   {/* Order Summary */}
                   <div className="lg:col-span-1">
-                    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl sticky top-24">
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2 text-cantinho-navy">
-                          <MapPin className="w-5 h-5" />
-                          <span>Resumo do Pedido</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">Subtotal</span>
-                            <span className="font-medium">{formatCurrency(subtotal)}</span>
-                          </div>
-                          
-                          {discount > 0 && (
-                            <div className="flex justify-between items-center text-green-600">
-                              <span className="flex items-center">
-                                <Gift className="w-4 h-4 mr-1" />
-                                Desconto (10%)
-                              </span>
-                              <span className="font-medium">-{formatCurrency(discount)}</span>
-                            </div>
-                          )}
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">Taxa de Entrega</span>
-                            {selectedLocation ? (
-                              <span className="font-medium">{formatCurrency(deliveryFee)}</span>
-                            ) : (
-                              <span className="text-gray-500 text-sm">Selecione localização</span>
-                            )}
-                          </div>
-                          
-                          <Separator />
-                          
-                          <div className="flex justify-between font-bold text-lg text-cantinho-navy">
-                            <span>Total</span>
-                            <span>{formatCurrency(total)}</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3 pt-4">
-                          {checkoutStep === 1 ? (
-                            <Button
-                              className="w-full bg-gradient-to-r from-cantinho-terracotta to-cantinho-terracotta/90 hover:from-cantinho-terracotta/90 hover:to-cantinho-terracotta shadow-lg hover:shadow-xl transition-all duration-300"
-                              onClick={() => setCheckoutStep(2)}
-                              size="lg"
-                            >
-                              Prosseguir para Pagamento
-                              <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              className="w-full transition-all hover:bg-muted"
-                              onClick={() => setCheckoutStep(1)}
-                            >
-                              Voltar ao Carrinho
-                            </Button>
-                          )}
-                          
-                          <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
-                            <Shield className="w-4 h-4" />
-                            <span>
-                              {checkoutStep === 1 
-                                ? "Pagamento seguro e dados protegidos"
-                                : "Seus dados estão seguros conosco"}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <OrderSummary
+                      subtotal={subtotal}
+                      discount={discount}
+                      deliveryFee={deliveryFee}
+                      selectedLocation={selectedLocation}
+                      total={total}
+                      checkoutStep={checkoutStep}
+                      onProceedToPayment={() => setCheckoutStep(2)}
+                      onBackToCart={() => setCheckoutStep(1)}
+                    />
                   </div>
                 </div>
               )}

@@ -166,10 +166,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Localização ou método de pagamento não selecionado");
     }
 
-    const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    // Generate a proper UUID for the order ID
+    const { data: uuidData } = await supabase.rpc('gen_random_uuid');
+    const orderId = uuidData || crypto.randomUUID();
     
     const orderData = {
-      id: orderId,
+      id: orderId, // Use proper UUID
       items: items,
       customer_info: JSON.stringify(customerInfo),
       subtotal: subtotal,
@@ -208,7 +210,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         status: "pending",
         createdAt: new Date().toISOString(),
         paymentStatus: "pending",
-        notes: customerInfo.notes
+        notes: customerInfo.notes || ""
       };
       
       setOrders(prev => [...prev, newOrder]);

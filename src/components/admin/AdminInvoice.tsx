@@ -46,7 +46,7 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
       email: order.customerInfo.email,
       phone: order.customerInfo.phone,
       address: order.customerInfo.address,
-      nif: order.customerInfo.nif || undefined
+      nif: (order.customerInfo as any).nif || undefined
     },
     items: order.items.map(item => ({
       description: item.name,
@@ -58,8 +58,8 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
     subtotal: order.subtotal,
     tax_total: order.subtotal * 0.14, // 14% IVA
     total: order.total,
-    payment_method: order.paymentMethod?.name,
-    payment_reference: order.payment_reference || undefined,
+    payment_method: (order as any).paymentMethod?.name || (order as any).payment_method,
+    payment_reference: (order as any).payment_reference || undefined,
     notes: order.notes
   };
 

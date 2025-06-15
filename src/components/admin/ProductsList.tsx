@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -128,8 +127,8 @@ const ProductsList = ({
 
   // Renderização de tabela para desktop
   return (
-    <div className="admin-table-container">
-      <Table>
+    <div className="admin-table-container overflow-x-auto w-full">
+      <Table className="min-w-[700px]">
         <TableHeader>
           <TableRow>
             <TableHead>Imagem</TableHead>

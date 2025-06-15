@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Order, OrderStatus } from "@/contexts/CartContext";
@@ -54,10 +53,10 @@ const AdminOrderDetail = ({
           <h3 className="text-lg sm:text-xl font-bold break-all">Pedido #{order.id}</h3>
           <p className="text-xs sm:text-sm text-gray-500">{formattedDate}</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-col xs:flex-row w-full md:w-auto">
           <Button 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full xs:w-auto"
             onClick={() => onPrepareInvoice(order)}
           >
             <Printer className="h-4 w-4" />
@@ -65,7 +64,7 @@ const AdminOrderDetail = ({
           </Button>
           <Button 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full xs:w-auto"
             onClick={() => onPrepareInvoice({...order, isProforma: true})}
           >
             <FileText className="h-4 w-4" />
@@ -167,7 +166,7 @@ const AdminOrderDetail = ({
                 {statusDisplay[order.status].label}
               </Badge>
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-col xs:flex-row flex-wrap w-full sm:w-auto">
               {order.status !== "pending" && (
                 <Button
                   variant="outline"
@@ -242,7 +241,7 @@ const AdminOrderDetail = ({
                 {paymentStatusDisplay[order.paymentStatus].label}
               </Badge>
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-col xs:flex-row flex-wrap w-full sm:w-auto">
               {order.paymentStatus !== "pending" && (
                 <Button
                   variant="outline"

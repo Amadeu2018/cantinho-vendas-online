@@ -225,7 +225,7 @@ const AdminProducts = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="relative md:w-72">
+        <div className="relative md:w-72 w-full">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar produto..."
@@ -234,17 +234,15 @@ const AdminProducts = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
         <ProductActions onAddProduct={() => setShowAddForm(true)} />
       </div>
-      
       <Card>
         <CardHeader>
           <CardTitle>Produtos</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6 w-full overflow-x-auto">
+            <TabsList className="mb-6 w-full overflow-x-auto flex no-scrollbar gap-2">
               <TabsTrigger value="all">Todos</TabsTrigger>
               <TabsTrigger value="low-stock">Estoque Baixo</TabsTrigger>
               <TabsTrigger value="out-of-stock">Sem Estoque</TabsTrigger>
@@ -254,7 +252,6 @@ const AdminProducts = () => {
                 </TabsTrigger>
               ))}
             </TabsList>
-          
             <TabsContent value={activeTab} className="mt-0">
               {loading ? (
                 <div className="flex justify-center items-center h-64">
@@ -288,7 +285,6 @@ const AdminProducts = () => {
           </Tabs>
         </CardContent>
       </Card>
-
       <DeleteConfirmDialog
         isOpen={deleteDialogOpen}
         onClose={closeDeleteDialog}

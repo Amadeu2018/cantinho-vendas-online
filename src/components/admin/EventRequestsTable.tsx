@@ -63,8 +63,8 @@ const EventRequestsTable = ({
           <p className="text-muted-foreground">Nenhuma solicitação encontrada</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <Table>
+        <div className="overflow-x-auto w-full">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Data</TableHead>

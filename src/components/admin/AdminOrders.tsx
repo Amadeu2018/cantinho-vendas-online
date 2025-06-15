@@ -52,7 +52,7 @@ const getPaymentBadgeColor = (status: "pending" | "completed" | "failed" | "canc
     case "cancelled":
       return "bg-gray-50 text-gray-700 hover:bg-gray-50 border-gray-200";
     default:
-      return "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
+      return "bg-orange-50 text-orange-700 hover:bg-orange-200";
   }
 };
 
@@ -88,11 +88,9 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
   const sortedOrders = [...orders].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-
   if (isMobile) {
     return <AdminOrdersMobile orders={sortedOrders} onSelectOrder={onSelectOrder} />;
   }
-
   if (sortedOrders.length === 0) {
     return (
       <div className="bg-gray-50 rounded-lg p-10 text-center">
@@ -102,46 +100,46 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
       </div>
     );
   }
-
+  // Responsivo: Tabela envelopada em scroll; cabeçalhos/tamanhos ajustados
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+    <div className="overflow-x-auto w-full">
+      <table className="w-full border-collapse admin-table min-w-[700px]">
         <thead>
           <tr className="bg-gray-50">
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">ID Pedido</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Cliente</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Data</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Total</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Status</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Pagamento</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Ações</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">ID</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Cliente</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Data</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Total</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Status</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Pagamento</th>
+            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Ações</th>
           </tr>
         </thead>
         <tbody>
           {sortedOrders.map((order) => (
             <tr key={order.id} className="border-b hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3">
-                <span className="font-mono text-sm">{order.id.slice(0, 10)}...</span>
+              <td className="px-2 py-2">
+                <span className="font-mono text-xs md:text-sm">{order.id.slice(0, 10)}...</span>
               </td>
-              <td className="px-4 py-3 font-medium">{order.customerInfo.name}</td>
-              <td className="px-4 py-3 text-sm text-gray-600">
+              <td className="px-2 py-2 font-medium break-words max-w-[110px] md:max-w-xs">{order.customerInfo.name}</td>
+              <td className="px-2 py-2 text-xs md:text-sm text-gray-600">
                 {formatDistanceToNow(new Date(order.createdAt), {
                   addSuffix: true,
                   locale: ptBR
                 })}
               </td>
-              <td className="px-4 py-3 font-medium">{formatPrice(order.total)}</td>
-              <td className="px-4 py-3">
+              <td className="px-2 py-2 font-medium whitespace-nowrap">{formatPrice(order.total)}</td>
+              <td className="px-2 py-2">
                 <Badge variant="outline" className={getStatusBadgeColor(order.status)}>
                   {formatStatus(order.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-2 py-2">
                 <Badge variant="outline" className={getPaymentBadgeColor(order.paymentStatus)}>
                   {formatPaymentStatus(order.paymentStatus)}
                 </Badge>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-2 py-2">
                 <Button 
                   variant="outline" 
                   size="sm" 

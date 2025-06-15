@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -147,7 +146,7 @@ const AdminEventRequests = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <CardTitle>Solicitações de Orçamento para Eventos</CardTitle>
         <EventRequestsFilters 
           selectedStatus={selectedStatus} 

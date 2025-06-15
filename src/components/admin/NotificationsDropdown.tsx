@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Bell, Package, ShoppingCart, CheckCircle, XCircle, Clock } from "lucide-react";
 import { 
@@ -37,12 +36,19 @@ const NotificationsDropdown = () => {
     
     // Set up realtime subscription for new notifications
     const channel = supabase
-      .channel('admin-notifications')
+      .channel('admin-notifications-dropdown')
       .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'notifications' }, 
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'notifications',
+          filter: 'user_id=eq.admin'
+        }, 
         handleNewNotification
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Notifications dropdown subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -52,27 +58,32 @@ const NotificationsDropdown = () => {
   const fetchNotifications = async () => {
     setIsLoading(true);
     try {
+      console.log('Buscando notificações do admin...');
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('type', 'order')
+        .eq('user_id', 'admin')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
         
       if (error) throw error;
 
-      const formattedNotifications = data.map((notification: any): OrderNotification => ({
+      console.log('Notificações encontradas:', data?.length || 0);
+
+      const formattedNotifications = (data || []).map((notification: any): OrderNotification => ({
         id: notification.id,
         orderId: notification.message.split(' ')[1] || '',
         message: notification.message,
         status: notification.title.toLowerCase().includes('novo') ? 'new' : 
                 notification.title.toLowerCase().includes('atualizado') ? 'updated' : 'other',
         createdAt: notification.created_at,
-        read: notification.read
+        read: notification.read || false
       }));
 
       setNotifications(formattedNotifications);
-      setUnreadCount(formattedNotifications.filter(n => !n.read).length);
+      const unread = formattedNotifications.filter(n => !n.read).length;
+      setUnreadCount(unread);
+      console.log('Notificações não lidas:', unread);
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -81,9 +92,10 @@ const NotificationsDropdown = () => {
   };
 
   const handleNewNotification = (payload: any) => {
+    console.log('Nova notificação recebida no dropdown:', payload);
     const newNotif = payload.new;
     
-    if (newNotif && newNotif.type === 'order') {
+    if (newNotif && newNotif.user_id === 'admin') {
       // Add new notification to the list
       const formattedNotification: OrderNotification = {
         id: newNotif.id,
@@ -92,17 +104,15 @@ const NotificationsDropdown = () => {
         status: newNotif.title.toLowerCase().includes('novo') ? 'new' : 
                 newNotif.title.toLowerCase().includes('atualizado') ? 'updated' : 'other',
         createdAt: newNotif.created_at,
-        read: newNotif.read
+        read: newNotif.read || false
       };
       
-      setNotifications(prev => [formattedNotification, ...prev].slice(0, 10));
-      setUnreadCount(prev => prev + 1);
+      setNotifications(prev => [formattedNotification, ...prev].slice(0, 20));
+      if (!formattedNotification.read) {
+        setUnreadCount(prev => prev + 1);
+      }
       
-      // Show toast for new notification
-      toast({
-        title: newNotif.title,
-        description: newNotif.message,
-      });
+      console.log('Notificação adicionada à lista');
     }
   };
 

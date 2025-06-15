@@ -116,14 +116,13 @@ export const useProfileData = () => {
     }
     
     try {
-      console.log("Buscando TODOS os pedidos mais recentes para o usuário:", user.id);
+      console.log("Buscando TODOS os pedidos para o usuário:", user.id);
       
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .eq("customer_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50); // Aumentar limite para garantir que pegamos todos os recentes
+        .order("created_at", { ascending: false });
       
       if (error) {
         console.error("Erro na consulta de pedidos:", error);
@@ -321,12 +320,57 @@ export const useProfileData = () => {
     }
   }, [user, fetchProfile, fetchAddresses, fetchOrders, fetchFavorites]);
 
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    console.log("Configurando subscriptions em tempo real para:", user.id);
+
+    // Subscribe to orders changes
+    const ordersChannel = supabase
+      .channel(`profile-orders-${user.id}`)
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'orders',
+          filter: `customer_id=eq.${user.id}`
+        }, 
+        (payload) => {
+          console.log('Order change detected for user:', payload);
+          fetchOrders(); // Refetch orders when changes occur
+        }
+      )
+      .subscribe();
+
+    // Subscribe to favorites changes
+    const favoritesChannel = supabase
+      .channel(`profile-favorites-${user.id}`)
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'favorites',
+          filter: `user_id=eq.${user.id}`
+        }, 
+        (payload) => {
+          console.log('Favorites change detected for user:', payload);
+          fetchFavorites(); // Refetch favorites when changes occur
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log("Limpando subscriptions");
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(favoritesChannel);
+    };
+  }, [user, fetchOrders, fetchFavorites]);
+
   // Calcular stats quando orders ou favorites mudarem
   useEffect(() => {
-    if (orders.length > 0 || favorites.length > 0) {
-      calculateStats();
-      generateRecentActivities();
-    }
+    calculateStats();
+    generateRecentActivities();
   }, [orders, favorites, calculateStats, generateRecentActivities]);
 
   return {

@@ -1,8 +1,11 @@
 
 import { useState, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FinanceCharts from "./finance/FinanceCharts";
 import FinanceStats from "./finance/FinanceStats";
+import TransactionsTable from "./finance/TransactionsTable";
 import { Order } from "@/hooks/admin/use-orders-data";
 import { subDays } from 'date-fns';
 import { ReportHeader } from "./reports/ReportHeader";
@@ -11,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { downloadCSV } from "@/lib/utils";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useIsMobile, useIsMobileOrTablet } from "@/hooks/use-mobile";
+import { Wallet, TrendingUp, BarChart3, Receipt } from "lucide-react";
 
 interface AdminFinanceProps {
   orders: Order[];
@@ -18,8 +23,11 @@ interface AdminFinanceProps {
 
 const AdminFinance = ({ orders }: AdminFinanceProps) => {
   const [period, setPeriod] = useState('month');
+  const [activeTab, setActiveTab] = useState('overview');
   const { toPDF, targetRef } = usePDF({ filename: 'relatorio_financeiro.pdf' });
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const isMobileOrTablet = useIsMobileOrTablet();
 
   const filteredOrders = useMemo(() => {
     const now = new Date();
@@ -77,40 +85,122 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center print:hidden">
-        <h2 className="text-2xl font-bold">Análise Financeira</h2>
-        <div className="flex items-center gap-4">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Semana</SelectItem>
-              <SelectItem value="month">Mês</SelectItem>
-              <SelectItem value="year">Ano</SelectItem>
-            </SelectContent>
-          </Select>
-          <ReportHeader title="" onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+      {/* Header Mobile-Optimized */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-cantinho-terracotta" />
+              Finanças
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Análise financeira e relatórios detalhados
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-full sm:w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Semana</SelectItem>
+                <SelectItem value="month">Mês</SelectItem>
+                <SelectItem value="year">Ano</SelectItem>
+              </SelectContent>
+            </Select>
+            <ReportHeader title="" onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+          </div>
         </div>
       </div>
 
-      <div ref={targetRef} className="space-y-6 bg-background p-4 rounded-lg">
+      <div ref={targetRef} className="space-y-4 sm:space-y-6 bg-background rounded-lg">
         <div className="hidden print:block mb-4 text-center">
-            <h1 className="text-3xl font-bold">Relatório Financeiro - O Cantinho do Zé</h1>
-            <p className="text-sm text-muted-foreground">Gerado em: {format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-            <p className="text-sm text-muted-foreground">Período: {period}</p>
+          <h1 className="text-3xl font-bold">Relatório Financeiro - O Cantinho do Zé</h1>
+          <p className="text-sm text-muted-foreground">Gerado em: {format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+          <p className="text-sm text-muted-foreground">Período: {period}</p>
         </div>
 
+        {/* Stats Cards */}
         <FinanceStats {...financialStats} />
 
-        <FinanceCharts 
-          orders={filteredOrders}
-        />
+        {/* Mobile Tabs */}
+        <Tabs defaultValue="overview" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
+          <TabsList className={`w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-3'} bg-muted p-1`}>
+            <TabsTrigger value="overview" className="flex items-center gap-2 text-xs sm:text-sm">
+              <TrendingUp className="h-4 w-4" />
+              {isMobile ? "Visão" : "Visão Geral"}
+            </TabsTrigger>
+            <TabsTrigger value="charts" className="flex items-center gap-2 text-xs sm:text-sm">
+              <BarChart3 className="h-4 w-4" />
+              {isMobile ? "Gráficos" : "Gráficos"}
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Receipt className="h-4 w-4" />
+              {isMobile ? "Histórico" : "Transações"}
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Resumo Financeiro</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-800">Receita Confirmada</h4>
+                      <p className="text-2xl font-bold text-green-900">
+                        {new Intl.NumberFormat('pt-AO', {
+                          style: 'currency',
+                          currency: 'AOA',
+                        }).format(financialStats.totalRevenue - financialStats.pendingRevenue)}
+                      </p>
+                      <p className="text-sm text-green-600">{financialStats.completedOrders} pedidos completos</p>
+                    </div>
+                    
+                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <h4 className="font-medium text-yellow-800">Receita Pendente</h4>
+                      <p className="text-2xl font-bold text-yellow-900">
+                        {new Intl.NumberFormat('pt-AO', {
+                          style: 'currency',
+                          currency: 'AOA',
+                        }).format(financialStats.pendingRevenue)}
+                      </p>
+                      <p className="text-sm text-yellow-600">
+                        {financialStats.totalOrders - financialStats.completedOrders} pedidos pendentes
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-800">Valor Médio por Pedido</h4>
+                    <p className="text-xl font-bold text-blue-900">
+                      {new Intl.NumberFormat('pt-AO', {
+                        style: 'currency',
+                        currency: 'AOA',
+                      }).format(financialStats.averageOrderValue)}
+                    </p>
+                    <p className="text-sm text-blue-600">Baseado em {financialStats.totalOrders} pedidos</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="charts">
+            <FinanceCharts orders={filteredOrders} />
+          </TabsContent>
+          
+          <TabsContent value="transactions">
+            <TransactionsTable orders={filteredOrders} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 };
 
 export default AdminFinance;
-

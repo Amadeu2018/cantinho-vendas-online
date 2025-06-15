@@ -1,14 +1,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Receipt, User, CreditCard } from "lucide-react";
 
 interface TransactionsTableProps {
   orders: any[];
 }
 
 const TransactionsTable = ({ orders }: TransactionsTableProps) => {
+  const isMobile = useIsMobile();
+  
   const recentTransactions = orders
     .filter(order => order.status !== "cancelled")
     .sort((a, b) => {
@@ -16,28 +21,133 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
       const dateB = new Date(b.created_at || b.createdAt);
       return dateB.getTime() - dateA.getTime();
     })
-    .slice(0, 10);
+    .slice(0, 20); // Show more transactions for better analysis
 
+  if (recentTransactions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Receipt className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+          <h3 className="mt-4 text-lg font-medium">Nenhuma transação</h3>
+          <p className="text-muted-foreground">Não há transações disponíveis para o período selecionado</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Mobile View - Cards
+  if (isMobile) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Receipt className="h-5 w-5" />
+            Histórico de Transações
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {recentTransactions.map((order) => {
+              let customerName = "Cliente";
+              let paymentMethod = "Desconhecido";
+              let paymentStatus = order.payment_status || order.paymentStatus || "pending";
+              const createdAt = order.created_at || order.createdAt;
+              const orderId = typeof order.id === 'string' ? order.id.slice(0, 8) : order.id;
+              
+              try {
+                // Handle customer info
+                if (order.customer_info && typeof order.customer_info === 'string') {
+                  try {
+                    const info = JSON.parse(order.customer_info);
+                    customerName = info.name || "Cliente";
+                  } catch (e) {
+                    customerName = order.customer_info;
+                  }
+                } else if (order.customer_info?.name) {
+                  customerName = order.customer_info.name;
+                } else if (order.customerInfo?.name) {
+                  customerName = order.customerInfo.name;
+                }
+                
+                // Handle payment method
+                if (order.payment_method && typeof order.payment_method === 'string') {
+                  paymentMethod = order.payment_method;
+                } else if (order.payment_method?.name) {
+                  paymentMethod = order.payment_method.name;
+                } else if (order.paymentMethod?.name) {
+                  paymentMethod = order.paymentMethod.name;
+                }
+              } catch (e) {
+                console.error("Error parsing order data:", e);
+              }
+              
+              const orderTotal = typeof order.total === 'number' ? order.total : 
+                                typeof order.total === 'string' ? parseFloat(order.total) : 0;
+              
+              return (
+                <div key={order.id} className="border rounded-lg p-3 bg-white hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-sm font-medium text-gray-900">#{orderId}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(createdAt), "dd/MM/yy HH:mm")}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-sm">{formatCurrency(orderTotal)}</p>
+                      <Badge className={`text-xs ${
+                        paymentStatus === "completed" 
+                          ? "bg-green-100 text-green-800 border-green-200" 
+                          : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      }`}>
+                        {paymentStatus === "completed" ? "Pago" : "Pendente"}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      <span className="truncate max-w-20">{customerName}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CreditCard className="h-3 w-3" />
+                      <span>{paymentMethod}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Desktop/Tablet View - Table
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Histórico de Transações</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Receipt className="h-5 w-5" />
+          Histórico de Transações
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID Pedido</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Método</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {recentTransactions.length > 0 ? (
-              recentTransactions.map((order) => {
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID Pedido</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Método</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentTransactions.map((order) => {
                 let customerName = "Cliente";
                 let paymentMethod = "Desconhecido";
                 let paymentStatus = order.payment_status || order.paymentStatus || "pending";
@@ -76,32 +186,26 @@ const TransactionsTable = ({ orders }: TransactionsTableProps) => {
                 
                 return (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{orderId}</TableCell>
+                    <TableCell className="font-medium font-mono">#{orderId}</TableCell>
                     <TableCell>{format(new Date(createdAt), "dd/MM/yy HH:mm")}</TableCell>
-                    <TableCell>{customerName}</TableCell>
+                    <TableCell className="max-w-32 truncate">{customerName}</TableCell>
                     <TableCell>{paymentMethod}</TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
+                      <Badge className={`${
                         paymentStatus === "completed" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-yellow-100 text-yellow-800"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : "bg-yellow-100 text-yellow-800 border-yellow-200"
                       }`}>
                         {paymentStatus === "completed" ? "Pago" : "Pendente"}
-                      </span>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{formatCurrency(orderTotal)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(orderTotal)}</TableCell>
                   </TableRow>
                 );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  Nenhuma transação disponível
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

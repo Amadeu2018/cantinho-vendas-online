@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,14 +6,20 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import InventoryList from "./InventoryList";
 import LowStockAlerts from "./LowStockAlerts";
+import InventorySearch from "./InventorySearch";
 import { useStockNotifications } from "@/hooks/admin/use-stock-notifications";
+import { useIsMobile, useIsMobileOrTablet } from "@/hooks/use-mobile";
+import { RefreshCw, Plus, AlertTriangle } from "lucide-react";
 
 const AdminInventory = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const isMobileOrTablet = useIsMobileOrTablet();
   const [inventory, setInventory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useStockNotifications();
 
@@ -22,7 +29,7 @@ const AdminInventory = () => {
 
   const fetchInventory = async () => {
     try {
-      // First get products
+      // Get products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*')
@@ -30,7 +37,7 @@ const AdminInventory = () => {
 
       if (productsError) throw productsError;
 
-      // Then get categories separately
+      // Get categories separately
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('categories')
         .select('*');
@@ -147,6 +154,13 @@ const AdminInventory = () => {
     }
   };
 
+  const filteredInventory = inventory.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const lowStockItems = inventory.filter(item => item.stock_quantity <= item.min_stock_quantity);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -156,23 +170,53 @@ const AdminInventory = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gestão de Inventário</h2>
-        <Button onClick={() => window.location.reload()}>
-          Atualizar
-        </Button>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+      {/* Header Mobile-Optimized */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-cantinho-terracotta" />
+            Estoque
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {inventory.length} produtos • {lowStockItems.length} alertas
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+          <InventorySearch 
+            searchTerm={searchTerm} 
+            onSearchChange={setSearchTerm}
+          />
+          <Button 
+            onClick={fetchInventory}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {isMobile ? "Atualizar" : "Atualizar"}
+          </Button>
+        </div>
       </div>
 
-      <LowStockAlerts inventory={inventory} />
+      {/* Low Stock Alerts - Mobile Optimized */}
+      {lowStockItems.length > 0 && (
+        <LowStockAlerts inventory={inventory} />
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Produtos em Estoque</CardTitle>
+      {/* Inventory List */}
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg flex items-center justify-between">
+            <span>Produtos em Estoque</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              {filteredInventory.length} itens
+            </span>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6">
           <InventoryList
-            inventory={inventory}
+            inventory={filteredInventory}
             editingId={editingId}
             editForm={editForm}
             onEdit={handleEdit}

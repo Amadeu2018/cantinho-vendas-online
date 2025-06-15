@@ -22,7 +22,11 @@ const AdminLayout = ({
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AdminSidebar />
+        <AdminSidebar 
+          activeTab={activeTab}
+          onTabChange={onTabChange || (() => {})}
+          onLogout={onLogout || (() => {})}
+        />
         <SidebarInset>
           <AdminHeader
             onLogout={onLogout}

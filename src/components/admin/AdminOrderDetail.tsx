@@ -48,40 +48,39 @@ const AdminOrderDetail = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-1 sm:px-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h3 className="text-xl font-bold">Pedido #{order.id}</h3>
-          <p className="text-gray-500">{formattedDate}</p>
+          <h3 className="text-lg sm:text-xl font-bold break-all">Pedido #{order.id}</h3>
+          <p className="text-xs sm:text-sm text-gray-500">{formattedDate}</p>
         </div>
-        
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
             onClick={() => onPrepareInvoice(order)}
           >
             <Printer className="h-4 w-4" />
-            Gerar Fatura
+            <span className="hidden xs:inline">Gerar Fatura</span>
           </Button>
-          
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
             onClick={() => onPrepareInvoice({...order, isProforma: true})}
           >
             <FileText className="h-4 w-4" />
-            Proforma
+            <span className="hidden xs:inline">Proforma</span>
           </Button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      {/* Cliente e Entrega */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Informações do Cliente</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Informações do Cliente</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 text-xs sm:text-sm break-words">
             <div>
               <span className="font-medium">Nome:</span> {order.customerInfo.name}
             </div>
@@ -98,12 +97,11 @@ const AdminOrderDetail = ({
             )}
           </CardContent>
         </Card>
-        
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Detalhes da Entrega</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Detalhes da Entrega</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 text-xs sm:text-sm">
             <div>
               <span className="font-medium">Local:</span> {order.location.name}
             </div>
@@ -117,39 +115,39 @@ const AdminOrderDetail = ({
         </Card>
       </div>
       
-      <Card>
+      {/* Itens do Pedido */}
+      <Card className="min-w-0">
         <CardHeader>
-          <CardTitle>Itens do Pedido</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Itens do Pedido</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between border-b pb-2">
+              <div key={item.id} className="flex flex-col xs:flex-row xs:items-center xs:justify-between border-b pb-2 gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-10 w-10 rounded overflow-hidden">
+                  <div className="h-10 w-10 rounded overflow-hidden flex-shrink-0">
                     <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                   </div>
                   <div>
                     <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-gray-500">{formatCurrency(item.price)} x {item.quantity}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{formatCurrency(item.price)} x {item.quantity}</p>
                   </div>
                 </div>
-                <div className="font-medium">{formatCurrency(item.price * item.quantity)}</div>
+                <div className="font-medium xs:text-right">{formatCurrency(item.price * item.quantity)}</div>
               </div>
             ))}
           </div>
-          
           <div className="mt-4 space-y-2">
-            <div className="flex justify-between">
+            <div className="flex justify-between text-xs sm:text-sm">
               <span>Subtotal</span>
               <span>{formatCurrency(order.subtotal)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-xs sm:text-sm">
               <span>Taxa de Entrega</span>
               <span>{formatCurrency(order.deliveryFee)}</span>
             </div>
             <Separator className="my-2" />
-            <div className="flex justify-between font-bold">
+            <div className="flex justify-between font-bold text-sm sm:text-base">
               <span>Total</span>
               <span>{formatCurrency(order.total)}</span>
             </div>
@@ -157,91 +155,94 @@ const AdminOrderDetail = ({
         </CardContent>
       </Card>
       
-      <Card>
+      {/* Status do Pedido */}
+      <Card className="min-w-0">
         <CardHeader>
-          <CardTitle>Status do Pedido</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Status do Pedido</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <Badge className={`${statusDisplay[order.status].color}`}>
                 {statusDisplay[order.status].label}
               </Badge>
             </div>
-            
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {order.status !== "pending" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("pending")}
                 >
-                  <Clock className="h-4 w-4 mr-1" /> Marcar como Pendente
+                  <Clock className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Marcar como Pendente</span>
+                  <span className="inline xs:hidden">Pendente</span>
                 </Button>
               )}
-              
               {order.status !== "confirmed" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("confirmed")}
                 >
-                  <Check className="h-4 w-4 mr-1" /> Confirmar Pedido
+                  <Check className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Confirmar Pedido</span>
+                  <span className="inline xs:hidden">Confirmar</span>
                 </Button>
               )}
-              
               {order.status !== "preparing" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("preparing")}
                 >
-                  <Check className="h-4 w-4 mr-1" /> Em Preparo
+                  <Check className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Em Preparo</span>
+                  <span className="inline xs:hidden">Preparo</span>
                 </Button>
               )}
-              
               {order.status !== "delivering" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("delivering")}
                 >
-                  <Truck className="h-4 w-4 mr-1" /> Em Entrega
+                  <Truck className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Em Entrega</span>
+                  <span className="inline xs:hidden">Entrega</span>
                 </Button>
               )}
-              
               {order.status !== "completed" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("completed")}
                 >
-                  <Check className="h-4 w-4 mr-1" /> Completar
+                  <Check className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Completar</span>
+                  <span className="inline xs:hidden">Finalizar</span>
                 </Button>
               )}
-              
               {order.status !== "cancelled" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("cancelled")}
                 >
-                  <Ban className="h-4 w-4 mr-1" /> Cancelar
+                  <Ban className="h-4 w-4 mr-1" /> 
+                  <span className="hidden xs:inline">Cancelar</span>
                 </Button>
               )}
             </div>
           </div>
-          
           <Separator />
-          
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <Badge className={`${paymentStatusDisplay[order.paymentStatus].color}`}>
                 {paymentStatusDisplay[order.paymentStatus].label}
               </Badge>
             </div>
-            
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {order.paymentStatus !== "pending" && (
                 <Button
                   variant="outline"
@@ -251,7 +252,6 @@ const AdminOrderDetail = ({
                   Marcar como Pendente
                 </Button>
               )}
-              
               {order.paymentStatus !== "completed" && (
                 <Button
                   variant="outline"

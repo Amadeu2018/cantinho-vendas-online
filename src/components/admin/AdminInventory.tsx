@@ -27,8 +27,8 @@ const AdminInventory = () => {
         .from('products')
         .select(`
           *,
-          categories(name)
-        `)
+          categories!inner(name)
+        `) // Fixed: use inner join to properly embed the category name
         .order('name');
 
       if (error) throw error;

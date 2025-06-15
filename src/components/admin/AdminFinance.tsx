@@ -15,7 +15,7 @@ const AdminFinance = ({ orders }: AdminFinanceProps) => {
   const getFilteredOrders = () => {
     const now = new Date();
     return orders.filter(order => {
-      const orderDate = new Date(order.created_at);
+      const orderDate = new Date(order.createdAt); // Fixed: use createdAt instead of created_at
       switch (period) {
         case 'week':
           return orderDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

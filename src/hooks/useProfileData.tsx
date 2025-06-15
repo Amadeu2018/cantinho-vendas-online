@@ -261,10 +261,24 @@ export const useProfileData = () => {
         (payload) => {
           console.log('Order change detected:', payload);
           // Verificar se o pedido pertence ao usuário atual
-          if (payload.new && payload.new.customer_info && 
-              typeof payload.new.customer_info === 'object' &&
-              payload.new.customer_info.email === user.email) {
-            fetchOrders();
+          const orderData = payload.new as any;
+          if (orderData && orderData.customer_info) {
+            // Fixed: properly check if customer_info contains user email
+            let customerEmail = '';
+            try {
+              if (typeof orderData.customer_info === 'string') {
+                const info = JSON.parse(orderData.customer_info);
+                customerEmail = info.email || '';
+              } else if (orderData.customer_info && typeof orderData.customer_info === 'object') {
+                customerEmail = orderData.customer_info.email || '';
+              }
+            } catch (e) {
+              console.error('Error parsing customer_info:', e);
+            }
+            
+            if (customerEmail === user.email) {
+              fetchOrders();
+            }
           }
         }
       )

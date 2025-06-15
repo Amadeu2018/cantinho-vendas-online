@@ -71,7 +71,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       toast({
         title: "Erro no processamento",
         description: "Ocorreu um erro ao processar o pedido",
-        variant: "descriptive"
+        variant: "destructive"
       });
     } finally {
       setLoading(false);

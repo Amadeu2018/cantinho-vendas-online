@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Order } from "@/hooks/admin/use-orders-data";
@@ -12,6 +11,8 @@ import { ReportStats } from "./reports/ReportStats";
 import { MonthlyReport } from "./reports/MonthlyReport";
 import { DailyReport } from "./reports/DailyReport";
 import { TopProductsReport } from "./reports/TopProductsReport";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BarChart3, Calendar, TrendingUp, FileText } from "lucide-react";
 
 interface AdminReportsProps {
   orders: Order[];
@@ -21,6 +22,7 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
   const [activeTab, setActiveTab] = useState('monthly');
   const { toPDF, targetRef } = usePDF({ filename: 'relatorio_geral.pdf' });
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const reportData = useMemo(() => {
     const totalOrders = orders.length;
@@ -151,10 +153,23 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <ReportHeader title="Relatórios e Análises" onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-cantinho-terracotta" />
+            Relatórios e Análises
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Análise detalhada de vendas e performance
+          </p>
+        </div>
+        <div className="w-full sm:w-auto">
+          <ReportHeader title="" onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+        </div>
+      </div>
 
-      <div ref={targetRef} className="space-y-6 bg-background p-4 rounded-lg">
+      <div ref={targetRef} className="space-y-4 sm:space-y-6 bg-background p-2 sm:p-4 rounded-lg">
         <div className="hidden print:block mb-4 text-center">
           <h1 className="text-3xl font-bold">Relatório - O Cantinho do Zé</h1>
           <p className="text-sm text-muted-foreground">Gerado em: {format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
@@ -168,10 +183,19 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
         />
 
         <Tabs defaultValue="monthly" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="print:hidden">
-            <TabsTrigger value="monthly">Últimos 6 Meses</TabsTrigger>
-            <TabsTrigger value="daily">Últimos 7 Dias</TabsTrigger>
-            <TabsTrigger value="products">Top Produtos</TabsTrigger>
+          <TabsList className={`w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-3'} bg-muted p-1`}>
+            <TabsTrigger value="monthly" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Calendar className="h-4 w-4" />
+              {isMobile ? "6M" : "6 Meses"}
+            </TabsTrigger>
+            <TabsTrigger value="daily" className="flex items-center gap-2 text-xs sm:text-sm">
+              <BarChart3 className="h-4 w-4" />
+              {isMobile ? "7D" : "7 Dias"}
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-2 text-xs sm:text-sm">
+              <TrendingUp className="h-4 w-4" />
+              {isMobile ? "Top" : "Produtos"}
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="monthly">

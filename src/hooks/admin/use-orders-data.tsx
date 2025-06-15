@@ -9,7 +9,7 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'delivered' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'delivered' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'completed' | 'failed' | 'cancelled';
   paymentMethod: {
     id: string;
@@ -87,6 +87,7 @@ export const useOrdersData = () => {
           case 'pending':
           case 'confirmed':
           case 'preparing':
+          case 'delivering':
           case 'delivered':
           case 'completed':
           case 'cancelled':

@@ -1,18 +1,17 @@
 
-import React from "react";
-import { Order } from "@/hooks/admin/use-orders-data";
+import { useState } from "react";
+import DashboardTabs from "./dashboard/DashboardTabs";
 import DashboardHeader from "./dashboard/DashboardHeader";
-import DashboardStatsGrid from "./dashboard/DashboardStatsGrid";
-import DashboardCharts from "./dashboard/DashboardCharts";
 import DashboardContent from "./dashboard/DashboardContent";
-import DashboardRefresh from "./dashboard/DashboardRefresh";
 import AdminOrdersList from "./AdminOrdersList";
 import AdminProducts from "./AdminProducts";
+import AdminCustomers from "./AdminCustomers";
 import AdminFinance from "./AdminFinance";
 import AdminInventory from "./AdminInventory";
 import AdminReports from "./AdminReports";
-import AdminCustomers from "./AdminCustomers";
 import AdminSettings from "./AdminSettings";
+import AdminEventRequests from "./AdminEventRequests";
+import { Order } from "@/hooks/admin/use-orders-data";
 
 interface AdminDashboardProps {
   orders: Order[];
@@ -20,31 +19,32 @@ interface AdminDashboardProps {
   onSelectOrder: (orderId: string) => void;
   onPrepareInvoice: (order: Order) => void;
   onLogout: () => void;
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 const AdminDashboard = ({ 
   orders, 
-  fetchingOrders, 
+  fetchingOrders,
   onSelectOrder, 
   onPrepareInvoice,
   onLogout,
-  activeTab = "dashboard",
+  activeTab,
   onTabChange
 }: AdminDashboardProps) => {
-  const { handleRefresh, isRefreshing } = DashboardRefresh({ 
-    onRefresh: async () => {
-      // Refresh logic here if needed
-    }
-  });
-
-  const renderContent = () => {
+  const renderTabContent = () => {
     switch (activeTab) {
+      case "dashboard":
+        return (
+          <DashboardContent 
+            orders={orders}
+            onSelectOrder={onSelectOrder}
+          />
+        );
       case "orders":
         return (
           <AdminOrdersList 
-            orders={orders} 
+            orders={orders}
             onSelectOrder={onSelectOrder}
             fetchingOrders={fetchingOrders}
           />
@@ -58,28 +58,37 @@ const AdminDashboard = ({
       case "inventory":
         return <AdminInventory />;
       case "reports":
-        return <AdminReports />;
+        return <AdminReports orders={orders} />;
       case "settings":
         return <AdminSettings />;
-      case "dashboard":
+      case "events":
+        return <AdminEventRequests />;
       default:
         return (
-          <div className="space-y-8">
-            <DashboardHeader onRefresh={handleRefresh} isRefreshing={isRefreshing} />
-            <DashboardStatsGrid orders={orders} />
-            <DashboardCharts orders={orders} />
-            <DashboardContent 
-              orders={orders}
-              onSelectOrder={onSelectOrder}
-            />
-          </div>
+          <DashboardContent 
+            orders={orders}
+            onSelectOrder={onSelectOrder}
+          />
         );
     }
   };
 
   return (
     <div className="space-y-6">
-      {renderContent()}
+      <DashboardHeader 
+        orders={orders}
+        onLogout={onLogout}
+      />
+      
+      <DashboardTabs 
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        orders={orders}
+      />
+      
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        {renderTabContent()}
+      </div>
     </div>
   );
 };

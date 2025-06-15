@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export type CartItem = {
   id: number;
@@ -28,6 +28,7 @@ export type OrderStatus =
   | "confirmed" 
   | "preparing" 
   | "delivering" 
+  | "delivered"
   | "completed" 
   | "cancelled";
 
@@ -43,7 +44,7 @@ export type Order = {
   status: OrderStatus;
   createdAt: string;
   notes?: string;
-  paymentStatus: "pending" | "completed";
+  paymentStatus: "pending" | "completed" | "failed" | "cancelled";
   isProforma?: boolean;
 };
 
@@ -70,7 +71,6 @@ type CartContextType = {
   addToFavorites: (dishId: number) => void;
   removeFromFavorites: (dishId: number) => void;
   isFavorite: (dishId: number) => boolean;
-  orderStatus?: OrderStatus; // Adicionado orderStatus como opcional
 };
 
 export type CustomerInfo = {
@@ -215,30 +215,64 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
-    const newOrder: Order = {
+    const orderData = {
       id: orderId,
-      items: [...items],
-      customerInfo,
-      location: selectedLocation,
-      paymentMethod: selectedPaymentMethod,
-      subtotal,
-      deliveryFee: selectedLocation.fee,
+      items: items,
+      customer_info: customerInfo,
+      subtotal: subtotal,
+      delivery_fee: selectedLocation.fee,
       total: subtotal + selectedLocation.fee,
       status: "pending",
-      createdAt: new Date().toISOString(),
-      paymentStatus: "pending"
+      payment_status: "pending",
+      payment_method: selectedPaymentMethod.name,
+      notes: customerInfo.notes || ""
     };
-    
-    setOrders(prev => [...prev, newOrder]);
-    
-    toast({
-      title: "Pedido recebido",
-      description: "Seu pedido foi registrado e está aguardando confirmação.",
-    });
-    
-    console.log("Novo pedido criado:", newOrder);
-    
-    return orderId;
+
+    try {
+      // Salvar pedido no Supabase
+      const { error } = await supabase
+        .from('orders')
+        .insert([orderData]);
+
+      if (error) {
+        console.error('Erro ao salvar pedido no Supabase:', error);
+        throw error;
+      }
+
+      const newOrder: Order = {
+        id: orderId,
+        items: [...items],
+        customerInfo,
+        location: selectedLocation,
+        paymentMethod: selectedPaymentMethod,
+        subtotal,
+        deliveryFee: selectedLocation.fee,
+        total: subtotal + selectedLocation.fee,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        paymentStatus: "pending",
+        notes: customerInfo.notes
+      };
+      
+      setOrders(prev => [...prev, newOrder]);
+      
+      toast({
+        title: "Pedido recebido",
+        description: "Seu pedido foi registrado e está aguardando confirmação.",
+      });
+      
+      console.log("Novo pedido criado:", newOrder);
+      
+      return orderId;
+    } catch (error: any) {
+      console.error('Erro ao processar pedido:', error);
+      toast({
+        title: "Erro ao processar pedido",
+        description: error.message || "Ocorreu um erro. Tente novamente.",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
   
   const getOrderById = (id: string): Order | undefined => {

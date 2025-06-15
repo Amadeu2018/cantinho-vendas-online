@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
@@ -15,6 +14,7 @@ const convertOrderType = (order: Order): CartOrder => {
   return {
     ...order,
     notes: order.notes || "",
+    status: order.status === 'delivered' ? 'delivering' : order.status,
     paymentMethod: {
       id: order.paymentMethod?.id || 'default-id',
       name: order.paymentMethod?.name || 'Método de pagamento',

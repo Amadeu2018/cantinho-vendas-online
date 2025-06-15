@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -41,28 +40,29 @@ const EventRequestsTable = ({
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div className="flex flex-col gap-3">
+    <div className="space-y-4">
+      {/* Search - Otimizado para mobile */}
+      <div className="px-2 sm:px-0">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Pesquisar solicitações..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 text-sm h-9"
+            className="pl-10 text-base h-12 rounded-xl border-gray-200 focus:border-cantinho-terracotta focus:ring-cantinho-terracotta"
           />
         </div>
       </div>
       
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
+          <div className="animate-spin h-8 w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
         </div>
       ) : isMobile ? (
         <EventRequestsTableMobile requests={filteredRequests} onSelectRequest={onSelectRequest} />
       ) : filteredRequests.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground text-sm">Nenhuma solicitação encontrada</p>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground text-base">Nenhuma solicitação encontrada</p>
         </div>
       ) : (
         <div className="overflow-x-auto w-full">

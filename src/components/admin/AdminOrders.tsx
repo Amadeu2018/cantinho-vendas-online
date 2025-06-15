@@ -1,3 +1,4 @@
+
 import { Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -88,71 +89,85 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
   const sortedOrders = [...orders].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+  
   if (isMobile) {
     return <AdminOrdersMobile orders={sortedOrders} onSelectOrder={onSelectOrder} />;
   }
+  
   if (sortedOrders.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-lg p-10 text-center">
-        <p className="text-gray-500">
+      <div className="bg-gray-50 rounded-lg p-6 md:p-10 text-center">
+        <p className="text-gray-500 text-sm md:text-base">
           Nenhum pedido encontrado nesta categoria.
         </p>
       </div>
     );
   }
+  
   // Responsivo: Tabela envelopada em scroll; cabeçalhos/tamanhos ajustados
   return (
     <div className="overflow-x-auto w-full">
-      <table className="w-full border-collapse admin-table min-w-[700px]">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">ID</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Cliente</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Data</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Total</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Status</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Pagamento</th>
-            <th className="px-2 py-2 text-left text-xs md:text-sm font-medium text-gray-700 border-b">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedOrders.map((order) => (
-            <tr key={order.id} className="border-b hover:bg-gray-50 transition-colors">
-              <td className="px-2 py-2">
-                <span className="font-mono text-xs md:text-sm">{order.id.slice(0, 10)}...</span>
-              </td>
-              <td className="px-2 py-2 font-medium break-words max-w-[110px] md:max-w-xs">{order.customerInfo.name}</td>
-              <td className="px-2 py-2 text-xs md:text-sm text-gray-600">
-                {formatDistanceToNow(new Date(order.createdAt), {
-                  addSuffix: true,
-                  locale: ptBR
-                })}
-              </td>
-              <td className="px-2 py-2 font-medium whitespace-nowrap">{formatPrice(order.total)}</td>
-              <td className="px-2 py-2">
-                <Badge variant="outline" className={getStatusBadgeColor(order.status)}>
-                  {formatStatus(order.status)}
-                </Badge>
-              </td>
-              <td className="px-2 py-2">
-                <Badge variant="outline" className={getPaymentBadgeColor(order.paymentStatus)}>
-                  {formatPaymentStatus(order.paymentStatus)}
-                </Badge>
-              </td>
-              <td className="px-2 py-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onSelectOrder(order.id)}
-                  className="border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white"
-                >
-                  Detalhes
-                </Button>
-              </td>
+      <div className="min-w-[800px]">
+        <table className="w-full border-collapse admin-table">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">ID</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Cliente</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Data</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Total</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Status</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Pagamento</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">Ações</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedOrders.map((order) => (
+              <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span className="font-mono text-xs text-gray-600">{order.id.slice(0, 8)}...</span>
+                </td>
+                <td className="px-3 py-4">
+                  <div className="max-w-[150px]">
+                    <p className="font-medium text-gray-900 truncate">{order.customerInfo.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{order.customerInfo.phone}</p>
+                  </div>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span className="text-xs text-gray-600">
+                    {formatDistanceToNow(new Date(order.createdAt), {
+                      addSuffix: true,
+                      locale: ptBR
+                    })}
+                  </span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span className="font-semibold text-gray-900">{formatPrice(order.total)}</span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <Badge variant="outline" className={`text-xs ${getStatusBadgeColor(order.status)}`}>
+                    {formatStatus(order.status)}
+                  </Badge>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <Badge variant="outline" className={`text-xs ${getPaymentBadgeColor(order.paymentStatus)}`}>
+                    {formatPaymentStatus(order.paymentStatus)}
+                  </Badge>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => onSelectOrder(order.id)}
+                    className="text-xs border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white"
+                  >
+                    Ver Detalhes
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

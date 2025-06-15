@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -196,10 +197,10 @@ const AdminProducts = () => {
 
   if (showAddForm) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Novo Produto</h2>
-          <Button variant="outline" onClick={() => setShowAddForm(false)}>
+      <div className="space-y-4 p-2 sm:p-4 lg:p-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h2 className="text-lg md:text-xl font-semibold">Novo Produto</h2>
+          <Button variant="outline" onClick={() => setShowAddForm(false)} className="text-sm md:text-base h-8 md:h-9">
             Voltar para Lista
           </Button>
         </div>
@@ -210,10 +211,10 @@ const AdminProducts = () => {
 
   if (showEditForm && selectedProduct) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Editar Produto</h2>
-          <Button variant="outline" onClick={() => setShowEditForm(false)}>
+      <div className="space-y-4 p-2 sm:p-4 lg:p-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h2 className="text-lg md:text-xl font-semibold">Editar Produto</h2>
+          <Button variant="outline" onClick={() => setShowEditForm(false)} className="text-sm md:text-base h-8 md:h-9">
             Voltar para Lista
           </Button>
         </div>
@@ -223,39 +224,49 @@ const AdminProducts = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="relative md:w-72 w-full">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+    <div className="space-y-4 md:space-y-6 p-2 sm:p-4 lg:p-0">
+      <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar produto..."
-            className="pl-8"
+            className="pl-8 text-sm md:text-base h-9 md:h-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <ProductActions onAddProduct={() => setShowAddForm(true)} />
       </div>
+      
       <Card>
-        <CardHeader>
-          <CardTitle>Produtos</CardTitle>
+        <CardHeader className="pb-3 md:pb-4">
+          <CardTitle className="text-lg md:text-xl">Produtos</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6 w-full overflow-x-auto flex no-scrollbar gap-2">
-              <TabsTrigger value="all">Todos</TabsTrigger>
-              <TabsTrigger value="low-stock">Estoque Baixo</TabsTrigger>
-              <TabsTrigger value="out-of-stock">Sem Estoque</TabsTrigger>
-              {categories.map(category => (
-                <TabsTrigger key={category.id} value={category.id}>
-                  {category.name}
+            <div className="mb-4 md:mb-6 overflow-x-auto">
+              <TabsList className={`h-auto p-1 bg-gray-100 ${isMobile ? 'w-max flex no-scrollbar' : 'w-full flex-wrap justify-start'} gap-1`}>
+                <TabsTrigger value="all" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                  Todos
                 </TabsTrigger>
-              ))}
-            </TabsList>
+                <TabsTrigger value="low-stock" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                  Estoque Baixo
+                </TabsTrigger>
+                <TabsTrigger value="out-of-stock" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                  Sem Estoque
+                </TabsTrigger>
+                {categories.map(category => (
+                  <TabsTrigger key={category.id} value={category.id} className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            
             <TabsContent value={activeTab} className="mt-0">
               {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Carregando produtos...</p>
+                <div className="flex justify-center items-center h-48 md:h-64">
+                  <div className="animate-spin h-6 w-6 md:h-8 md:w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
                 </div>
               ) : (
                 isMobile ? (
@@ -285,6 +296,7 @@ const AdminProducts = () => {
           </Tabs>
         </CardContent>
       </Card>
+      
       <DeleteConfirmDialog
         isOpen={deleteDialogOpen}
         onClose={closeDeleteDialog}

@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Order, OrderStatus } from "@/contexts/CartContext";
@@ -47,68 +48,79 @@ const AdminOrderDetail = ({
   };
 
   return (
-    <div className="space-y-6 px-1 sm:px-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h3 className="text-lg sm:text-xl font-bold break-all">Pedido #{order.id}</h3>
-          <p className="text-xs sm:text-sm text-gray-500">{formattedDate}</p>
+    <div className="space-y-4 md:space-y-6 px-2 sm:px-4 lg:px-0">
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 break-words">
+            Pedido #{order.id}
+          </h3>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">{formattedDate}</p>
         </div>
-        <div className="flex gap-2 flex-col xs:flex-row w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 w-full xs:w-auto"
+            className="flex items-center justify-center gap-2 text-xs md:text-sm h-8 md:h-9 px-3 md:px-4"
             onClick={() => onPrepareInvoice(order)}
           >
-            <Printer className="h-4 w-4" />
-            <span className="hidden xs:inline">Gerar Fatura</span>
+            <Printer className="h-3 w-3 md:h-4 md:w-4" />
+            <span>Gerar Fatura</span>
           </Button>
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 w-full xs:w-auto"
+            className="flex items-center justify-center gap-2 text-xs md:text-sm h-8 md:h-9 px-3 md:px-4"
             onClick={() => onPrepareInvoice({...order, isProforma: true})}
           >
-            <FileText className="h-4 w-4" />
-            <span className="hidden xs:inline">Proforma</span>
+            <FileText className="h-3 w-3 md:h-4 md:w-4" />
+            <span>Proforma</span>
           </Button>
         </div>
       </div>
       
       {/* Cliente e Entrega */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle className="text-base sm:text-lg">Informações do Cliente</CardTitle>
+          <CardHeader className="pb-3 md:pb-4">
+            <CardTitle className="text-sm md:text-base lg:text-lg">Informações do Cliente</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-xs sm:text-sm break-words">
-            <div>
-              <span className="font-medium">Nome:</span> {order.customerInfo.name}
+          <CardContent className="space-y-2 md:space-y-3 text-xs md:text-sm">
+            <div className="break-words">
+              <span className="font-medium text-gray-700">Nome:</span>
+              <span className="ml-2 text-gray-900">{order.customerInfo.name}</span>
             </div>
-            <div>
-              <span className="font-medium">Endereço:</span> {order.customerInfo.address}
+            <div className="break-words">
+              <span className="font-medium text-gray-700">Endereço:</span>
+              <span className="ml-2 text-gray-900">{order.customerInfo.address}</span>
             </div>
-            <div>
-              <span className="font-medium">Telefone:</span> {order.customerInfo.phone}
+            <div className="break-words">
+              <span className="font-medium text-gray-700">Telefone:</span>
+              <span className="ml-2 text-gray-900">{order.customerInfo.phone}</span>
             </div>
             {order.customerInfo.notes && (
-              <div>
-                <span className="font-medium">Observações:</span> {order.customerInfo.notes}
+              <div className="break-words">
+                <span className="font-medium text-gray-700">Observações:</span>
+                <span className="ml-2 text-gray-900">{order.customerInfo.notes}</span>
               </div>
             )}
           </CardContent>
         </Card>
+        
         <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle className="text-base sm:text-lg">Detalhes da Entrega</CardTitle>
+          <CardHeader className="pb-3 md:pb-4">
+            <CardTitle className="text-sm md:text-base lg:text-lg">Detalhes da Entrega</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-xs sm:text-sm">
+          <CardContent className="space-y-2 md:space-y-3 text-xs md:text-sm">
             <div>
-              <span className="font-medium">Local:</span> {order.location.name}
+              <span className="font-medium text-gray-700">Local:</span>
+              <span className="ml-2 text-gray-900">{order.location.name}</span>
             </div>
             <div>
-              <span className="font-medium">Taxa de Entrega:</span> {formatCurrency(order.location.fee)}
+              <span className="font-medium text-gray-700">Taxa de Entrega:</span>
+              <span className="ml-2 text-gray-900">{formatCurrency(order.location.fee)}</span>
             </div>
             <div>
-              <span className="font-medium">Tempo Estimado:</span> {order.location.estimatedTime}
+              <span className="font-medium text-gray-700">Tempo Estimado:</span>
+              <span className="ml-2 text-gray-900">{order.location.estimatedTime}</span>
             </div>
           </CardContent>
         </Card>
@@ -116,37 +128,42 @@ const AdminOrderDetail = ({
       
       {/* Itens do Pedido */}
       <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle className="text-base sm:text-lg">Itens do Pedido</CardTitle>
+        <CardHeader className="pb-3 md:pb-4">
+          <CardTitle className="text-sm md:text-base lg:text-lg">Itens do Pedido</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {order.items.map((item) => (
-              <div key={item.id} className="flex flex-col xs:flex-row xs:items-center xs:justify-between border-b pb-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-10 w-10 rounded overflow-hidden flex-shrink-0">
+              <div key={item.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3 gap-2 sm:gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded overflow-hidden flex-shrink-0">
                     <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                   </div>
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">{formatCurrency(item.price)} x {item.quantity}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 text-sm md:text-base truncate">{item.name}</p>
+                    <p className="text-xs md:text-sm text-gray-500">
+                      {formatCurrency(item.price)} x {item.quantity}
+                    </p>
                   </div>
                 </div>
-                <div className="font-medium xs:text-right">{formatCurrency(item.price * item.quantity)}</div>
+                <div className="font-semibold text-gray-900 text-sm md:text-base sm:text-right">
+                  {formatCurrency(item.price * item.quantity)}
+                </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>Subtotal</span>
-              <span>{formatCurrency(order.subtotal)}</span>
+          
+          <div className="mt-4 md:mt-6 space-y-2 md:space-y-3">
+            <div className="flex justify-between text-xs md:text-sm">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium">{formatCurrency(order.subtotal)}</span>
             </div>
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>Taxa de Entrega</span>
-              <span>{formatCurrency(order.deliveryFee)}</span>
+            <div className="flex justify-between text-xs md:text-sm">
+              <span className="text-gray-600">Taxa de Entrega</span>
+              <span className="font-medium">{formatCurrency(order.deliveryFee)}</span>
             </div>
-            <Separator className="my-2" />
-            <div className="flex justify-between font-bold text-sm sm:text-base">
+            <Separator className="my-2 md:my-3" />
+            <div className="flex justify-between font-bold text-sm md:text-base lg:text-lg">
               <span>Total</span>
               <span>{formatCurrency(order.total)}</span>
             </div>
@@ -156,26 +173,26 @@ const AdminOrderDetail = ({
       
       {/* Status do Pedido */}
       <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle className="text-base sm:text-lg">Status do Pedido</CardTitle>
+        <CardHeader className="pb-3 md:pb-4">
+          <CardTitle className="text-sm md:text-base lg:text-lg">Status do Pedido</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Badge className={`${statusDisplay[order.status].color}`}>
+        <CardContent className="space-y-4 md:space-y-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 md:gap-4">
+            <div className="flex items-center">
+              <Badge className={`${statusDisplay[order.status].color} text-white text-xs md:text-sm`}>
                 {statusDisplay[order.status].label}
               </Badge>
             </div>
-            <div className="flex gap-2 flex-col xs:flex-row flex-wrap w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2">
               {order.status !== "pending" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("pending")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  <Clock className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Marcar como Pendente</span>
-                  <span className="inline xs:hidden">Pendente</span>
+                  <Clock className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Pendente
                 </Button>
               )}
               {order.status !== "confirmed" && (
@@ -183,10 +200,10 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("confirmed")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  <Check className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Confirmar Pedido</span>
-                  <span className="inline xs:hidden">Confirmar</span>
+                  <Check className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Confirmar
                 </Button>
               )}
               {order.status !== "preparing" && (
@@ -194,10 +211,10 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("preparing")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  <Check className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Em Preparo</span>
-                  <span className="inline xs:hidden">Preparo</span>
+                  <Check className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Preparo
                 </Button>
               )}
               {order.status !== "delivering" && (
@@ -205,10 +222,10 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("delivering")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  <Truck className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Em Entrega</span>
-                  <span className="inline xs:hidden">Entrega</span>
+                  <Truck className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Entrega
                 </Button>
               )}
               {order.status !== "completed" && (
@@ -216,10 +233,10 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("completed")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  <Check className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Completar</span>
-                  <span className="inline xs:hidden">Finalizar</span>
+                  <Check className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Finalizar
                 </Button>
               )}
               {order.status !== "cancelled" && (
@@ -227,28 +244,32 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange("cancelled")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3 text-red-600 border-red-300 hover:bg-red-50"
                 >
-                  <Ban className="h-4 w-4 mr-1" /> 
-                  <span className="hidden xs:inline">Cancelar</span>
+                  <Ban className="h-3 w-3 md:h-4 md:w-4 mr-1" /> 
+                  Cancelar
                 </Button>
               )}
             </div>
           </div>
+          
           <Separator />
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Badge className={`${paymentStatusDisplay[order.paymentStatus].color}`}>
+          
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 md:gap-4">
+            <div className="flex items-center">
+              <Badge className={`${paymentStatusDisplay[order.paymentStatus].color} text-white text-xs md:text-sm`}>
                 {paymentStatusDisplay[order.paymentStatus].label}
               </Badge>
             </div>
-            <div className="flex gap-2 flex-col xs:flex-row flex-wrap w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2">
               {order.paymentStatus !== "pending" && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePaymentStatusChange("pending")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
-                  Marcar como Pendente
+                  Marcar Pendente
                 </Button>
               )}
               {order.paymentStatus !== "completed" && (
@@ -256,6 +277,7 @@ const AdminOrderDetail = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handlePaymentStatusChange("completed")}
+                  className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
                 >
                   Confirmar Pagamento
                 </Button>

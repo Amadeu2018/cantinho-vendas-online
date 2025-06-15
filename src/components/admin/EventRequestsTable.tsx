@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -29,86 +30,98 @@ const EventRequestsTable = ({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pendente":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendente</Badge>;
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">Pendente</Badge>;
       case "atendido":
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Atendido</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">Atendido</Badge>;
       case "cancelado":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Cancelado</Badge>;
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">Cancelado</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline" className="text-xs">{status}</Badge>;
     }
   };
 
   return (
-    <>
-      <div className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Pesquisar solicitações..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-8 text-sm md:text-base h-9 md:h-10"
           />
         </div>
       </div>
+      
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin h-8 w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
+        <div className="flex justify-center items-center h-48 md:h-64">
+          <div className="animate-spin h-6 w-6 md:h-8 md:w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
         </div>
       ) : isMobile ? (
         <EventRequestsTableMobile requests={filteredRequests} onSelectRequest={onSelectRequest} />
       ) : filteredRequests.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Nenhuma solicitação encontrada</p>
+        <div className="text-center py-8 md:py-12">
+          <p className="text-muted-foreground text-sm md:text-base">Nenhuma solicitação encontrada</p>
         </div>
       ) : (
         <div className="overflow-x-auto w-full">
-          <Table className="min-w-[700px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Tipo de Evento</TableHead>
-                <TableHead>Data do Evento</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell>
-                    {format(new Date(request.created_at), "dd/MM/yyyy")}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{request.nome}</p>
-                      <p className="text-xs text-muted-foreground">{request.email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{request.tipo_evento}</TableCell>
-                  <TableCell>
-                    {format(new Date(request.data_evento), "dd/MM/yyyy")}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onSelectRequest(request)}
-                    >
-                      <PenSquare className="h-4 w-4 mr-1" />
-                      Detalhes
-                    </Button>
-                  </TableCell>
+          <div className="min-w-[800px]">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Data</TableHead>
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Cliente</TableHead>
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Tipo de Evento</TableHead>
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Data do Evento</TableHead>
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Status</TableHead>
+                  <TableHead className="px-3 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody className="bg-white divide-y divide-gray-200">
+                {filteredRequests.map((request) => (
+                  <TableRow key={request.id} className="hover:bg-gray-50 transition-colors">
+                    <TableCell className="px-3 py-4 whitespace-nowrap">
+                      <span className="text-xs md:text-sm text-gray-600">
+                        {format(new Date(request.created_at), "dd/MM/yyyy")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-3 py-4">
+                      <div className="max-w-[200px]">
+                        <p className="font-medium text-gray-900 text-sm truncate">{request.nome}</p>
+                        <p className="text-xs text-gray-500 truncate">{request.email}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-3 py-4">
+                      <span className="text-sm text-gray-900">{request.tipo_evento}</span>
+                    </TableCell>
+                    <TableCell className="px-3 py-4 whitespace-nowrap">
+                      <span className="text-xs md:text-sm text-gray-600">
+                        {format(new Date(request.data_evento), "dd/MM/yyyy")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-3 py-4 whitespace-nowrap">
+                      {getStatusBadge(request.status)}
+                    </TableCell>
+                    <TableCell className="px-3 py-4 whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onSelectRequest(request)}
+                        className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
+                      >
+                        <PenSquare className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        Detalhes
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

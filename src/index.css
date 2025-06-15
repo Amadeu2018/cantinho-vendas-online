@@ -249,3 +249,49 @@
     page-break-inside: avoid;
   }
 }
+
+/* RESPONSIVO PARA CARDS E GRIDS DO PAINEL ADMINISTRATIVO */
+@layer components {
+  .admin-dashboard-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4;
+  }
+  .admin-dashboard-card {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  .admin-section-header {
+    @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 mb-4;
+  }
+  .admin-section-title {
+    @apply text-lg md:text-2xl font-bold;
+  }
+}
+
+/* Responsividade reforçada para tabelas administrativas */
+@media (max-width: 640px) {
+  .responsive-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    white-space: nowrap;
+    padding: 0.5rem;
+  }
+  .mobile-card-view {
+    @apply flex flex-col border rounded-lg p-4 mb-4 shadow-sm bg-white;
+  }
+  .mobile-card-label {
+    @apply text-xs sm:text-sm text-gray-500 mb-1;
+  }
+  .mobile-card-value {
+    @apply font-medium mb-2;
+  }
+}
+
+/* Ajuste global para grid das views de pedidos, produtos, estoque, etc */
+@media (max-width: 1024px) {
+  .admin-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}

@@ -73,8 +73,8 @@ const AdminDashboard = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 md:px-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 sm:p-6">
         {renderTabContent()}
       </div>
     </div>

@@ -1,67 +1,87 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { Order } from "@/hooks/admin/use-orders-data";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { formatCurrency } from "@/lib/utils";
 
-interface FinanceChartsProps {
-  orders: any[];
-  period: string;
-  onPeriodChange: (period: string) => void;
+interface DailyStats {
+  date: string;
+  revenue: number;
+  orders: number;
 }
 
-const FinanceCharts = ({ orders, period, onPeriodChange }: FinanceChartsProps) => {
-  const getFilteredOrders = () => {
-    const now = new Date();
-    const filtered = orders.filter(order => {
-      const orderDate = new Date(order.created_at);
-      switch (period) {
-        case 'week':
-          return orderDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        case 'month':
-          return orderDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        case 'year':
-          return orderDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        default:
-          return true;
+interface StatusStats {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface FinanceChartsProps {
+  orders: Order[];
+}
+
+const FinanceCharts = ({ orders }: FinanceChartsProps) => {
+
+  const dailyStats = useMemo(() => {
+    const stats: { [key: string]: { revenue: number, orders: number } } = {};
+    
+    orders.forEach(order => {
+      const date = format(parseISO(order.createdAt), 'yyyy-MM-dd');
+      if (!stats[date]) {
+        stats[date] = { revenue: 0, orders: 0 };
       }
+      stats[date].revenue += order.total;
+      stats[date].orders += 1;
     });
-    return filtered;
-  };
 
-  const filteredOrders = getFilteredOrders();
+    return Object.keys(stats).sort().map(date => ({
+      date: format(parseISO(date), 'dd/MM', { locale: ptBR }),
+      revenue: stats[date].revenue,
+      orders: stats[date].orders,
+    }));
+  }, [orders]);
 
-  const revenueData = filteredOrders.reduce((acc: any[], order) => {
-    const date = new Date(order.created_at).toISOString().split('T')[0];
-    const existing = acc.find(item => item.date === date);
-    if (existing) {
-      existing.revenue += Number(order.total) || 0;
-    } else {
-      acc.push({ date, revenue: Number(order.total) || 0 });
-    }
-    return acc;
-  }, []).slice(-7);
-
-  const statusData = [
-    { name: 'Concluídos', value: filteredOrders.filter(o => o.status === 'completed').length, color: '#10B981' },
-    { name: 'Pendentes', value: filteredOrders.filter(o => o.status === 'pending').length, color: '#F59E0B' },
-    { name: 'Cancelados', value: filteredOrders.filter(o => o.status === 'cancelled').length, color: '#EF4444' }
-  ];
+  const statusData: StatusStats[] = useMemo(() => ([
+    { name: 'Concluídos', value: orders.filter(o => o.status === 'completed').length, color: '#10B981' },
+    { name: 'Pendentes', value: orders.filter(o => ['pending', 'confirmed', 'preparing', 'delivering'].includes(o.status)).length, color: '#F59E0B' },
+    { name: 'Cancelados', value: orders.filter(o => o.status === 'cancelled').length, color: '#EF4444' }
+  ]), [orders]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card>
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2 xl:col-span-1">
         <CardHeader>
           <CardTitle>Receita por Dia</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={revenueData}>
+            <LineChart data={dailyStats}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+              <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Receita']} />
+              <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pedidos por Dia</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={dailyStats}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip formatter={(value) => [`${Number(value).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`, 'Receita']} />
-              <Line type="monotone" dataKey="revenue" stroke="#8884d8" />
-            </LineChart>
+              <Tooltip formatter={(value) => [value, 'Pedidos']} />
+              <Bar dataKey="orders" fill="hsl(var(--primary))" />
+            </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>

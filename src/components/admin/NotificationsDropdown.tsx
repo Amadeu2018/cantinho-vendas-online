@@ -1,41 +1,36 @@
 
-import { useState, useEffect } from "react";
-import { Bell, Package, ShoppingCart, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useEffect } from "react";
+import { Bell } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuGroup, 
-  DropdownMenuItem, 
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-type OrderNotification = {
-  id: string;
-  orderId: string;
-  message: string;
-  status: string;
-  createdAt: string;
-  read: boolean;
-};
+import { useNotificationsData } from "@/hooks/admin/use-notifications-data";
+import NotificationItem from "./notifications/NotificationItem";
 
 const NotificationsDropdown = () => {
-  const [notifications, setNotifications] = useState<OrderNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    fetchNotifications,
+    handleNewNotification,
+    markAsRead,
+    markAllAsRead
+  } = useNotificationsData();
 
   useEffect(() => {
     fetchNotifications();
     
-    // Set up realtime subscription for new notifications
     const channel = supabase
       .channel('admin-notifications-dropdown')
       .on('postgres_changes', 
@@ -56,130 +51,13 @@ const NotificationsDropdown = () => {
     };
   }, []);
 
-  const fetchNotifications = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Buscando notificações do admin...');
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', 'admin')
-        .order('created_at', { ascending: false })
-        .limit(20);
-        
-      if (error) throw error;
-
-      console.log('Notificações encontradas:', data?.length || 0);
-
-      const formattedNotifications = (data || []).map((notification: any): OrderNotification => ({
-        id: notification.id,
-        orderId: notification.message.split(' ')[1] || '',
-        message: notification.message,
-        status: notification.title.toLowerCase().includes('novo') ? 'new' : 
-                notification.title.toLowerCase().includes('atualizado') ? 'updated' : 'other',
-        createdAt: notification.created_at,
-        read: notification.read || false
-      }));
-
-      setNotifications(formattedNotifications);
-      const unread = formattedNotifications.filter(n => !n.read).length;
-      setUnreadCount(unread);
-      console.log('Notificações não lidas:', unread);
-    } catch (error: any) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleNewNotification = (payload: any) => {
-    console.log('Nova notificação recebida no dropdown:', payload);
-    const newNotif = payload.new;
-    
-    if (newNotif && newNotif.user_id === 'admin') {
-      // Add new notification to the list
-      const formattedNotification: OrderNotification = {
-        id: newNotif.id,
-        orderId: newNotif.message.split(' ')[1] || '',
-        message: newNotif.message,
-        status: newNotif.title.toLowerCase().includes('novo') ? 'new' : 
-                newNotif.title.toLowerCase().includes('atualizado') ? 'updated' : 'other',
-        createdAt: newNotif.created_at,
-        read: newNotif.read || false
-      };
-      
-      setNotifications(prev => [formattedNotification, ...prev].slice(0, 20));
-      if (!formattedNotification.read) {
-        setUnreadCount(prev => prev + 1);
-      }
-      
-      console.log('Notificação adicionada à lista');
-    }
-  };
-
-  const markAsRead = async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
-        
-      if (error) throw error;
-      
-      // Update local state
-      setNotifications(
-        notifications.map(notification =>
-          notification.id === notificationId 
-            ? { ...notification, read: true } 
-            : notification
-        )
-      );
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error: any) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const notificationIds = notifications
-        .filter(n => !n.read)
-        .map(n => n.id);
-        
-      if (notificationIds.length === 0) return;
-      
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .in('id', notificationIds);
-        
-      if (error) throw error;
-      
-      // Update local state
-      setNotifications(
-        notifications.map(notification => ({ ...notification, read: true }))
-      );
-      
-      setUnreadCount(0);
-      
+  const handleMarkAllAsRead = async () => {
+    const success = await markAllAsRead();
+    if (success) {
       toast({
         title: "Notificações",
         description: "Todas as notificações foram marcadas como lidas.",
       });
-    } catch (error: any) {
-      console.error('Error marking all notifications as read:', error);
-    }
-  };
-
-  const getNotificationIcon = (status: string) => {
-    switch (status) {
-      case 'new':
-        return <ShoppingCart className="h-4 w-4 text-green-500" />;
-      case 'updated':
-        return <Package className="h-4 w-4 text-blue-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -205,7 +83,7 @@ const NotificationsDropdown = () => {
             <Button 
               variant="ghost" 
               className="text-xs h-7 px-2"
-              onClick={markAllAsRead}
+              onClick={handleMarkAllAsRead}
             >
               Marcar tudo como lido
             </Button>
@@ -224,33 +102,11 @@ const NotificationsDropdown = () => {
           ) : (
             <DropdownMenuGroup>
               {notifications.map((notification) => (
-                <DropdownMenuItem
+                <NotificationItem
                   key={notification.id}
-                  className={`p-3 cursor-pointer flex gap-3 ${!notification.read ? 'bg-muted/50' : ''}`}
-                  onClick={() => {
-                    if (!notification.read) {
-                      markAsRead(notification.id);
-                    }
-                  }}
-                >
-                  <div>
-                    {getNotificationIcon(notification.status)}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{notification.message}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.createdAt), {
-                        addSuffix: true,
-                        locale: ptBR
-                      })}
-                    </p>
-                  </div>
-                  {!notification.read && (
-                    <div className="self-center">
-                      <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                    </div>
-                  )}
-                </DropdownMenuItem>
+                  notification={notification}
+                  onMarkAsRead={markAsRead}
+                />
               ))}
             </DropdownMenuGroup>
           )}

@@ -1,9 +1,10 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dish } from "@/types/dish";
+import { useProfileStats } from "./profile/use-profile-stats";
+import { useRecentActivities } from "./profile/use-recent-activities";
 
 export interface ProfileData {
   email: string;
@@ -48,14 +49,11 @@ export const useProfileData = () => {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<Dish[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
-  const [stats, setStats] = useState<ProfileStats>({
-    totalOrders: 0,
-    pendingOrders: 0,
-    completedOrders: 0,
-    favoriteCount: 0
-  });
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Use custom hooks for calculations
+  const stats = useProfileStats(orders, favorites);
+  const recentActivities = useRecentActivities(orders, favorites);
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
@@ -227,85 +225,7 @@ export const useProfileData = () => {
     }
   }, [user]);
 
-  const calculateStats = useCallback(() => {
-    const totalOrders = orders.length;
-    const pendingOrders = orders.filter(order => 
-      ['pending', 'confirmed', 'preparing', 'delivering'].includes(order.status)
-    ).length;
-    const completedOrders = orders.filter(order => 
-      order.status === 'completed'
-    ).length;
-    const favoriteCount = favorites.length;
-
-    console.log("Calculando stats:", { 
-      totalOrders, 
-      pendingOrders, 
-      completedOrders, 
-      favoriteCount 
-    });
-
-    setStats({
-      totalOrders,
-      pendingOrders,
-      completedOrders,
-      favoriteCount
-    });
-  }, [orders, favorites]);
-
-  const generateRecentActivities = useCallback(() => {
-    const activities: RecentActivity[] = [];
-
-    console.log("Gerando atividades recentes com", orders.length, "pedidos");
-
-    // Pegar os 10 pedidos mais recentes
-    orders.slice(0, 10).forEach(order => {
-      const items = order.items || [];
-      
-      activities.push({
-        id: `order-${order.id}`,
-        type: 'order',
-        title: `Pedido #${order.id.slice(0, 8).toUpperCase()}`,
-        description: `Status: ${getStatusDisplayName(order.status)}`,
-        timestamp: order.created_at,
-        status: order.status,
-        total: Number(order.total) || 0,
-        itemsCount: Array.isArray(items) ? items.length : 0
-      });
-    });
-
-    // Adicionar favoritos
-    favorites.slice(0, 3).forEach((favorite, index) => {
-      activities.push({
-        id: `favorite-${favorite.id}`,
-        type: 'favorite',
-        title: 'Adicionado aos favoritos',
-        description: favorite.name,
-        timestamp: new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000).toISOString()
-      });
-    });
-
-    // Ordenar por timestamp (mais recente primeiro)
-    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    
-    const finalActivities = activities.slice(0, 10);
-    console.log("Atividades recentes finais:", finalActivities);
-    
-    setRecentActivities(finalActivities);
-  }, [orders, favorites]);
-
-  const getStatusDisplayName = (status: string) => {
-    const statusMap: Record<string, string> = {
-      pending: "Aguardando Confirmação",
-      confirmed: "Confirmado",
-      preparing: "Em Preparação",
-      delivering: "Em Entrega",
-      completed: "Entregue",
-      cancelled: "Cancelado"
-    };
-    return statusMap[status] || status;
-  };
-
-  // Fetch inicial dos dados
+  // Initial data fetch
   useEffect(() => {
     if (user) {
       console.log("Usuário logado, carregando dados do perfil:", user.id);
@@ -322,13 +242,12 @@ export const useProfileData = () => {
     }
   }, [user, fetchProfile, fetchAddresses, fetchOrders, fetchFavorites]);
 
-  // Set up real-time subscriptions
+  // Real-time subscriptions
   useEffect(() => {
     if (!user) return;
 
     console.log("Configurando subscriptions em tempo real para:", user.id);
 
-    // Subscribe to orders changes
     const ordersChannel = supabase
       .channel(`profile-orders-${user.id}`)
       .on('postgres_changes', 
@@ -340,12 +259,11 @@ export const useProfileData = () => {
         }, 
         (payload) => {
           console.log('Order change detected for user:', payload);
-          fetchOrders(); // Refetch orders when changes occur
+          fetchOrders();
         }
       )
       .subscribe();
 
-    // Subscribe to favorites changes
     const favoritesChannel = supabase
       .channel(`profile-favorites-${user.id}`)
       .on('postgres_changes', 
@@ -357,7 +275,7 @@ export const useProfileData = () => {
         }, 
         (payload) => {
           console.log('Favorites change detected for user:', payload);
-          fetchFavorites(); // Refetch favorites when changes occur
+          fetchFavorites();
         }
       )
       .subscribe();
@@ -368,12 +286,6 @@ export const useProfileData = () => {
       supabase.removeChannel(favoritesChannel);
     };
   }, [user, fetchOrders, fetchFavorites]);
-
-  // Calcular stats quando orders ou favorites mudarem
-  useEffect(() => {
-    calculateStats();
-    generateRecentActivities();
-  }, [orders, favorites, calculateStats, generateRecentActivities]);
 
   return {
     profile,

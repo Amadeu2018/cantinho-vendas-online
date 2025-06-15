@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCartState } from "@/hooks/use-cart-state";
+import { deliveryLocations, paymentMethods } from "@/utils/cart-helpers";
 
 export type CartItem = {
   id: number;
@@ -48,6 +50,13 @@ export type Order = {
   isProforma?: boolean;
 };
 
+export type CustomerInfo = {
+  name: string;
+  address: string;
+  phone: string;
+  notes?: string;
+};
+
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">) => void;
@@ -73,77 +82,21 @@ type CartContextType = {
   isFavorite: (dishId: number) => boolean;
 };
 
-export type CustomerInfo = {
-  name: string;
-  address: string;
-  phone: string;
-  notes?: string;
-};
-
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [favorites, setFavorites] = useState<number[]>([]);
-  
-  const deliveryLocations: DeliveryLocation[] = [
-    { id: 1, name: "Bairro Azul", fee: 1000, estimatedTime: "20-30 min" },
-    { id: 2, name: "Maculusso", fee: 1500, estimatedTime: "25-35 min" },
-    { id: 3, name: "Maianga", fee: 1500, estimatedTime: "25-35 min" },
-    { id: 4, name: "Talatona", fee: 2500, estimatedTime: "35-50 min" },
-    { id: 5, name: "Miramar", fee: 1800, estimatedTime: "30-40 min" },
-    { id: 6, name: "Kilamba", fee: 3000, estimatedTime: "40-60 min" }
-  ];
-  
-  const paymentMethods: PaymentMethod[] = [
-    { id: "cash", name: "Dinheiro na Entrega", icon: "banknote" },
-    { id: "multicaixa", name: "Multicaixa Express", icon: "credit-card" },
-    { id: "transfer", name: "Transferência Bancária", icon: "landmark" }
-  ];
-  
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cantinho-cart");
-    if (savedCart) {
-      try {
-        setItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Erro ao carregar carrinho:", error);
-      }
-    }
-    
-    const savedOrders = localStorage.getItem("cantinho-orders");
-    if (savedOrders) {
-      try {
-        setOrders(JSON.parse(savedOrders));
-      } catch (error) {
-        console.error("Erro ao carregar pedidos:", error);
-      }
-    }
-    
-    const savedFavorites = localStorage.getItem("cantinho-favorites");
-    if (savedFavorites) {
-      try {
-        setFavorites(JSON.parse(savedFavorites));
-      } catch (error) {
-        console.error("Erro ao carregar favoritos:", error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("cantinho-cart", JSON.stringify(items));
-  }, [items]);
-  
-  useEffect(() => {
-    localStorage.setItem("cantinho-orders", JSON.stringify(orders));
-  }, [orders]);
-  
-  useEffect(() => {
-    localStorage.setItem("cantinho-favorites", JSON.stringify(favorites));
-  }, [favorites]);
+  const {
+    items,
+    setItems,
+    selectedLocation,
+    setSelectedLocation,
+    selectedPaymentMethod,
+    setSelectedPaymentMethod,
+    orders,
+    setOrders,
+    favorites,
+    setFavorites
+  } = useCartState();
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setItems(currentItems => {
@@ -218,7 +171,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const orderData = {
       id: orderId,
       items: items,
-      customer_info: JSON.stringify(customerInfo), // Ensure it's JSON string
+      customer_info: JSON.stringify(customerInfo),
       subtotal: subtotal,
       delivery_fee: selectedLocation.fee,
       total: subtotal + selectedLocation.fee,
@@ -231,7 +184,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Submitting order to Supabase:', orderData);
       
-      // Salvar pedido no Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert([orderData])

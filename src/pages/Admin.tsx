@@ -1,38 +1,29 @@
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminAuthentication from "@/components/admin/AdminAuthentication";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminOrderView from "@/components/admin/AdminOrderView";
 import AdminInvoiceView from "@/components/admin/AdminInvoiceView";
-import { Order as CartOrder } from "@/contexts/CartContext";
-import { useAdminOrders, Order } from "@/hooks/use-admin-orders";
+import { useAdminOrders } from "@/hooks/use-admin-orders";
 import { useToast } from "@/hooks/use-toast";
-
-const convertOrderType = (order: Order): CartOrder => {
-  return {
-    ...order,
-    notes: order.notes || "",
-    status: order.status === 'delivered' ? 'delivering' : order.status,
-    paymentMethod: {
-      id: order.paymentMethod?.id || 'default-id',
-      name: order.paymentMethod?.name || 'Método de pagamento',
-      icon: order.paymentMethod?.icon || 'credit-card'
-    }
-  };
-};
+import { useAdminState } from "@/hooks/use-admin-state";
+import { convertOrderType, getTitle } from "@/utils/admin-helpers";
 
 const Admin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<CartOrder | null>(null);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const { user } = useAuth();
   const { toast } = useToast();
-  const location = useLocation();
+  const {
+    isAuthenticated,
+    selectedOrderId,
+    selectedInvoiceOrder,
+    activeTab,
+    setActiveTab,
+    handleAuthentication,
+    handleLogout,
+    handleSelectOrder,
+    handlePrepareInvoice,
+    handleBackFromInvoice
+  } = useAdminState();
   
   const { 
     orders, 
@@ -41,23 +32,6 @@ const Admin = () => {
     updateOrderStatus,
     updatePaymentStatus
   } = useAdminOrders();
-  
-  useEffect(() => {
-    if (user) {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    } else {
-      setIsAuthenticated(false);
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    // Check if there's a state for activeTab from navigation
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
 
   // Auto-refresh orders every 30 seconds
   useEffect(() => {
@@ -69,32 +43,6 @@ const Admin = () => {
       return () => clearInterval(interval);
     }
   }, [isAuthenticated, refreshOrders]);
-
-  const handleAuthentication = (isAdmin: boolean) => {
-    setIsAuthenticated(isAdmin);
-    if (isAdmin) {
-      refreshOrders();
-    }
-  };
-  
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setSelectedOrderId(null);
-    setSelectedInvoiceOrder(null);
-  };
-  
-  const handleSelectOrder = (orderId: string | null) => {
-    setSelectedOrderId(orderId);
-  };
-  
-  const handlePrepareInvoice = (order: CartOrder) => {
-    setSelectedInvoiceOrder(order);
-    setSelectedOrderId(null);
-  };
-  
-  const handleBackFromInvoice = () => {
-    setSelectedInvoiceOrder(null);
-  };
   
   const getOrderById = (orderId: string) => {
     return orders.find(order => order.id === orderId) || null;
@@ -124,30 +72,6 @@ const Admin = () => {
         variant: "destructive"
       });
     }
-  };
-
-  const getTitle = () => {
-    if (selectedOrder) {
-      return `Pedido #${selectedOrder.id.slice(0, 8)}`;
-    }
-    if (selectedInvoiceOrder) {
-      return "Fatura";
-    }
-    
-    // Map activeTab to title
-    const titleMap: { [key: string]: string } = {
-      dashboard: "Dashboard",
-      orders: "Pedidos",
-      products: "Produtos",
-      customers: "Clientes",
-      finance: "Finanças",
-      inventory: "Estoque",
-      reports: "Relatórios",
-      settings: "Configurações",
-      events: "Eventos"
-    };
-    
-    return titleMap[activeTab] || "Dashboard";
   };
 
   const renderContent = () => {
@@ -181,7 +105,7 @@ const Admin = () => {
         orders={orders}
         fetchingOrders={fetchingOrders}
         onSelectOrder={orderId => handleSelectOrder(orderId)}
-        onPrepareInvoice={(order: Order) => handlePrepareInvoice(convertOrderType(order))}
+        onPrepareInvoice={(order) => handlePrepareInvoice(convertOrderType(order))}
         onLogout={handleLogout}
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -196,7 +120,7 @@ const Admin = () => {
   return (
     <AdminLayout 
       onLogout={handleLogout} 
-      title={getTitle()}
+      title={getTitle(activeTab, selectedOrder, selectedInvoiceOrder)}
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >

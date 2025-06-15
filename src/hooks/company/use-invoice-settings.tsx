@@ -39,22 +39,26 @@ export const defaultInvoiceTemplates: InvoiceTemplate[] = [
   {
     id: 'modern',
     name: 'Moderno',
-    description: 'Design limpo e moderno com cores vibrantes'
+    description: 'Design limpo e moderno com cores vibrantes',
+    type: 'modern'
   },
   {
     id: 'classic',
     name: 'Clássico',
-    description: 'Design tradicional e profissional'
+    description: 'Design tradicional e profissional',
+    type: 'classic'
   },
   {
     id: 'minimal',
     name: 'Minimalista',
-    description: 'Design simples e elegante'
+    description: 'Design simples e elegante',
+    type: 'minimal'
   },
   {
     id: 'primavera',
     name: 'Primavera Style',
-    description: 'Similar ao formato do software Primavera'
+    description: 'Similar ao formato do software Primavera',
+    type: 'primavera'
   }
 ];
 
@@ -109,7 +113,7 @@ export const useInvoiceSettings = () => {
         .from("invoice_settings")
         .select("*")
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
@@ -128,12 +132,11 @@ export const useInvoiceSettings = () => {
   const updateSettings = async (newSettings: Partial<InvoiceSettings>) => {
     setSaving(true);
     try {
+      const updatedSettings = { ...settings, ...newSettings };
+      
       const { data, error } = await supabase
         .from("invoice_settings")
-        .upsert({
-          ...settings,
-          ...newSettings,
-        })
+        .upsert(updatedSettings, { onConflict: 'id' })
         .select()
         .single();
 

@@ -89,12 +89,12 @@ const FeaturedDishes = () => {
           </div>
         ) : (
           <>
-            {/* Mobile-first dishes grid */}
+            {/* Mobile-first dishes grid with consistent height */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
               {popularDishes.map((dish, index) => (
                 <div
                   key={dish.id}
-                  className="animate-scale-in"
+                  className="animate-scale-in h-full flex"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <MenuCard dish={dish} />
@@ -103,10 +103,10 @@ const FeaturedDishes = () => {
             </div>
 
             {/* Mobile-first call to action */}
-            <div className="text-center">
+            <div className="text-center px-4">
               <div className="bg-gradient-to-r from-cantinho-navy to-cantinho-terracotta p-6 sm:p-8 rounded-2xl text-white max-w-2xl mx-auto mb-6 sm:mb-8">
                 <h3 className="text-xl sm:text-2xl font-bold mb-3">Explore Todo o Nosso Menu</h3>
-                <p className="text-white/90 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed px-2">
+                <p className="text-white/90 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">
                   Mais de 100 pratos tradicionais esperando por você. Descubra sabores únicos da culinária lusófona.
                 </p>
                 <Button

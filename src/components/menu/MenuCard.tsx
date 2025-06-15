@@ -63,7 +63,7 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   };
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] border-0 bg-white">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] border-0 bg-white flex flex-col h-full">
       <MenuCardImage
         image={dish.image}
         name={dish.name}
@@ -76,18 +76,20 @@ const MenuCard = ({ dish }: MenuCardProps) => {
         onToggleFavorite={toggleFavorite}
       />
 
-      <MenuCardContent
-        name={dish.name}
-        category={dish.category}
-        description={dish.description}
-        price={dish.price}
-        finalPrice={finalPrice}
-        savings={savings}
-        isSpicy={dish.isSpicy}
-        isVegetarian={dish.isVegetarian}
-        isFirstOrder={isFirstOrder}
-        onAddToCart={handleAddToCart}
-      />
+      <div className="flex-grow flex flex-col">
+        <MenuCardContent
+          name={dish.name}
+          category={dish.category}
+          description={dish.description}
+          price={dish.price}
+          finalPrice={finalPrice}
+          savings={savings}
+          isSpicy={dish.isSpicy}
+          isVegetarian={dish.isVegetarian}
+          isFirstOrder={isFirstOrder}
+          onAddToCart={handleAddToCart}
+        />
+      </div>
     </Card>
   );
 };

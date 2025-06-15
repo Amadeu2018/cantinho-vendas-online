@@ -24,8 +24,7 @@ const SmoothScrollArea = React.forwardRef<
         fadeEdges && "mask-fade"
       )}
       style={{
-        scrollBehavior: 'smooth',
-        WebkitScrollBehavior: 'smooth'
+        scrollBehavior: 'smooth'
       }}
     >
       {children}

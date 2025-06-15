@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,20 +22,29 @@ const AdminInventory = () => {
 
   const fetchInventory = async () => {
     try {
-      const { data, error } = await supabase
+      // First get products
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select(`
-          *,
-          categories!inner(name)
-        `) // Fixed: use inner join to properly embed the category name
+        .select('*')
         .order('name');
 
-      if (error) throw error;
+      if (productsError) throw productsError;
 
-      const processedData = data.map(item => ({
-        ...item,
-        category_name: item.categories?.name || 'Sem categoria'
-      }));
+      // Then get categories separately
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*');
+
+      if (categoriesError) throw categoriesError;
+
+      // Combine the data
+      const processedData = (productsData || []).map(product => {
+        const category = categoriesData?.find(cat => cat.id === product.category_id);
+        return {
+          ...product,
+          category_name: category?.name || 'Sem categoria'
+        };
+      });
 
       setInventory(processedData);
     } catch (error: any) {

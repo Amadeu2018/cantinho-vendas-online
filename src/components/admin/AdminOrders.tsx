@@ -1,9 +1,10 @@
-
 import { Order } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
+import AdminOrdersMobile from "./AdminOrdersMobile";
 
 type AdminOrdersProps = {
   orders: Order[];
@@ -81,11 +82,16 @@ const formatPaymentStatus = (status: "pending" | "completed" | "failed" | "cance
   return statusMap[status] || status;
 };
 
-const AdminOrders = ({ orders, onSelectOrder }: AdminOrdersProps) => {
+const AdminOrders = ({ orders, onSelectOrder }: any) => {
+  const isMobile = useIsMobile();
   // Sort orders by date, most recent first
   const sortedOrders = [...orders].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+
+  if (isMobile) {
+    return <AdminOrdersMobile orders={sortedOrders} onSelectOrder={onSelectOrder} />;
+  }
 
   if (sortedOrders.length === 0) {
     return (

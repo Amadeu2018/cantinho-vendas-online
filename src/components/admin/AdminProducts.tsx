@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,8 @@ import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductsList from "./ProductsList";
 import ProductActions from "./ProductActions";
+import ProductsListMobile from "./ProductsListMobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -27,6 +28,7 @@ const AdminProducts = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [activeTab, setActiveTab] = useState("all");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchProducts();
@@ -259,17 +261,28 @@ const AdminProducts = () => {
                   <p>Carregando produtos...</p>
                 </div>
               ) : (
-                <ProductsList 
-                  products={filteredProducts}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  onView={handleViewProduct}
-                  onEdit={handleEditProduct}
-                  onDelete={openDeleteDialog}
-                  onUpdateStock={handleUpdateStock}
-                  getCategoryName={getCategoryName}
-                />
+                isMobile ? (
+                  <ProductsListMobile
+                    products={filteredProducts}
+                    onView={handleViewProduct}
+                    onEdit={handleEditProduct}
+                    onDelete={openDeleteDialog}
+                    onUpdateStock={handleUpdateStock}
+                    getCategoryName={getCategoryName}
+                  />
+                ) : (
+                  <ProductsList 
+                    products={filteredProducts}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    onView={handleViewProduct}
+                    onEdit={handleEditProduct}
+                    onDelete={openDeleteDialog}
+                    onUpdateStock={handleUpdateStock}
+                    getCategoryName={getCategoryName}
+                  />
+                )
               )}
             </TabsContent>
           </Tabs>

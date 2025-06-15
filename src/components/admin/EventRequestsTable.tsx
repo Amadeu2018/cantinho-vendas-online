@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PenSquare, Search } from "lucide-react";
 import type { EventRequest } from "./AdminEventRequests";
+import { useIsMobile } from "@/hooks/use-mobile";
+import EventRequestsTableMobile from "./EventRequestsTableMobile";
 
 interface EventRequestsTableProps {
   loading: boolean;
@@ -23,6 +24,8 @@ const EventRequestsTable = ({
   onSelectRequest 
 }: EventRequestsTableProps) => {
   
+  const isMobile = useIsMobile();
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pendente":
@@ -49,11 +52,12 @@ const EventRequestsTable = ({
           />
         </div>
       </div>
-
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin h-8 w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
         </div>
+      ) : isMobile ? (
+        <EventRequestsTableMobile requests={filteredRequests} onSelectRequest={onSelectRequest} />
       ) : filteredRequests.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">Nenhuma solicitação encontrada</p>

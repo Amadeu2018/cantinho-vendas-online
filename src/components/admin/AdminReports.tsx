@@ -1,5 +1,4 @@
-
-import { useMemo } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,13 +6,23 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Order } from "@/hooks/admin/use-orders-data";
 import { format, parseISO, subMonths, isAfter, startOfMonth, subDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Package, DollarSign, CheckCircle, TrendingUp } from "lucide-react";
+import { Package, DollarSign, CheckCircle, TrendingUp, Download, FilePdf, FileExcel } from "lucide-react";
+import { usePDF } from 'react-to-pdf';
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { downloadCSV } from "@/lib/utils";
 
 interface AdminReportsProps {
   orders: Order[];
 }
 
 const AdminReports = ({ orders }: AdminReportsProps) => {
+  const [activeTab, setActiveTab] = useState('monthly');
+  const reportsRef = useRef<HTMLDivElement>(null);
+  const { toPDF } = usePDF({ filename: 'relatorio_cantinho.pdf', target: reportsRef });
+  const { toast } = useToast();
+
   const { totalOrders, totalRevenue, completedOrders, avgOrderValue } = useMemo(() => {
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -102,10 +111,77 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
       .slice(0, 5);
   }, [orders]);
 
+  const handleExportPDF = () => {
+    toast({
+      title: "A gerar PDF...",
+      description: "O seu relatório está a ser preparado para download.",
+    });
+    toPDF();
+  };
+
+  const handleExportCSV = () => {
+    let dataToExport;
+    let filename;
+
+    switch (activeTab) {
+      case 'monthly':
+        dataToExport = monthlyData.map(d => ({
+          'Mês/Ano': d.month,
+          'Pedidos': d.pedidos,
+          'Receita (AOA)': d.receita.toFixed(2),
+        }));
+        filename = 'relatorio_mensal_pedidos_receita';
+        break;
+      case 'daily':
+        dataToExport = dailyData.map(d => ({
+          'Dia': d.day,
+          'Pedidos': d.pedidos,
+          'Receita (AOA)': d.receita.toFixed(2),
+        }));
+        filename = 'relatorio_diario_pedidos_receita';
+        break;
+      case 'products':
+        dataToExport = topProducts.map(p => ({
+          'Produto': p.name,
+          'Vendas (unidades)': p.vendas,
+        }));
+        filename = 'relatorio_top_produtos';
+        break;
+      default:
+        toast({ title: "Erro", description: "Aba de relatório inválida para exportação.", variant: "destructive" });
+        return;
+    }
+
+    downloadCSV(dataToExport, filename, toast);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6" ref={reportsRef}>
+      <div className="flex justify-between items-center print:hidden">
         <h2 className="text-2xl font-bold">Relatórios e Análises</h2>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportPDF}>
+              <FilePdf className="h-4 w-4 mr-2" />
+              Exportar para PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCSV}>
+              <FileExcel className="h-4 w-4 mr-2" />
+              Exportar para Excel (CSV)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      <div className="hidden print:block mb-4">
+        <h1 className="text-3xl font-bold">Relatório - O Cantinho do Zé</h1>
+        <p className="text-sm text-muted-foreground">Gerado em: {format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -160,8 +236,8 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
         </Card>
       </div>
 
-      <Tabs defaultValue="monthly" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="monthly" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
+        <TabsList className="print:hidden">
           <TabsTrigger value="monthly">Últimos 6 Meses</TabsTrigger>
           <TabsTrigger value="daily">Últimos 7 Dias</TabsTrigger>
           <TabsTrigger value="products">Top Produtos</TabsTrigger>
@@ -206,22 +282,40 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
         </TabsContent>
         
         <TabsContent value="daily">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pedidos Diários</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={dailyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip formatter={(value: number, name) => [name === 'pedidos' ? value : value.toLocaleString("pt-AO", { style: "currency", currency: "AOA" }), name === 'pedidos' ? 'Pedidos' : 'Receita']} />
-                  <Bar dataKey="pedidos" fill="var(--color-secondary)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pedidos Diários (Últimos 7 dias)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={dailyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip formatter={(value: number) => [value, 'Pedidos']} />
+                    <Bar dataKey="pedidos" fill="var(--color-secondary)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Receita Diária (Últimos 7 dias)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={dailyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip formatter={(value: number) => [value.toLocaleString("pt-AO", { style: "currency", currency: "AOA" }), 'Receita']} />
+                    <Line type="monotone" dataKey="receita" stroke="var(--color-secondary)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
         <TabsContent value="products">

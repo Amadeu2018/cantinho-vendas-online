@@ -12,9 +12,9 @@ import ContactCTA from '@/components/sobre/ContactCTA';
 
 const Sobre = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-tl from-cantinho-cream via-white to-cantinho-sand">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-cantinho-cream/30 via-white to-cantinho-sand/20">
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow pt-16 sm:pt-20">
         <HeroSection />
         <CompanyHistory />
         <ServicesSection />

@@ -1,12 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dish } from "@/types/dish";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileForm from "@/components/profile/ProfileForm";
 import AddressesList from "@/components/profile/AddressesList";
 import FavoritesList from "@/components/profile/FavoritesList";
 import OrdersHistory from "@/components/profile/OrdersHistory";
+import OrderTracking from "@/components/profile/OrderTracking";
+import ProfileStats from "@/components/profile/ProfileStats";
+import RecentActivity from "@/components/profile/RecentActivity";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -23,6 +28,13 @@ const Profile = () => {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<Dish[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    pendingOrders: 0,
+    completedOrders: 0,
+    favoriteCount: 0
+  });
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -32,6 +44,13 @@ const Profile = () => {
       fetchOrders();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (orders.length > 0 || favorites.length > 0) {
+      calculateStats();
+      generateRecentActivities();
+    }
+  }, [orders, favorites]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -166,6 +185,60 @@ const Profile = () => {
     }
   };
 
+  const calculateStats = () => {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => 
+      ['pending', 'confirmed', 'preparing', 'delivering'].includes(order.status)
+    ).length;
+    const completedOrders = orders.filter(order => 
+      order.status === 'completed'
+    ).length;
+    const favoriteCount = favorites.length;
+
+    setStats({
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      favoriteCount
+    });
+  };
+
+  const generateRecentActivities = () => {
+    const activities: any[] = [];
+
+    // Add recent orders
+    orders.slice(0, 3).forEach(order => {
+      activities.push({
+        id: `order-${order.id}`,
+        type: 'order',
+        title: `Pedido #${order.id.slice(0, 8).toUpperCase()}`,
+        description: `Total: ${new Intl.NumberFormat("pt-AO", {
+          style: "currency",
+          currency: "AOA",
+          minimumFractionDigits: 0,
+        }).format(order.total)}`,
+        timestamp: order.created_at,
+        status: order.status
+      });
+    });
+
+    // Add recent favorites (simulate timestamps)
+    favorites.slice(0, 2).forEach((favorite, index) => {
+      activities.push({
+        id: `favorite-${favorite.id}`,
+        type: 'favorite',
+        title: 'Adicionado aos favoritos',
+        description: favorite.name,
+        timestamp: new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000).toISOString()
+      });
+    });
+
+    // Sort by timestamp (most recent first)
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    setRecentActivities(activities.slice(0, 5));
+  };
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -245,21 +318,58 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-3xl font-bold">Meu Perfil</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Meu Perfil</h1>
+        <div className="text-sm text-gray-600">
+          Bem-vindo de volta, {profile.email ? profile.email.split('@')[0] : 'usuário'}!
+        </div>
+      </div>
       
-      <ProfileForm
-        profile={profile}
-        loading={loading}
-        onProfileChange={setProfile}
-        onSubmit={handleProfileUpdate}
-        onAddAddress={handleAddAddress}
-      />
+      <ProfileStats {...stats} />
 
-      <AddressesList addresses={addresses} />
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="tracking">Acompanhar</TabsTrigger>
+          <TabsTrigger value="profile">Perfil</TabsTrigger>
+          <TabsTrigger value="addresses">Endereços</TabsTrigger>
+          <TabsTrigger value="favorites">Favoritos</TabsTrigger>
+          <TabsTrigger value="orders">Histórico</TabsTrigger>
+        </TabsList>
 
-      <FavoritesList favorites={favorites} />
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentActivity activities={recentActivities} />
+            <OrderTracking userId={user.id} />
+          </div>
+        </TabsContent>
 
-      <OrdersHistory orders={orders} />
+        <TabsContent value="tracking">
+          <OrderTracking userId={user.id} />
+        </TabsContent>
+
+        <TabsContent value="profile">
+          <ProfileForm
+            profile={profile}
+            loading={loading}
+            onProfileChange={setProfile}
+            onSubmit={handleProfileUpdate}
+            onAddAddress={handleAddAddress}
+          />
+        </TabsContent>
+
+        <TabsContent value="addresses">
+          <AddressesList addresses={addresses} />
+        </TabsContent>
+
+        <TabsContent value="favorites">
+          <FavoritesList favorites={favorites} />
+        </TabsContent>
+
+        <TabsContent value="orders">
+          <OrdersHistory orders={orders} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

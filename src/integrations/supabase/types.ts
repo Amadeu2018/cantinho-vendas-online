@@ -450,9 +450,17 @@ export type Database = {
           address_postal_code: string | null
           address_province: string | null
           address_street: string | null
+          bank_account_iban: string | null
+          bank_account_name: string | null
+          bank_name: string | null
           business_license_number: string | null
           business_license_url: string | null
+          company_address: string | null
+          company_email: string | null
+          company_logo_url: string | null
           company_name: string | null
+          company_nif: string | null
+          company_phone: string | null
           created_at: string
           email: string | null
           emergency_contact_name: string | null
@@ -461,7 +469,10 @@ export type Database = {
           id_document_number: string | null
           id_document_type: string | null
           id_document_url: string | null
+          multicaixa_name: string | null
+          multicaixa_phone: string | null
           nif: string | null
+          payment_notes: string | null
           phone: string | null
           rating: number | null
           role: Database["public"]["Enums"]["user_role"] | null
@@ -475,9 +486,17 @@ export type Database = {
           address_postal_code?: string | null
           address_province?: string | null
           address_street?: string | null
+          bank_account_iban?: string | null
+          bank_account_name?: string | null
+          bank_name?: string | null
           business_license_number?: string | null
           business_license_url?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
+          company_nif?: string | null
+          company_phone?: string | null
           created_at?: string
           email?: string | null
           emergency_contact_name?: string | null
@@ -486,7 +505,10 @@ export type Database = {
           id_document_number?: string | null
           id_document_type?: string | null
           id_document_url?: string | null
+          multicaixa_name?: string | null
+          multicaixa_phone?: string | null
           nif?: string | null
+          payment_notes?: string | null
           phone?: string | null
           rating?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -500,9 +522,17 @@ export type Database = {
           address_postal_code?: string | null
           address_province?: string | null
           address_street?: string | null
+          bank_account_iban?: string | null
+          bank_account_name?: string | null
+          bank_name?: string | null
           business_license_number?: string | null
           business_license_url?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
+          company_nif?: string | null
+          company_phone?: string | null
           created_at?: string
           email?: string | null
           emergency_contact_name?: string | null
@@ -511,7 +541,10 @@ export type Database = {
           id_document_number?: string | null
           id_document_type?: string | null
           id_document_url?: string | null
+          multicaixa_name?: string | null
+          multicaixa_phone?: string | null
           nif?: string | null
+          payment_notes?: string | null
           phone?: string | null
           rating?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null

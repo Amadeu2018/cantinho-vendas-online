@@ -20,6 +20,8 @@ import Profile from "./pages/Profile";
 import EventAdmin from "./pages/EventAdmin";
 import Sobre from "./pages/Sobre";
 import FirstOrder from "./pages/FirstOrder";
+import ResetPassword from "./pages/ResetPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 
 const queryClient = new QueryClient();
 
@@ -41,8 +43,11 @@ const App = () => (
                 <Route path="/carrinho" element={<Carrinho />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/eventos" element={<EventAdmin />} />
+                <Route path="/event-admin" element={<EventAdmin />} />
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/register" element={<Register />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
+                <Route path="/auth/update-password" element={<UpdatePassword />} />
                 <Route path="/perfil" element={<Profile />} />
                 <Route path="/sobre" element={<Sobre />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

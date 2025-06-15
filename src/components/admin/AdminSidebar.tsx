@@ -48,11 +48,14 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
   };
   
   return (
-    <Sidebar className="bg-gradient-to-br from-cantinho-navy to-cantinho-navy/90 text-white border-r-0">
+    <Sidebar 
+      className="bg-gradient-to-br from-cantinho-navy to-cantinho-navy/90 text-white border-r-0"
+      collapsible="icon"
+    >
       <SidebarHeader className="border-b border-white/10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
-            <Utensils className="h-6 w-6" />
+            <Utensils className="h-6 w-6 flex-shrink-0" />
             <span className="text-xl font-bold group-data-[collapsible=icon]:hidden">Cantinho Algarvio</span>
           </div>
         </div>
@@ -67,8 +70,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("dashboard")}
                 onClick={() => handleTabClick("dashboard")}
                 tooltip="Dashboard"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <LayoutDashboard className="h-5 w-5" />
+                <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
                 <span>Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -78,8 +82,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("orders")}
                 onClick={() => handleTabClick("orders")}
                 tooltip="Pedidos"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-5 w-5 flex-shrink-0" />
                 <span>Pedidos</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -89,8 +94,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("events")}
                 onClick={() => handleTabClick("events")}
                 tooltip="Eventos"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <CalendarDays className="h-5 w-5" />
+                <CalendarDays className="h-5 w-5 flex-shrink-0" />
                 <span>Eventos</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -100,8 +106,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("products")}
                 onClick={() => handleTabClick("products")}
                 tooltip="Produtos"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Package className="h-5 w-5" />
+                <Package className="h-5 w-5 flex-shrink-0" />
                 <span>Produtos</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -111,8 +118,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("inventory")}
                 onClick={() => handleTabClick("inventory")}
                 tooltip="Estoque"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Archive className="h-5 w-5" />
+                <Archive className="h-5 w-5 flex-shrink-0" />
                 <span>Estoque</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -127,8 +135,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("finance")}
                 onClick={() => handleTabClick("finance")}
                 tooltip="Finanças"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Wallet className="h-5 w-5" />
+                <Wallet className="h-5 w-5 flex-shrink-0" />
                 <span>Finanças</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -138,8 +147,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("payments")}
                 onClick={() => handleTabClick("payments")}
                 tooltip="Pagamentos"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <CreditCard className="h-5 w-5" />
+                <CreditCard className="h-5 w-5 flex-shrink-0" />
                 <span>Pagamentos</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -149,8 +159,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("invoices")}
                 onClick={() => handleTabClick("invoices")}
                 tooltip="Faturas"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <FileText className="h-5 w-5" />
+                <FileText className="h-5 w-5 flex-shrink-0" />
                 <span>Faturas</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -160,8 +171,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("reports")}
                 onClick={() => handleTabClick("reports")}
                 tooltip="Relatórios"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <BarChart className="h-5 w-5" />
+                <BarChart className="h-5 w-5 flex-shrink-0" />
                 <span>Relatórios</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -171,8 +183,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("analytics")}
                 onClick={() => handleTabClick("analytics")}
                 tooltip="Analytics"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <TrendingUp className="h-5 w-5" />
+                <TrendingUp className="h-5 w-5 flex-shrink-0" />
                 <span>Analytics</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -187,8 +200,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("customers")}
                 onClick={() => handleTabClick("customers")}
                 tooltip="Clientes"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Users className="h-5 w-5" />
+                <Users className="h-5 w-5 flex-shrink-0" />
                 <span>Clientes</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -198,8 +212,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("menu")}
                 onClick={() => handleTabClick("menu")}
                 tooltip="Cardápio"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Utensils className="h-5 w-5" />
+                <Utensils className="h-5 w-5 flex-shrink-0" />
                 <span>Cardápio</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -209,8 +224,9 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 isActive={isActive("settings")}
                 onClick={() => handleTabClick("settings")}
                 tooltip="Configurações"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="h-5 w-5 flex-shrink-0" />
                 <span>Configurações</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -221,8 +237,12 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
       <SidebarFooter className="border-t border-white/10 p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={onLogout} tooltip="Sair">
-              <LogOut className="h-5 w-5" />
+            <SidebarMenuButton 
+              onClick={onLogout} 
+              tooltip="Sair"
+              className="hover:bg-red-500/20 hover:text-white"
+            >
+              <LogOut className="h-5 w-5 flex-shrink-0" />
               <span>Sair</span>
             </SidebarMenuButton>
           </SidebarMenuItem>

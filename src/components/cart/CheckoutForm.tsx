@@ -4,12 +4,14 @@ import { useCart, CustomerInfo } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import CustomerInfoForm from "./checkout/CustomerInfoForm";
 import DeliveryLocationSelector from "./checkout/DeliveryLocationSelector";
 import SimplePaymentSelector from "./checkout/SimplePaymentSelector";
 
 const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { 
     deliveryLocations, 
     selectedLocation, 
@@ -23,6 +25,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: "",
+    email: user?.email || "",
     address: "",
     phone: "",
     notes: ""
@@ -68,7 +71,7 @@ const CheckoutForm = ({ onSuccess }: { onSuccess: (orderId: string) => void }) =
       toast({
         title: "Erro no processamento",
         description: "Ocorreu um erro ao processar o pedido",
-        variant: "destructive"
+        variant: "descriptive"
       });
     } finally {
       setLoading(false);

@@ -53,6 +53,7 @@ export type Order = {
 
 export type CustomerInfo = {
   name: string;
+  email?: string;
   address: string;
   phone: string;
   notes?: string;

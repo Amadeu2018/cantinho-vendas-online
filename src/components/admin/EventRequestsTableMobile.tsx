@@ -26,41 +26,41 @@ const getStatusBadge = (status: string) => {
 const EventRequestsTableMobile = ({ requests, onSelectRequest }: Props) => {
   if (!requests.length) {
     return (
-      <div className="text-center py-8 md:py-12">
-        <p className="text-sm md:text-base text-gray-500">Nenhuma solicitação encontrada</p>
+      <div className="text-center py-6 sm:py-8 md:py-12">
+        <p className="text-sm text-gray-500">Nenhuma solicitação encontrada</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-3">
       {requests.map(req => (
-        <div key={req.id} className="mobile-card-view bg-white border border-gray-200 rounded-lg p-3 md:p-4 shadow-sm">
-          <div className="space-y-2 md:space-y-3">
+        <div key={req.id} className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+          <div className="space-y-2">
             <div className="flex justify-between items-start gap-2">
-              <span className="mobile-card-label text-xs md:text-sm text-gray-500">Cliente:</span>
-              <span className="mobile-card-value text-sm md:text-base font-medium text-right">{req.nome}</span>
+              <span className="text-xs text-gray-500 flex-shrink-0">Cliente:</span>
+              <span className="text-sm font-medium text-right min-w-0 truncate">{req.nome}</span>
             </div>
             
             <div className="flex justify-between items-start gap-2">
-              <span className="mobile-card-label text-xs md:text-sm text-gray-500">Email:</span>
-              <span className="mobile-card-value text-sm md:text-base text-right break-all">{req.email}</span>
+              <span className="text-xs text-gray-500 flex-shrink-0">Email:</span>
+              <span className="text-sm text-right min-w-0 break-all">{req.email}</span>
             </div>
             
             <div className="flex justify-between items-start gap-2">
-              <span className="mobile-card-label text-xs md:text-sm text-gray-500">Tipo:</span>
-              <span className="mobile-card-value text-sm md:text-base text-right">{req.tipo_evento}</span>
+              <span className="text-xs text-gray-500 flex-shrink-0">Tipo:</span>
+              <span className="text-sm text-right min-w-0 truncate">{req.tipo_evento}</span>
             </div>
             
             <div className="flex justify-between items-start gap-2">
-              <span className="mobile-card-label text-xs md:text-sm text-gray-500">Data do Evento:</span>
-              <span className="mobile-card-value text-sm md:text-base text-right">
+              <span className="text-xs text-gray-500 flex-shrink-0">Data do Evento:</span>
+              <span className="text-sm text-right">
                 {format(new Date(req.data_evento), "dd/MM/yyyy")}
               </span>
             </div>
             
             <div className="flex justify-between items-center gap-2">
-              <span className="mobile-card-label text-xs md:text-sm text-gray-500">Status:</span>
+              <span className="text-xs text-gray-500 flex-shrink-0">Status:</span>
               <span>{getStatusBadge(req.status)}</span>
             </div>
             
@@ -69,9 +69,9 @@ const EventRequestsTableMobile = ({ requests, onSelectRequest }: Props) => {
                 size="sm"
                 variant="ghost"
                 onClick={() => onSelectRequest(req)}
-                className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
+                className="text-xs h-7 px-2"
               >
-                <PenSquare className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <PenSquare className="h-3 w-3 mr-1" />
                 Detalhes
               </Button>
             </div>

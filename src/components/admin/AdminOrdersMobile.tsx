@@ -38,55 +38,62 @@ const formatPaymentStatus = (status: string) => {
 const AdminOrdersMobile = ({ orders, onSelectOrder }: any) => {
   if (!orders.length) {
     return (
-      <div className="bg-gray-50 rounded-lg p-10 text-center">
-        <p className="text-gray-500">Nenhum pedido encontrado nesta categoria.</p>
+      <div className="bg-gray-50 rounded-lg p-6 text-center">
+        <p className="text-gray-500 text-sm">Nenhum pedido encontrado nesta categoria.</p>
       </div>
     );
   }
+  
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {orders.map((order: any) => (
-        <div key={order.id} className="mobile-card-view cursor-pointer" onClick={() => onSelectOrder(order.id)}>
-          <div className="flex justify-between items-center mb-1">
-            <span className="mobile-card-label">ID Pedido</span>
-            <span className="mobile-card-value font-mono text-xs">{order.id.slice(0, 10)}</span>
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="mobile-card-label">Cliente</span>
-            <span className="mobile-card-value">{order.customerInfo.name}</span>
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="mobile-card-label">Total</span>
-            <span className="mobile-card-value">{formatPrice(order.total)}</span>
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="mobile-card-label">Status</span>
-            <Badge variant="outline">{formatStatus(order.status)}</Badge>
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="mobile-card-label">Pagamento</span>
-            <Badge variant="outline">{formatPaymentStatus(order.paymentStatus)}</Badge>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="mobile-card-label">Criado</span>
-            <span className="mobile-card-value text-xs">
-              {formatDistanceToNow(new Date(order.createdAt), {
-                addSuffix: true,
-                locale: ptBR
-              })}
-            </span>
-          </div>
-          <div className="flex justify-end mt-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectOrder(order.id);
-              }}
-            >
-              Detalhes
-            </Button>
+        <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">ID Pedido</span>
+              <span className="font-mono text-xs text-gray-900">{order.id.slice(0, 10)}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Cliente</span>
+              <span className="text-sm font-medium text-right min-w-0 truncate">{order.customerInfo.name}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Total</span>
+              <span className="text-sm font-semibold">{formatPrice(order.total)}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Status</span>
+              <Badge variant="outline" className="text-xs">{formatStatus(order.status)}</Badge>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Pagamento</span>
+              <Badge variant="outline" className="text-xs">{formatPaymentStatus(order.paymentStatus)}</Badge>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Criado</span>
+              <span className="text-xs text-gray-600">
+                {formatDistanceToNow(new Date(order.createdAt), {
+                  addSuffix: true,
+                  locale: ptBR
+                })}
+              </span>
+            </div>
+            
+            <div className="flex justify-end pt-2 border-t border-gray-100">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onSelectOrder(order.id)}
+                className="text-xs h-7 px-2"
+              >
+                Detalhes
+              </Button>
+            </div>
           </div>
         </div>
       ))}

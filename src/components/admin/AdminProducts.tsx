@@ -81,11 +81,6 @@ const AdminProducts = () => {
     setDeleteDialogOpen(true);
   };
 
-  const closeDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setProductToDelete(null);
-  };
-
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
 
@@ -103,7 +98,8 @@ const AdminProducts = () => {
       });
 
       setProducts(products.filter(product => product.id !== productToDelete));
-      closeDeleteDialog();
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
     } catch (error: any) {
       console.error("Erro ao excluir produto:", error);
       toast({
@@ -197,10 +193,10 @@ const AdminProducts = () => {
 
   if (showAddForm) {
     return (
-      <div className="space-y-4 p-2 sm:p-4 lg:p-0">
+      <div className="space-y-4 p-3 sm:p-0">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="text-lg md:text-xl font-semibold">Novo Produto</h2>
-          <Button variant="outline" onClick={() => setShowAddForm(false)} className="text-sm md:text-base h-8 md:h-9">
+          <h2 className="text-lg font-semibold">Novo Produto</h2>
+          <Button variant="outline" onClick={() => setShowAddForm(false)} className="text-sm h-8">
             Voltar para Lista
           </Button>
         </div>
@@ -211,10 +207,10 @@ const AdminProducts = () => {
 
   if (showEditForm && selectedProduct) {
     return (
-      <div className="space-y-4 p-2 sm:p-4 lg:p-0">
+      <div className="space-y-4 p-3 sm:p-0">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="text-lg md:text-xl font-semibold">Editar Produto</h2>
-          <Button variant="outline" onClick={() => setShowEditForm(false)} className="text-sm md:text-base h-8 md:h-9">
+          <h2 className="text-lg font-semibold">Editar Produto</h2>
+          <Button variant="outline" onClick={() => setShowEditForm(false)} className="text-sm h-8">
             Voltar para Lista
           </Button>
         </div>
@@ -224,13 +220,13 @@ const AdminProducts = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 p-2 sm:p-4 lg:p-0">
-      <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:justify-between">
+    <div className="space-y-4 p-3 sm:p-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar produto..."
-            className="pl-8 text-sm md:text-base h-9 md:h-10"
+            className="pl-8 text-sm h-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -239,24 +235,24 @@ const AdminProducts = () => {
       </div>
       
       <Card>
-        <CardHeader className="pb-3 md:pb-4">
-          <CardTitle className="text-lg md:text-xl">Produtos</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Produtos</CardTitle>
         </CardHeader>
-        <CardContent className="px-3 md:px-6">
+        <CardContent className="px-3 sm:px-6">
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <div className="mb-4 md:mb-6 overflow-x-auto">
+            <div className="mb-4 overflow-x-auto">
               <TabsList className={`h-auto p-1 bg-gray-100 ${isMobile ? 'w-max flex no-scrollbar' : 'w-full flex-wrap justify-start'} gap-1`}>
-                <TabsTrigger value="all" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                <TabsTrigger value="all" className="text-xs px-2 py-1.5 whitespace-nowrap flex-shrink-0">
                   Todos
                 </TabsTrigger>
-                <TabsTrigger value="low-stock" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                <TabsTrigger value="low-stock" className="text-xs px-2 py-1.5 whitespace-nowrap flex-shrink-0">
                   Estoque Baixo
                 </TabsTrigger>
-                <TabsTrigger value="out-of-stock" className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                <TabsTrigger value="out-of-stock" className="text-xs px-2 py-1.5 whitespace-nowrap flex-shrink-0">
                   Sem Estoque
                 </TabsTrigger>
                 {categories.map(category => (
-                  <TabsTrigger key={category.id} value={category.id} className="text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                  <TabsTrigger key={category.id} value={category.id} className="text-xs px-2 py-1.5 whitespace-nowrap flex-shrink-0">
                     {category.name}
                   </TabsTrigger>
                 ))}
@@ -265,8 +261,8 @@ const AdminProducts = () => {
             
             <TabsContent value={activeTab} className="mt-0">
               {loading ? (
-                <div className="flex justify-center items-center h-48 md:h-64">
-                  <div className="animate-spin h-6 w-6 md:h-8 md:w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
+                <div className="flex justify-center items-center h-48">
+                  <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
                 </div>
               ) : (
                 isMobile ? (
@@ -299,7 +295,7 @@ const AdminProducts = () => {
       
       <DeleteConfirmDialog
         isOpen={deleteDialogOpen}
-        onClose={closeDeleteDialog}
+        onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteProduct}
         title="Excluir produto"
         description="Tem certeza que deseja excluir este produto? Esta ação não poderá ser desfeita."

@@ -41,32 +41,32 @@ const EventRequestsTable = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-        <div className="relative flex-1">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col gap-3">
+        <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Pesquisar solicitações..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 text-sm md:text-base h-9 md:h-10"
+            className="pl-8 text-sm h-9"
           />
         </div>
       </div>
       
       {loading ? (
-        <div className="flex justify-center items-center h-48 md:h-64">
-          <div className="animate-spin h-6 w-6 md:h-8 md:w-8 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
+        <div className="flex justify-center items-center h-48">
+          <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
         </div>
       ) : isMobile ? (
         <EventRequestsTableMobile requests={filteredRequests} onSelectRequest={onSelectRequest} />
       ) : filteredRequests.length === 0 ? (
-        <div className="text-center py-8 md:py-12">
-          <p className="text-muted-foreground text-sm md:text-base">Nenhuma solicitação encontrada</p>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground text-sm">Nenhuma solicitação encontrada</p>
         </div>
       ) : (
         <div className="overflow-x-auto w-full">
-          <div className="min-w-[800px]">
+          <div className="min-w-[700px]">
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
@@ -82,12 +82,12 @@ const EventRequestsTable = ({
                 {filteredRequests.map((request) => (
                   <TableRow key={request.id} className="hover:bg-gray-50 transition-colors">
                     <TableCell className="px-3 py-4 whitespace-nowrap">
-                      <span className="text-xs md:text-sm text-gray-600">
+                      <span className="text-xs text-gray-600">
                         {format(new Date(request.created_at), "dd/MM/yyyy")}
                       </span>
                     </TableCell>
                     <TableCell className="px-3 py-4">
-                      <div className="max-w-[200px]">
+                      <div className="max-w-[180px]">
                         <p className="font-medium text-gray-900 text-sm truncate">{request.nome}</p>
                         <p className="text-xs text-gray-500 truncate">{request.email}</p>
                       </div>
@@ -96,7 +96,7 @@ const EventRequestsTable = ({
                       <span className="text-sm text-gray-900">{request.tipo_evento}</span>
                     </TableCell>
                     <TableCell className="px-3 py-4 whitespace-nowrap">
-                      <span className="text-xs md:text-sm text-gray-600">
+                      <span className="text-xs text-gray-600">
                         {format(new Date(request.data_evento), "dd/MM/yyyy")}
                       </span>
                     </TableCell>
@@ -108,9 +108,9 @@ const EventRequestsTable = ({
                         size="sm"
                         variant="ghost"
                         onClick={() => onSelectRequest(request)}
-                        className="text-xs md:text-sm h-7 md:h-8 px-2 md:px-3"
+                        className="text-xs h-7 px-2"
                       >
-                        <PenSquare className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        <PenSquare className="h-3 w-3 mr-1" />
                         Detalhes
                       </Button>
                     </TableCell>

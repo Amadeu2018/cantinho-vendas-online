@@ -96,19 +96,18 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
   
   if (sortedOrders.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-lg p-6 md:p-10 text-center">
-        <p className="text-gray-500 text-sm md:text-base">
+      <div className="bg-gray-50 rounded-lg p-6 text-center">
+        <p className="text-gray-500 text-sm">
           Nenhum pedido encontrado nesta categoria.
         </p>
       </div>
     );
   }
   
-  // Responsivo: Tabela envelopada em scroll; cabeçalhos/tamanhos ajustados
   return (
     <div className="overflow-x-auto w-full">
-      <div className="min-w-[800px]">
-        <table className="w-full border-collapse admin-table">
+      <div className="min-w-[700px]">
+        <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-50">
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-700 border-b uppercase tracking-wider">ID</th>
@@ -127,8 +126,8 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
                   <span className="font-mono text-xs text-gray-600">{order.id.slice(0, 8)}...</span>
                 </td>
                 <td className="px-3 py-4">
-                  <div className="max-w-[150px]">
-                    <p className="font-medium text-gray-900 truncate">{order.customerInfo.name}</p>
+                  <div className="max-w-[140px]">
+                    <p className="font-medium text-gray-900 text-sm truncate">{order.customerInfo.name}</p>
                     <p className="text-xs text-gray-500 truncate">{order.customerInfo.phone}</p>
                   </div>
                 </td>
@@ -141,7 +140,7 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
                   </span>
                 </td>
                 <td className="px-3 py-4 whitespace-nowrap">
-                  <span className="font-semibold text-gray-900">{formatPrice(order.total)}</span>
+                  <span className="font-semibold text-gray-900 text-sm">{formatPrice(order.total)}</span>
                 </td>
                 <td className="px-3 py-4 whitespace-nowrap">
                   <Badge variant="outline" className={`text-xs ${getStatusBadgeColor(order.status)}`}>
@@ -158,7 +157,7 @@ const AdminOrders = ({ orders, onSelectOrder }: any) => {
                     variant="outline" 
                     size="sm" 
                     onClick={() => onSelectOrder(order.id)}
-                    className="text-xs border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white"
+                    className="text-xs border-cantinho-navy text-cantinho-navy hover:bg-cantinho-navy hover:text-white h-7 px-2"
                   >
                     Ver Detalhes
                   </Button>

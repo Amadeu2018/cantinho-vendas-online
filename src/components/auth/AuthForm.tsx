@@ -194,7 +194,14 @@ const AuthForm = ({ mode }: AuthFormProps) => {
             </Button>
           </form>
           
-          <div className="mt-4 text-center text-sm text-gray-500">
+          <div className="mt-4 text-center text-sm text-gray-500 space-y-2">
+            {mode === "login" && (
+              <p>
+                <a href="/auth/reset-password" className="text-cantinho-navy hover:underline">
+                  Esqueceu sua senha?
+                </a>
+              </p>
+            )}
             {mode === "login" ? (
               <p>
                 Não tem uma conta?{" "}

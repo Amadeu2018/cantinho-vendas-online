@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,8 @@ type AuthContextType = {
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -233,6 +234,60 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao enviar email",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Email enviado",
+        description: "Verifique seu email para redefinir sua senha.",
+      });
+    } catch (error) {
+      console.error('Erro ao enviar email de recuperação:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({ password });
+      
+      if (error) {
+        toast({
+          title: "Erro ao atualizar senha",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Senha atualizada",
+        description: "Sua senha foi atualizada com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar senha:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       session, 
@@ -244,7 +299,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signUpWithPhone,
       signInWithGoogle,
       signInWithFacebook,
-      signOut 
+      signOut,
+      resetPassword,
+      updatePassword
     }}>
       {children}
     </AuthContext.Provider>

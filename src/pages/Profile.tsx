@@ -11,6 +11,7 @@ import OrdersHistory from "@/components/profile/OrdersHistory";
 import OrderTracking from "@/components/profile/OrderTracking";
 import ProfileStats from "@/components/profile/ProfileStats";
 import RecentActivity from "@/components/profile/RecentActivity";
+import PaymentSettings from "@/components/profile/PaymentSettings";
 import { useProfileDataFetcher } from "@/components/profile/ProfileDataFetcher";
 import { useProfileActions } from "@/components/profile/ProfileActions";
 
@@ -67,13 +68,14 @@ const Profile = () => {
       <ProfileStats {...stats} />
 
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="tracking">Acompanhar</TabsTrigger>
           <TabsTrigger value="profile">Perfil</TabsTrigger>
           <TabsTrigger value="addresses">Endereços</TabsTrigger>
           <TabsTrigger value="favorites">Favoritos</TabsTrigger>
           <TabsTrigger value="orders">Histórico</TabsTrigger>
+          <TabsTrigger value="payments">Pagamentos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -107,6 +109,10 @@ const Profile = () => {
 
         <TabsContent value="orders">
           <OrdersHistory orders={orders} />
+        </TabsContent>
+
+        <TabsContent value="payments">
+          <PaymentSettings />
         </TabsContent>
       </Tabs>
     </div>

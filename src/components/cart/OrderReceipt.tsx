@@ -13,7 +13,9 @@ import {
   Clock, 
   Shield,
   Receipt,
-  CheckCircle
+  CheckCircle,
+  CreditCard,
+  Building2
 } from "lucide-react";
 
 interface OrderReceiptProps {
@@ -36,6 +38,7 @@ interface OrderReceiptProps {
     discount: number;
     total: number;
     paymentMethod: string;
+    paymentReference?: string;
     createdAt: string;
   };
 }
@@ -49,7 +52,6 @@ const OrderReceipt = ({ orderId, orderData }: OrderReceiptProps) => {
       description: "Seu recibo em PDF será baixado em instantes.",
     });
     
-    // Simular geração de PDF
     setTimeout(() => {
       toast({
         title: "Recibo baixado!",
@@ -74,6 +76,68 @@ const OrderReceipt = ({ orderId, orderData }: OrderReceiptProps) => {
       minute: '2-digit'
     });
   };
+
+  const getPaymentDetails = () => {
+    switch (orderData.paymentMethod) {
+      case "bank_transfer":
+        return {
+          icon: <Building2 className="w-4 h-4" />,
+          name: "Transferência Bancária",
+          details: (
+            <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm">
+              <p><strong>IBAN:</strong> AO06.0055.0000.0000.0000.1019.0</p>
+              <p><strong>Banco:</strong> BAI - Banco Angolano de Investimentos</p>
+              <p><strong>Titular:</strong> Cantinho Sabores de Angola Lda</p>
+              <p><strong>NIF:</strong> 5000000000</p>
+              {orderData.paymentReference && (
+                <p><strong>Referência:</strong> {orderData.paymentReference}</p>
+              )}
+            </div>
+          )
+        };
+      case "multicaixa_express":
+        return {
+          icon: <CreditCard className="w-4 h-4" />,
+          name: "Multicaixa Express",
+          details: orderData.paymentReference && (
+            <div className="mt-2 p-3 bg-green-50 rounded-lg text-sm">
+              <p><strong>Referência de Pagamento:</strong> {orderData.paymentReference}</p>
+              <p><strong>Status:</strong> Processado com sucesso</p>
+            </div>
+          )
+        };
+      case "unitel_money":
+        return {
+          icon: <Phone className="w-4 h-4" />,
+          name: "Unitel Money",
+          details: orderData.paymentReference && (
+            <div className="mt-2 p-3 bg-orange-50 rounded-lg text-sm">
+              <p><strong>Referência:</strong> {orderData.paymentReference}</p>
+              <p><strong>Processado via:</strong> Carteira Móvel</p>
+            </div>
+          )
+        };
+      case "cash_on_delivery":
+        return {
+          icon: <Receipt className="w-4 h-4" />,
+          name: "Pagamento na Entrega",
+          details: (
+            <div className="mt-2 p-3 bg-yellow-50 rounded-lg text-sm">
+              <p><strong>Forma:</strong> Dinheiro vivo</p>
+              <p><strong>Status:</strong> A pagar na entrega</p>
+            </div>
+          )
+        };
+      default:
+        return {
+          icon: <CreditCard className="w-4 h-4" />,
+          name: orderData.paymentMethod,
+          details: null
+        };
+    }
+  };
+
+  const paymentInfo = getPaymentDetails();
 
   return (
     <Card className="max-w-2xl mx-auto shadow-2xl border-0">
@@ -134,9 +198,22 @@ const OrderReceipt = ({ orderId, orderData }: OrderReceiptProps) => {
             </h3>
             <div className="space-y-2 text-sm text-gray-700">
               <p><strong>Data:</strong> {formatDate(orderData.createdAt)}</p>
-              <p><strong>Método de Pagamento:</strong> {orderData.paymentMethod}</p>
               <p><strong>Status:</strong> <span className="text-green-600 font-medium">Confirmado</span></p>
             </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Payment Information */}
+        <div>
+          <h3 className="font-semibold text-cantinho-navy mb-3 flex items-center gap-2">
+            {paymentInfo.icon}
+            Informações de Pagamento
+          </h3>
+          <div className="text-sm text-gray-700">
+            <p><strong>Método:</strong> {paymentInfo.name}</p>
+            {paymentInfo.details}
           </div>
         </div>
 

@@ -11,7 +11,7 @@ import OrdersHistory from "@/components/profile/OrdersHistory";
 import OrderTracking from "@/components/profile/OrderTracking";
 import ProfileStats from "@/components/profile/ProfileStats";
 import RecentActivity from "@/components/profile/RecentActivity";
-import { useProfileData } from "@/components/profile/ProfileDataFetcher";
+import { useProfileDataFetcher } from "@/components/profile/ProfileDataFetcher";
 import { useProfileActions } from "@/components/profile/ProfileActions";
 
 const Profile = () => {
@@ -30,7 +30,7 @@ const Profile = () => {
     fetchProfile,
     fetchAddresses,
     fetchOrders
-  } = useProfileData();
+  } = useProfileDataFetcher();
 
   const { loading, handleProfileUpdate, handleAddAddress } = useProfileActions({
     profile,
@@ -39,7 +39,6 @@ const Profile = () => {
     fetchAddresses
   });
 
-  // Get default tab from URL params
   const defaultTab = searchParams.get('tab') || 'overview';
 
   if (!user) {

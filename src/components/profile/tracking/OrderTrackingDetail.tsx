@@ -178,7 +178,7 @@ const OrderTrackingDetail = ({
                       </Badge>
                     )}
                   </div>
-                  <p className={`text-sm ${isActive ? 'text-green-700' :text-gray-500'}`}>
+                  <p className={`text-sm ${isActive ? 'text-green-700' : 'text-gray-500'}`}>
                     {step.description}
                   </p>
                 </div>

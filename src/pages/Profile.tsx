@@ -27,12 +27,13 @@ const Profile = () => {
     orders,
     stats,
     recentActivities,
+    loading,
     fetchProfile,
     fetchAddresses,
     fetchOrders
   } = useProfileDataFetcher();
 
-  const { loading, handleProfileUpdate, handleAddAddress } = useProfileActions({
+  const { loading: actionsLoading, handleProfileUpdate, handleAddAddress } = useProfileActions({
     profile,
     setProfile,
     addresses,
@@ -45,6 +46,16 @@ const Profile = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <p>Você precisa estar logado para ver seu perfil.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin h-8 w-8 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
+        </div>
       </div>
     );
   }
@@ -79,7 +90,7 @@ const Profile = () => {
         <TabsContent value="profile">
           <ProfileForm
             profile={profile}
-            loading={loading}
+            loading={actionsLoading}
             onProfileChange={setProfile}
             onSubmit={handleProfileUpdate}
             onAddAddress={handleAddAddress}

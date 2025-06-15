@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -54,8 +55,9 @@ export const useProfileData = () => {
     favoriteCount: 0
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -89,9 +91,9 @@ export const useProfileData = () => {
         email: user.email || ""
       }));
     }
-  };
+  }, [user]);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -105,30 +107,30 @@ export const useProfileData = () => {
     } catch (error: any) {
       console.error("Erro ao buscar endereços:", error);
     }
-  };
+  }, [user]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!user) {
       console.log("Usuário não encontrado");
       return;
     }
     
     try {
-      console.log("Buscando TODOS os pedidos para o usuário:", user.id);
+      console.log("Buscando TODOS os pedidos mais recentes para o usuário:", user.id);
       
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(50); // Aumentar limite para garantir que pegamos todos os recentes
       
       if (error) {
         console.error("Erro na consulta de pedidos:", error);
         throw error;
       }
       
-      console.log("Todos os pedidos encontrados:", data?.length || 0);
+      console.log("Pedidos encontrados:", data?.length || 0);
       
       const processedOrders = (data || []).map(order => {
         let processedItems = [];
@@ -153,7 +155,7 @@ export const useProfileData = () => {
       });
       
       setOrders(processedOrders);
-      console.log("Todos os pedidos processados e definidos:", processedOrders.length);
+      console.log("Pedidos processados e definidos:", processedOrders.length);
       
     } catch (error: any) {
       console.error("Erro ao buscar pedidos:", error);
@@ -163,16 +165,169 @@ export const useProfileData = () => {
         variant: "destructive",
       });
     }
+  }, [user, toast]);
+
+  const fetchFavorites = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const { data: favoritesData, error: favoritesError } = await supabase
+        .from("favorites")
+        .select("dish_id")
+        .eq("user_id", user.id);
+      
+      if (favoritesError) {
+        console.error("Erro ao buscar favoritos:", favoritesError);
+        return;
+      }
+      
+      if (favoritesData && favoritesData.length > 0) {
+        const dishIds = favoritesData.map(fav => fav.dish_id);
+        
+        const { data: dishesData, error: dishesError } = await supabase
+          .from("products")
+          .select("*")
+          .in("id", dishIds);
+        
+        if (dishesError) {
+          console.error("Erro ao buscar produtos dos favoritos:", dishesError);
+          return;
+        }
+        
+        const mappedDishes: Dish[] = (dishesData || []).map((product: any) => {
+          let category: 'appetizer' | 'main' | 'dessert' = 'main';
+          
+          const name = (product.name || '').toLowerCase();
+          const description = (product.description || '').toLowerCase();
+          
+          if (name.includes('entrada') || description.includes('entrada')) {
+            category = 'appetizer';
+          } else if (name.includes('sobremesa') || name.includes('doce') || description.includes('sobremesa')) {
+            category = 'dessert';
+          }
+          
+          return {
+            id: product.id || '',
+            name: product.name || 'Produto sem nome',
+            description: product.description || '',
+            price: Number(product.price) || 0,
+            image_url: product.image_url || '/placeholder.svg',
+            image: product.image_url || '/placeholder.svg',
+            category,
+            popular: false,
+            tags: [],
+          };
+        });
+        
+        setFavorites(mappedDishes);
+      }
+    } catch (error: any) {
+      console.error("Erro ao buscar favoritos:", error);
+    }
+  }, [user]);
+
+  const calculateStats = useCallback(() => {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => 
+      ['pending', 'confirmed', 'preparing', 'delivering'].includes(order.status)
+    ).length;
+    const completedOrders = orders.filter(order => 
+      order.status === 'completed'
+    ).length;
+    const favoriteCount = favorites.length;
+
+    console.log("Calculando stats:", { 
+      totalOrders, 
+      pendingOrders, 
+      completedOrders, 
+      favoriteCount 
+    });
+
+    setStats({
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      favoriteCount
+    });
+  }, [orders, favorites]);
+
+  const generateRecentActivities = useCallback(() => {
+    const activities: RecentActivity[] = [];
+
+    console.log("Gerando atividades recentes com", orders.length, "pedidos");
+
+    // Pegar os 10 pedidos mais recentes
+    orders.slice(0, 10).forEach(order => {
+      const items = order.items || [];
+      
+      activities.push({
+        id: `order-${order.id}`,
+        type: 'order',
+        title: `Pedido #${order.id.slice(0, 8).toUpperCase()}`,
+        description: `Status: ${getStatusDisplayName(order.status)}`,
+        timestamp: order.created_at,
+        status: order.status,
+        total: Number(order.total) || 0,
+        itemsCount: Array.isArray(items) ? items.length : 0
+      });
+    });
+
+    // Adicionar favoritos
+    favorites.slice(0, 3).forEach((favorite, index) => {
+      activities.push({
+        id: `favorite-${favorite.id}`,
+        type: 'favorite',
+        title: 'Adicionado aos favoritos',
+        description: favorite.name,
+        timestamp: new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000).toISOString()
+      });
+    });
+
+    // Ordenar por timestamp (mais recente primeiro)
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    const finalActivities = activities.slice(0, 10);
+    console.log("Atividades recentes finais:", finalActivities);
+    
+    setRecentActivities(finalActivities);
+  }, [orders, favorites]);
+
+  const getStatusDisplayName = (status: string) => {
+    const statusMap: Record<string, string> = {
+      pending: "Aguardando Confirmação",
+      confirmed: "Confirmado",
+      preparing: "Em Preparação",
+      delivering: "Em Entrega",
+      completed: "Entregue",
+      cancelled: "Cancelado"
+    };
+    return statusMap[status] || status;
   };
 
+  // Fetch inicial dos dados
   useEffect(() => {
     if (user) {
       console.log("Usuário logado, carregando dados do perfil:", user.id);
-      fetchProfile();
-      fetchAddresses();
-      fetchOrders();
+      setLoading(true);
+      
+      Promise.all([
+        fetchProfile(),
+        fetchAddresses(),
+        fetchOrders(),
+        fetchFavorites()
+      ]).finally(() => {
+        setLoading(false);
+      });
     }
-  }, [user]);
+  }, [user, fetchProfile, fetchAddresses, fetchOrders, fetchFavorites]);
+
+  // Calcular stats quando orders ou favorites mudarem
+  useEffect(() => {
+    if (orders.length > 0 || favorites.length > 0) {
+      calculateStats();
+      generateRecentActivities();
+    }
+  }, [orders, favorites, calculateStats, generateRecentActivities]);
 
   return {
     profile,
@@ -182,12 +337,13 @@ export const useProfileData = () => {
     favorites,
     setFavorites,
     orders,
+    setOrders,
     stats,
-    setStats,
     recentActivities,
-    setRecentActivities,
+    loading,
     fetchProfile,
     fetchAddresses,
-    fetchOrders
+    fetchOrders,
+    fetchFavorites
   };
 };

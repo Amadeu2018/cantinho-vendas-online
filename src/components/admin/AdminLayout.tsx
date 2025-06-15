@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
-import AdminSidebar from "./layout/AdminSidebar";
+import React from "react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./layout/AdminHeader";
 
 interface AdminLayoutProps {
@@ -18,41 +19,21 @@ const AdminLayout = ({
   activeTab = "dashboard",
   onTabChange 
 }: AdminLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 flex">
-      <AdminSidebar 
-        sidebarOpen={sidebarOpen}
-        onCloseSidebar={() => setSidebarOpen(false)}
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-      />
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main content */}
-      <div className="flex-1 lg:ml-0">
-        <AdminHeader
-          onOpenSidebar={() => setSidebarOpen(true)}
-          onLogout={onLogout}
-          title={title}
-          activeTab={activeTab}
-          onTabChange={onTabChange}
-        />
-
-        {/* Main Content */}
-        <main className="p-6">
-          {children}
-        </main>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AdminSidebar />
+        <SidebarInset>
+          <AdminHeader
+            onLogout={onLogout}
+            title={title}
+          />
+          <main className="p-6 flex-1">
+            {children}
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

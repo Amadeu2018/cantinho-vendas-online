@@ -2,33 +2,23 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Search, Menu, Home } from "lucide-react";
+import { LogOut, Search, Home } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import NotificationsDropdown from "../NotificationsDropdown";
-import AdminHeaderTabs from "./AdminHeaderTabs";
 
 interface AdminHeaderProps {
-  onOpenSidebar: () => void;
   onLogout?: () => void;
   title: string;
-  activeTab: string;
-  onTabChange?: (tab: string) => void;
 }
 
-const AdminHeader = ({ onOpenSidebar, onLogout, title, activeTab, onTabChange }: AdminHeaderProps) => {
+const AdminHeader = ({ onLogout, title }: AdminHeaderProps) => {
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left section */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={onOpenSidebar}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          <SidebarTrigger />
           
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2 text-cantinho-navy hover:text-cantinho-terracotta transition-colors">
@@ -39,9 +29,6 @@ const AdminHeader = ({ onOpenSidebar, onLogout, title, activeTab, onTabChange }:
             <h1 className="font-bold text-xl text-cantinho-navy">{title}</h1>
           </div>
         </div>
-
-        {/* Center Navigation Tabs - Only show on larger screens */}
-        <AdminHeaderTabs activeTab={activeTab} onTabChange={onTabChange} />
 
         {/* Right section */}
         <div className="flex items-center gap-4">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,12 +115,13 @@ export const useProfileData = () => {
     }
     
     try {
-      console.log("Buscando TODOS os pedidos para o usuário:", user.id);
+      console.log("Buscando pedidos pelo email:", user.email);
       
+      // Buscar pedidos pelo email do usuário em customer_info
       const { data, error } = await supabase
         .from("orders")
         .select("*")
-        .eq("customer_id", user.id)
+        .contains("customer_info", { email: user.email })
         .order("created_at", { ascending: false });
       
       if (error) {
@@ -127,7 +129,7 @@ export const useProfileData = () => {
         throw error;
       }
       
-      console.log("Pedidos encontrados:", data?.length || 0);
+      console.log("Pedidos encontrados pelo email:", data?.length || 0);
       
       const processedOrders = (data || []).map(order => {
         let processedItems = [];
@@ -228,7 +230,7 @@ export const useProfileData = () => {
   // Initial data fetch
   useEffect(() => {
     if (user) {
-      console.log("Usuário logado, carregando dados do perfil:", user.id);
+      console.log("Usuário logado, carregando dados do perfil:", user.email);
       setLoading(true);
       
       Promise.all([
@@ -246,7 +248,7 @@ export const useProfileData = () => {
   useEffect(() => {
     if (!user) return;
 
-    console.log("Configurando subscriptions em tempo real para:", user.id);
+    console.log("Configurando subscriptions em tempo real para:", user.email);
 
     const ordersChannel = supabase
       .channel(`profile-orders-${user.id}`)
@@ -254,12 +256,16 @@ export const useProfileData = () => {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'orders',
-          filter: `customer_id=eq.${user.id}`
+          table: 'orders'
         }, 
         (payload) => {
-          console.log('Order change detected for user:', payload);
-          fetchOrders();
+          console.log('Order change detected:', payload);
+          // Verificar se o pedido pertence ao usuário atual
+          if (payload.new && payload.new.customer_info && 
+              typeof payload.new.customer_info === 'object' &&
+              payload.new.customer_info.email === user.email) {
+            fetchOrders();
+          }
         }
       )
       .subscribe();

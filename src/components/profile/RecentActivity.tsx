@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +76,13 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
     }).format(price);
   };
 
+  const handleTrackOrder = (activity: Activity) => {
+    // Extract order ID from activity ID
+    const orderId = activity.id.replace('order-', '');
+    // Navigate to profile with orders tab and specific order tracking
+    navigate(`/perfil?tab=orders&track=${orderId}`);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -139,7 +145,7 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate('/perfil?tab=tracking')}
+                            onClick={() => handleTrackOrder(activity)}
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             Acompanhar

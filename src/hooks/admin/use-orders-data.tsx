@@ -22,7 +22,7 @@ export interface Order {
     phone: string;
   };
   createdAt: string;
-  notes: string;
+  notes?: string; // Made optional to match CartContext
   location: {
     id: number;
     name: string;
@@ -55,7 +55,7 @@ export const useOrdersData = () => {
 
       console.log('Raw orders data:', data);
 
-      const formattedOrders: Order[] = data.map((order: any) => {
+      const formattedOrders: Order[] = (data || []).map((order: any) => {
         let customerInfo = {
           name: 'Cliente',
           address: 'Endereço não informado',
@@ -141,8 +141,29 @@ export const useOrdersData = () => {
     }
   };
 
+  // Set up real-time subscription for orders
   useEffect(() => {
     fetchOrders();
+
+    // Subscribe to real-time changes
+    const subscription = supabase
+      .channel('orders_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'orders' 
+        }, 
+        (payload) => {
+          console.log('Real-time order change:', payload);
+          fetchOrders(); // Refetch orders when changes occur
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { 

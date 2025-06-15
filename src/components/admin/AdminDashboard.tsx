@@ -11,7 +11,7 @@ import AdminInventory from "./AdminInventory";
 import AdminReports from "./AdminReports";
 import AdminSettings from "./AdminSettings";
 import AdminEventRequests from "./AdminEventRequests";
-import { Order } from "@/contexts/CartContext";
+import { Order } from "@/hooks/admin/use-orders-data";
 
 interface AdminDashboardProps {
   orders: Order[];

@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Order as CartOrder } from "@/contexts/CartContext";
+import { Order } from "@/hooks/admin/use-orders-data";
 
 interface RecentOrdersProps {
-  orders: CartOrder[];
+  orders: Order[];
   onSelectOrder: (orderId: string) => void;
 }
 

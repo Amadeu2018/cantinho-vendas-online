@@ -218,7 +218,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const orderData = {
       id: orderId,
       items: items,
-      customer_info: customerInfo,
+      customer_info: JSON.stringify(customerInfo), // Ensure it's JSON string
       subtotal: subtotal,
       delivery_fee: selectedLocation.fee,
       total: subtotal + selectedLocation.fee,
@@ -229,15 +229,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     try {
+      console.log('Submitting order to Supabase:', orderData);
+      
       // Salvar pedido no Supabase
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .insert([orderData]);
+        .insert([orderData])
+        .select();
 
       if (error) {
         console.error('Erro ao salvar pedido no Supabase:', error);
         throw error;
       }
+
+      console.log('Order saved successfully:', data);
 
       const newOrder: Order = {
         id: orderId,

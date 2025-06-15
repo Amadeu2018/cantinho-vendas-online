@@ -10,6 +10,10 @@ type AuthContextType = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
+  signInWithPhone: (phone: string, password: string) => Promise<void>;
+  signUpWithPhone: (phone: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -70,7 +74,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
       
       if (error) {
         toast({
@@ -87,6 +97,116 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     } catch (error) {
       console.error('Erro ao criar conta:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithPhone = async (phone: string, password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({ 
+        phone, 
+        password 
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao fazer login",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
+      });
+    } catch (error) {
+      console.error('Erro ao fazer login com telefone:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUpWithPhone = async (phone: string, password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signUp({ 
+        phone, 
+        password 
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Você já pode fazer login com seu número de telefone.",
+      });
+    } catch (error) {
+      console.error('Erro ao criar conta com telefone:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao fazer login com Google",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+    } catch (error) {
+      console.error('Erro ao fazer login com Google:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithFacebook = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao fazer login com Facebook",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+    } catch (error) {
+      console.error('Erro ao fazer login com Facebook:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -114,7 +234,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      loading, 
+      signIn, 
+      signUp, 
+      signInWithPhone,
+      signUpWithPhone,
+      signInWithGoogle,
+      signInWithFacebook,
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

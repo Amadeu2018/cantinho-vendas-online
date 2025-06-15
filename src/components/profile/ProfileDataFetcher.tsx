@@ -175,21 +175,23 @@ export const useProfileData = () => {
     }
     
     try {
-      console.log("Buscando pedidos para o usuário:", user.id);
+      console.log("Buscando TODOS os pedidos para o usuário:", user.id);
       
+      // Buscar TODOS os pedidos, não apenas os em andamento
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(20); // Limitar para os 20 mais recentes
       
       if (error) {
         console.error("Erro na consulta de pedidos:", error);
         throw error;
       }
       
-      console.log("Pedidos encontrados:", data?.length || 0);
-      console.log("Dados dos pedidos:", data);
+      console.log("Todos os pedidos encontrados:", data?.length || 0);
+      console.log("Dados completos dos pedidos:", data);
       
       // Processar os dados dos pedidos
       const processedOrders = (data || []).map(order => {
@@ -215,7 +217,19 @@ export const useProfileData = () => {
       });
       
       setOrders(processedOrders);
-      console.log("Pedidos processados e definidos:", processedOrders.length);
+      console.log("Todos os pedidos processados e definidos:", processedOrders.length);
+      
+      // Log detalhado de cada pedido
+      processedOrders.forEach((order, index) => {
+        console.log(`Pedido ${index + 1}:`, {
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          created_at: order.created_at,
+          items_count: order.items?.length || 0
+        });
+      });
+      
     } catch (error: any) {
       console.error("Erro ao buscar pedidos:", error);
       toast({
@@ -236,7 +250,13 @@ export const useProfileData = () => {
     ).length;
     const favoriteCount = favorites.length;
 
-    console.log("Calculando stats:", { totalOrders, pendingOrders, completedOrders, favoriteCount });
+    console.log("Calculando stats com todos os pedidos:", { 
+      totalOrders, 
+      pendingOrders, 
+      completedOrders, 
+      favoriteCount,
+      ordersData: orders.map(o => ({ id: o.id, status: o.status }))
+    });
 
     setStats({
       totalOrders,
@@ -249,10 +269,10 @@ export const useProfileData = () => {
   const generateRecentActivities = () => {
     const activities: RecentActivity[] = [];
 
-    console.log("Gerando atividades recentes com", orders.length, "pedidos");
+    console.log("Gerando atividades recentes com TODOS os", orders.length, "pedidos");
 
-    // Add recent orders with more details
-    orders.slice(0, 5).forEach(order => {
+    // Add ALL recent orders (não apenas os pendentes)
+    orders.slice(0, 8).forEach(order => {
       const items = order.items || [];
       
       activities.push({
@@ -281,8 +301,14 @@ export const useProfileData = () => {
     // Sort by timestamp (most recent first)
     activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
-    const finalActivities = activities.slice(0, 6);
-    console.log("Atividades recentes geradas:", finalActivities.length);
+    const finalActivities = activities.slice(0, 8);
+    console.log("Atividades recentes finais geradas:", finalActivities);
+    console.log("Detalhes das atividades:", finalActivities.map(a => ({
+      type: a.type,
+      title: a.title,
+      status: a.status,
+      total: a.total
+    })));
     
     setRecentActivities(finalActivities);
   };
@@ -310,12 +336,16 @@ export const useProfileData = () => {
   }, [user]);
 
   useEffect(() => {
-    console.log("Orders ou favorites mudaram, recalculando stats");
-    console.log("Orders:", orders.length, "Favorites:", favorites.length);
+    console.log("Orders ou favorites mudaram, recalculando stats e atividades");
+    console.log("Orders atuais:", orders.length, "Favorites:", favorites.length);
     
     if (orders.length > 0 || favorites.length > 0) {
       calculateStats();
       generateRecentActivities();
+    } else if (orders.length === 0 && favorites.length === 0) {
+      // Garantir que as atividades sejam limpas se não houver dados
+      setRecentActivities([]);
+      console.log("Nenhum pedido ou favorito encontrado, limpando atividades");
     }
   }, [orders, favorites]);
 

@@ -9,7 +9,8 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 
-interface Order {
+// Interface mais flexível para aceitar dados do Supabase
+interface SupabaseOrder {
   id: string;
   total: number;
   status: string;
@@ -18,11 +19,12 @@ interface Order {
   customer_info: any;
   items: any[];
   payment_method: string;
+  [key: string]: any;
 }
 
 interface OrderTrackingListProps {
-  orders: Order[];
-  onSelectOrder: (order: Order) => void;
+  orders: SupabaseOrder[];
+  onSelectOrder: (order: SupabaseOrder) => void;
   formatPrice: (price: number) => string;
   getStatusName: (status: string) => string;
   getStatusColor: (status: string) => string;

@@ -18,7 +18,8 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 
-interface Order {
+// Interface flexível para aceitar dados do Supabase
+interface SupabaseOrder {
   id: string;
   total: number;
   status: string;
@@ -27,10 +28,11 @@ interface Order {
   customer_info: any;
   items: any[];
   payment_method: string;
+  [key: string]: any;
 }
 
 interface OrderTrackingDetailProps {
-  order: Order;
+  order: SupabaseOrder;
   onBack: () => void;
   formatPrice: (price: number) => string;
   getStatusName: (status: string) => string;
@@ -176,7 +178,7 @@ const OrderTrackingDetail = ({
                       </Badge>
                     )}
                   </div>
-                  <p className={`text-sm ${isActive ? 'text-green-700' : 'text-gray-500'}`}>
+                  <p className={`text-sm ${isActive ? 'text-green-700' :text-gray-500'}`}>
                     {step.description}
                   </p>
                 </div>

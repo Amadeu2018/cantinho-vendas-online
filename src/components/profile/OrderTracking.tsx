@@ -6,15 +6,17 @@ import { useToast } from "@/hooks/use-toast";
 import OrderTrackingList from "./tracking/OrderTrackingList";
 import OrderTrackingDetail from "./tracking/OrderTrackingDetail";
 
-interface Order {
+// Interface mais flexível que aceita dados do Supabase
+interface SupabaseOrder {
   id: string;
   total: number;
   status: string;
   payment_status: string;
   created_at: string;
   customer_info: any;
-  items: any[];
+  items: any; // Pode ser array ou string JSON
   payment_method: string;
+  [key: string]: any; // Para outras propriedades do Supabase
 }
 
 interface OrderTrackingProps {
@@ -22,9 +24,9 @@ interface OrderTrackingProps {
 }
 
 const OrderTracking = ({ userId }: OrderTrackingProps) => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<SupabaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<SupabaseOrder | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,6 +61,9 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
 
   const fetchUserOrders = async () => {
     try {
+      console.log("Buscando pedidos EM ANDAMENTO para OrderTracking:", userId);
+      
+      // Buscar apenas pedidos em andamento para o componente de tracking
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -68,14 +73,33 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
         
       if (error) throw error;
       
-      // Transform the data to match our Order interface
-      const transformedOrders: Order[] = (data || []).map(order => ({
-        ...order,
-        items: Array.isArray(order.items) ? order.items : 
-               typeof order.items === 'string' ? JSON.parse(order.items) : []
-      }));
+      console.log("Pedidos em andamento encontrados:", data?.length || 0);
       
-      setOrders(transformedOrders);
+      // Processar os dados dos pedidos para compatibilidade
+      const processedOrders: SupabaseOrder[] = (data || []).map(order => {
+        let processedItems = [];
+        
+        try {
+          if (Array.isArray(order.items)) {
+            processedItems = order.items;
+          } else if (typeof order.items === 'string') {
+            processedItems = JSON.parse(order.items);
+          } else if (order.items && typeof order.items === 'object') {
+            processedItems = [order.items];
+          }
+        } catch (e) {
+          console.error("Erro ao processar items do pedido:", order.id, e);
+          processedItems = [];
+        }
+        
+        return {
+          ...order,
+          items: processedItems
+        };
+      });
+      
+      setOrders(processedOrders);
+      console.log("Pedidos em andamento processados:", processedOrders.length);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({

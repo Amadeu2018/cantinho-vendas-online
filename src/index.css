@@ -149,20 +149,131 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Classes responsivas para tabelas administrativas */
+/* Painel Administrativo: Grid/Cards responsivos e cabeçalhos */
 @layer components {
-  .admin-table-container {
-    @apply w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  .admin-dashboard-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
   }
-  
-  .admin-card-responsive {
+  .admin-dashboard-card {
     @apply p-3 sm:p-4 md:p-6;
   }
-  
-  .admin-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4;
+  .admin-section-header {
+    @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 mb-4;
+  }
+  .admin-section-title {
+    @apply text-lg md:text-2xl font-bold;
+  }
+  .admin-table-container {
+    @apply w-full overflow-x-auto;
+  }
+  .admin-table {
+    @apply w-full border-collapse text-sm;
+  }
+  .admin-table th,
+  .admin-table td {
+    @apply px-3 py-2;
   }
 }
+
+/* Tabelas, grids e cards mobile */
+@media (max-width: 640px) {
+  .admin-dashboard-cards,
+  .admin-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+  }
+  .responsive-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    white-space: nowrap;
+    padding: 0.5rem;
+  }
+  .mobile-card-view {
+    @apply flex flex-col border rounded-lg p-4 mb-4 shadow-sm bg-white;
+  }
+  .mobile-card-label {
+    @apply text-xs sm:text-sm text-gray-500 mb-1;
+  }
+  .mobile-card-value {
+    @apply font-medium mb-2;
+  }
+}
+
+/* Simplifica ajuste global para grid admin (estoque, produtos, etc) */
+@media (max-width: 1024px) {
+  .admin-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Print para admin: como já estava */
+@media print {
+  /* Esconde elementos não relevantes para a impressão */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostra apenas o conteúdo do container da fatura */
+  #invoice-container, 
+  #invoice-container * {
+    visibility: visible;
+  }
+  
+  /* Posiciona o container da fatura no topo da página */
+  #invoice-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+  }
+  
+  /* Remove bordas arredondadas e sombras para impressão limpa */
+  #invoice-container.card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  /* Esconde botões e outros elementos desnecessários */
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Ajusta cores para impressão */
+  .text-cantinho-navy {
+    color: #000 !important;
+  }
+  
+  /* Garante que tabelas e conteúdo caibam bem na página */
+  #invoice-container table {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+  
+  /* Evita quebrar elementos importantes */
+  h2, h3, h4, 
+  #invoice-container .invoice-header, 
+  #invoice-container .customer-info,
+  #invoice-container .invoice-summary {
+    page-break-inside: avoid;
+  }
+}
+
+/* Ajuste: tabela admin sempre horizontal scroll em mobile */
+@media (max-width: 768px) {
+  .admin-table-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+}
+
+
+/* Remove duplicidade: se encontrar regras antigas similares, favor priorizar estas atuais! */
 
 /* Estilização para menus responsivos */
 .mobile-menu-container {

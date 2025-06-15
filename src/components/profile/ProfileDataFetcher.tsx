@@ -70,21 +70,26 @@ export const useProfileData = () => {
       
       if (data) {
         setProfile({
-          email: data.email || "",
+          email: data.email || user.email || "",
           phone: data.phone || "",
           address_street: data.address_street || "",
           address_city: data.address_city || "",
           address_province: data.address_province || "",
           address_postal_code: data.address_postal_code || "",
         });
+      } else {
+        // Se não há perfil, usar dados do auth
+        setProfile(prev => ({
+          ...prev,
+          email: user.email || ""
+        }));
       }
     } catch (error: any) {
       console.error("Erro ao buscar perfil:", error);
-      toast({
-        title: "Erro ao carregar perfil",
-        description: error.message,
-        variant: "destructive",
-      });
+      setProfile(prev => ({
+        ...prev,
+        email: user.email || ""
+      }));
     }
   };
 
@@ -113,7 +118,10 @@ export const useProfileData = () => {
         .select("dish_id")
         .eq("user_id", user.id);
       
-      if (favoritesError) throw favoritesError;
+      if (favoritesError) {
+        console.error("Erro ao buscar favoritos:", favoritesError);
+        return;
+      }
       
       if (favoritesData && favoritesData.length > 0) {
         const dishIds = favoritesData.map(fav => fav.dish_id);
@@ -123,7 +131,10 @@ export const useProfileData = () => {
           .select("*")
           .in("id", dishIds);
         
-        if (dishesError) throw dishesError;
+        if (dishesError) {
+          console.error("Erro ao buscar produtos dos favoritos:", dishesError);
+          return;
+        }
         
         const mappedDishes: Dish[] = (dishesData || []).map((product: any) => {
           let category: 'appetizer' | 'main' | 'dessert' = 'main';
@@ -158,19 +169,53 @@ export const useProfileData = () => {
   };
 
   const fetchOrders = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log("Usuário não encontrado");
+      return;
+    }
     
     try {
+      console.log("Buscando pedidos para o usuário:", user.id);
+      
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erro na consulta de pedidos:", error);
+        throw error;
+      }
       
-      console.log("Orders fetched:", data);
-      setOrders(data || []);
+      console.log("Pedidos encontrados:", data?.length || 0);
+      console.log("Dados dos pedidos:", data);
+      
+      // Processar os dados dos pedidos
+      const processedOrders = (data || []).map(order => {
+        let processedItems = [];
+        
+        try {
+          if (Array.isArray(order.items)) {
+            processedItems = order.items;
+          } else if (typeof order.items === 'string') {
+            processedItems = JSON.parse(order.items);
+          } else if (order.items && typeof order.items === 'object') {
+            processedItems = [order.items];
+          }
+        } catch (e) {
+          console.error("Erro ao processar items do pedido:", order.id, e);
+          processedItems = [];
+        }
+        
+        return {
+          ...order,
+          items: processedItems
+        };
+      });
+      
+      setOrders(processedOrders);
+      console.log("Pedidos processados e definidos:", processedOrders.length);
     } catch (error: any) {
       console.error("Erro ao buscar pedidos:", error);
       toast({
@@ -191,6 +236,8 @@ export const useProfileData = () => {
     ).length;
     const favoriteCount = favorites.length;
 
+    console.log("Calculando stats:", { totalOrders, pendingOrders, completedOrders, favoriteCount });
+
     setStats({
       totalOrders,
       pendingOrders,
@@ -202,10 +249,11 @@ export const useProfileData = () => {
   const generateRecentActivities = () => {
     const activities: RecentActivity[] = [];
 
+    console.log("Gerando atividades recentes com", orders.length, "pedidos");
+
     // Add recent orders with more details
-    orders.slice(0, 4).forEach(order => {
-      const items = Array.isArray(order.items) ? order.items : 
-                   typeof order.items === 'string' ? JSON.parse(order.items) : [];
+    orders.slice(0, 5).forEach(order => {
+      const items = order.items || [];
       
       activities.push({
         id: `order-${order.id}`,
@@ -214,13 +262,13 @@ export const useProfileData = () => {
         description: `Status: ${getStatusDisplayName(order.status)}`,
         timestamp: order.created_at,
         status: order.status,
-        total: order.total,
-        itemsCount: items.length
+        total: Number(order.total) || 0,
+        itemsCount: Array.isArray(items) ? items.length : 0
       });
     });
 
     // Add recent favorites
-    favorites.slice(0, 2).forEach((favorite, index) => {
+    favorites.slice(0, 3).forEach((favorite, index) => {
       activities.push({
         id: `favorite-${favorite.id}`,
         type: 'favorite',
@@ -233,7 +281,10 @@ export const useProfileData = () => {
     // Sort by timestamp (most recent first)
     activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
-    setRecentActivities(activities.slice(0, 6));
+    const finalActivities = activities.slice(0, 6);
+    console.log("Atividades recentes geradas:", finalActivities.length);
+    
+    setRecentActivities(finalActivities);
   };
 
   const getStatusDisplayName = (status: string) => {
@@ -250,6 +301,7 @@ export const useProfileData = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("Usuário logado, carregando dados do perfil:", user.id);
       fetchProfile();
       fetchAddresses();
       fetchFavorites();
@@ -258,6 +310,9 @@ export const useProfileData = () => {
   }, [user]);
 
   useEffect(() => {
+    console.log("Orders ou favorites mudaram, recalculando stats");
+    console.log("Orders:", orders.length, "Favorites:", favorites.length);
+    
     if (orders.length > 0 || favorites.length > 0) {
       calculateStats();
       generateRecentActivities();

@@ -2,9 +2,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ShoppingBag, Heart, MessageCircle } from "lucide-react";
+import { ShoppingBag, Heart, MessageCircle, Eye, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Activity {
   id: string;
@@ -13,6 +15,8 @@ interface Activity {
   description: string;
   timestamp: string;
   status?: string;
+  total?: number;
+  itemsCount?: number;
 }
 
 interface RecentActivityProps {
@@ -20,6 +24,8 @@ interface RecentActivityProps {
 }
 
 const RecentActivity = ({ activities }: RecentActivityProps) => {
+  const navigate = useNavigate();
+
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
       case 'order':
@@ -63,10 +69,28 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
     }
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("pt-AO", {
+      style: "currency",
+      currency: "AOA",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Atividade Recente</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Atividade Recente</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/perfil?tab=orders')}
+          >
+            Ver Todos
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {activities.length > 0 ? (
@@ -74,15 +98,25 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
             {activities.map((activity) => {
               const Icon = getActivityIcon(activity.type);
               return (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
                   <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-sm">{activity.title}</p>
                         <p className="text-sm text-gray-600">{activity.description}</p>
+                        {activity.total && (
+                          <p className="text-sm font-semibold text-cantinho-terracotta mt-1">
+                            {formatPrice(activity.total)}
+                            {activity.itemsCount && (
+                              <span className="text-gray-500 font-normal ml-2">
+                                • {activity.itemsCount} item(s)
+                              </span>
+                            )}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500 mt-1">
                           {formatDistanceToNow(new Date(activity.timestamp), {
                             addSuffix: true,
@@ -90,15 +124,28 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
                           })}
                         </p>
                       </div>
-                      {activity.status && (
-                        <Badge variant="outline" className={getStatusColor(activity.status)}>
-                          {activity.status === 'pending' ? 'Pendente' :
-                           activity.status === 'confirmed' ? 'Confirmado' :
-                           activity.status === 'preparing' ? 'Preparando' :
-                           activity.status === 'delivering' ? 'Entregando' :
-                           activity.status === 'completed' ? 'Concluído' : activity.status}
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-2 ml-2">
+                        {activity.status && (
+                          <Badge variant="outline" className={getStatusColor(activity.status)}>
+                            {activity.status === 'pending' ? 'Pendente' :
+                             activity.status === 'confirmed' ? 'Confirmado' :
+                             activity.status === 'preparing' ? 'Preparando' :
+                             activity.status === 'delivering' ? 'Entregando' :
+                             activity.status === 'completed' ? 'Concluído' : activity.status}
+                          </Badge>
+                        )}
+                        {activity.type === 'order' && activity.status && 
+                         ['pending', 'confirmed', 'preparing', 'delivering'].includes(activity.status) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/perfil?tab=tracking')}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Acompanhar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -106,9 +153,16 @@ const RecentActivity = ({ activities }: RecentActivityProps) => {
             })}
           </div>
         ) : (
-          <p className="text-gray-600 text-center py-8">
-            Nenhuma atividade recente
-          </p>
+          <div className="text-center py-8">
+            <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-2">Nenhuma atividade recente</p>
+            <Button 
+              onClick={() => navigate('/menu')}
+              className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+            >
+              Fazer Primeiro Pedido
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>

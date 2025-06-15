@@ -1,10 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dish } from "@/types/dish";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Home } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ProfileForm from "@/components/profile/ProfileForm";
 import AddressesList from "@/components/profile/AddressesList";
 import FavoritesList from "@/components/profile/FavoritesList";
@@ -16,6 +18,8 @@ import RecentActivity from "@/components/profile/RecentActivity";
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
     email: "",
@@ -35,6 +39,9 @@ const Profile = () => {
     favoriteCount: 0
   });
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
+
+  // Get default tab from URL params
+  const defaultTab = searchParams.get('tab') || 'overview';
 
   useEffect(() => {
     if (user) {
@@ -206,23 +213,24 @@ const Profile = () => {
   const generateRecentActivities = () => {
     const activities: any[] = [];
 
-    // Add recent orders
-    orders.slice(0, 3).forEach(order => {
+    // Add recent orders with more details
+    orders.slice(0, 4).forEach(order => {
+      const items = Array.isArray(order.items) ? order.items : 
+                   typeof order.items === 'string' ? JSON.parse(order.items) : [];
+      
       activities.push({
         id: `order-${order.id}`,
         type: 'order',
         title: `Pedido #${order.id.slice(0, 8).toUpperCase()}`,
-        description: `Total: ${new Intl.NumberFormat("pt-AO", {
-          style: "currency",
-          currency: "AOA",
-          minimumFractionDigits: 0,
-        }).format(order.total)}`,
+        description: `Status: ${getStatusDisplayName(order.status)}`,
         timestamp: order.created_at,
-        status: order.status
+        status: order.status,
+        total: order.total,
+        itemsCount: items.length
       });
     });
 
-    // Add recent favorites (simulate timestamps)
+    // Add recent favorites
     favorites.slice(0, 2).forEach((favorite, index) => {
       activities.push({
         id: `favorite-${favorite.id}`,
@@ -236,7 +244,19 @@ const Profile = () => {
     // Sort by timestamp (most recent first)
     activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
-    setRecentActivities(activities.slice(0, 5));
+    setRecentActivities(activities.slice(0, 6));
+  };
+
+  const getStatusDisplayName = (status: string) => {
+    const statusMap: Record<string, string> = {
+      pending: "Aguardando Confirmação",
+      confirmed: "Confirmado",
+      preparing: "Em Preparação",
+      delivering: "Em Entrega",
+      completed: "Entregue",
+      cancelled: "Cancelado"
+    };
+    return statusMap[status] || status;
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -319,7 +339,27 @@ const Profile = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Meu Perfil</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Início
+            </Button>
+          </div>
+          <h1 className="text-3xl font-bold">Meu Perfil</h1>
+        </div>
         <div className="text-sm text-gray-600">
           Bem-vindo de volta, {profile.email ? profile.email.split('@')[0] : 'usuário'}!
         </div>
@@ -327,7 +367,7 @@ const Profile = () => {
       
       <ProfileStats {...stats} />
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="tracking">Acompanhar</TabsTrigger>

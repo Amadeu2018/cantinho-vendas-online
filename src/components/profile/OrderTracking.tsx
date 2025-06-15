@@ -12,12 +12,15 @@ import {
   Package,
   MapPin,
   Phone,
-  Eye
+  Eye,
+  ArrowLeft,
+  Home
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 
 interface Order {
   id: string;
@@ -39,6 +42,7 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const orderSteps = [
     { 
@@ -113,7 +117,15 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Transform the data to match our Order interface
+      const transformedOrders: Order[] = (data || []).map(order => ({
+        ...order,
+        items: Array.isArray(order.items) ? order.items : 
+               typeof order.items === 'string' ? JSON.parse(order.items) : []
+      }));
+      
+      setOrders(transformedOrders);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({
@@ -171,6 +183,26 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
   if (loading) {
     return (
       <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Início
+            </Button>
+          </div>
+        </CardHeader>
         <CardContent className="p-6">
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin h-8 w-8 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
@@ -188,12 +220,30 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Acompanhar Pedido</CardTitle>
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedOrder(null)}
-            >
-              Voltar
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Voltar
+              </Button>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/')}
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Início
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setSelectedOrder(null)}
+              >
+                Lista de Pedidos
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -293,7 +343,27 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pedidos em Andamento</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Pedidos em Andamento</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Início
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {orders.length > 0 ? (
@@ -309,6 +379,11 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
                         locale: ptBR
                       })}
                     </p>
+                    {order.items && order.items.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {order.items.length} item(s)
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-bold">{formatPrice(order.total)}</p>
@@ -339,9 +414,16 @@ const OrderTracking = ({ userId }: OrderTrackingProps) => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 text-center py-8">
-            Você não tem pedidos em andamento no momento
-          </p>
+          <div className="text-center py-8">
+            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-2">Você não tem pedidos em andamento no momento</p>
+            <Button 
+              onClick={() => navigate('/menu')}
+              className="bg-cantinho-terracotta hover:bg-cantinho-terracotta/90"
+            >
+              Ver Menu
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>

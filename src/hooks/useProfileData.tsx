@@ -219,6 +219,8 @@ export const useProfileData = () => {
         });
         
         setFavorites(mappedDishes);
+      } else {
+        setFavorites([]);
       }
     } catch (error: any) {
       console.error("Erro ao buscar favoritos:", error);

@@ -22,7 +22,7 @@ export const useOrdersNotifications = (refreshOrders: () => void) => {
             
             // Get customer info for notification
             let customerName = 'Cliente';
-            let customerInfo = {};
+            let customerInfo: any = {};
             
             try {
               if (payload.new.customer_info) {
@@ -31,7 +31,7 @@ export const useOrdersNotifications = (refreshOrders: () => void) => {
                 } else {
                   customerInfo = payload.new.customer_info;
                 }
-                customerName = customerInfo.name || 'Cliente';
+                customerName = customerInfo?.name || 'Cliente';
               }
             } catch (e) {
               console.error('Error parsing customer info:', e);
@@ -62,7 +62,6 @@ export const useOrdersNotifications = (refreshOrders: () => void) => {
             toast({
               title: 'Novo pedido recebido!',
               description: `Pedido #${payload.new.id.slice(0, 8)} de ${customerName} foi recebido.`,
-              duration: 5000,
             });
 
             console.log('Admin: Toast exibido para novo pedido');

@@ -30,6 +30,8 @@ const getStatusBadgeColor = (status: Order["status"]) => {
       return "bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-200";
     case "delivering":
       return "bg-purple-50 text-purple-700 hover:bg-purple-50 border-purple-200";
+    case "delivered":
+      return "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
     case "completed":
       return "bg-green-50 text-green-700 hover:bg-green-50 border-green-200";
     case "cancelled":
@@ -40,10 +42,17 @@ const getStatusBadgeColor = (status: Order["status"]) => {
 };
 
 // Helper for getting payment status badge color
-const getPaymentBadgeColor = (status: "pending" | "completed") => {
-  return status === "completed" 
-    ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-200" 
-    : "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
+const getPaymentBadgeColor = (status: "pending" | "completed" | "failed" | "cancelled") => {
+  switch (status) {
+    case "completed":
+      return "bg-green-50 text-green-700 hover:bg-green-50 border-green-200";
+    case "failed":
+      return "bg-red-50 text-red-700 hover:bg-red-50 border-red-200";
+    case "cancelled":
+      return "bg-gray-50 text-gray-700 hover:bg-gray-50 border-gray-200";
+    default:
+      return "bg-orange-50 text-orange-700 hover:bg-orange-50 border-orange-200";
+  }
 };
 
 // Helper for formatting status names
@@ -53,6 +62,7 @@ const formatStatus = (status: Order["status"]) => {
     confirmed: "Confirmado",
     preparing: "Em Preparo",
     delivering: "Em Entrega",
+    delivered: "Entregue",
     completed: "Concluído",
     cancelled: "Cancelado"
   };
@@ -61,8 +71,14 @@ const formatStatus = (status: Order["status"]) => {
 };
 
 // Helper for formatting payment status
-const formatPaymentStatus = (status: "pending" | "completed") => {
-  return status === "completed" ? "Pago" : "Pendente";
+const formatPaymentStatus = (status: "pending" | "completed" | "failed" | "cancelled") => {
+  const statusMap = {
+    completed: "Pago",
+    failed: "Falhou",
+    cancelled: "Cancelado",
+    pending: "Pendente"
+  };
+  return statusMap[status] || status;
 };
 
 const AdminOrders = ({ orders, onSelectOrder }: AdminOrdersProps) => {

@@ -42,12 +42,18 @@ export const useOrdersData = () => {
     setError(null);
     
     try {
+      console.log('Fetching orders from Supabase...');
       const { data, error } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Raw orders data:', data);
 
       const formattedOrders: Order[] = data.map((order: any) => {
         let customerInfo = {
@@ -72,11 +78,6 @@ export const useOrdersData = () => {
               phone: order.customer_info.phone || customerInfo.phone
             };
           }
-          
-          // Fallback to individual fields if they exist
-          if (order.customer_name) customerInfo.name = order.customer_name;
-          if (order.customer_address) customerInfo.address = order.customer_address;
-          if (order.customer_phone) customerInfo.phone = order.customer_phone;
         } catch (e) {
           console.error('Error parsing customer info:', e);
         }
@@ -93,14 +94,11 @@ export const useOrdersData = () => {
           case 'cancelled':
             mappedStatus = order.status;
             break;
-          case 'ready':
-            mappedStatus = 'preparing';
-            break;
           default:
             mappedStatus = 'pending';
         }
 
-        return {
+        const formattedOrder = {
           id: order.id,
           items: order.items || [],
           subtotal: Number(order.subtotal) || 0,
@@ -123,8 +121,12 @@ export const useOrdersData = () => {
             estimatedTime: '30-45 min'
           }
         };
+
+        console.log('Formatted order:', formattedOrder);
+        return formattedOrder;
       });
 
+      console.log('All formatted orders:', formattedOrders);
       setOrders(formattedOrders);
     } catch (error: any) {
       console.error('Error fetching orders:', error);

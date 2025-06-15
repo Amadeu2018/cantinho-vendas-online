@@ -11,7 +11,7 @@ import AdminInventory from "./AdminInventory";
 import AdminReports from "./AdminReports";
 import AdminSettings from "./AdminSettings";
 import AdminEventRequests from "./AdminEventRequests";
-import { Order } from "@/hooks/admin/use-orders-data";
+import { Order } from "@/contexts/CartContext";
 
 interface AdminDashboardProps {
   orders: Order[];
@@ -75,15 +75,11 @@ const AdminDashboard = ({
 
   return (
     <div className="space-y-6">
-      <DashboardHeader 
-        orders={orders}
-        onLogout={onLogout}
-      />
+      <DashboardHeader onLogout={onLogout} />
       
       <DashboardTabs 
         activeTab={activeTab}
         onTabChange={onTabChange}
-        orders={orders}
       />
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">

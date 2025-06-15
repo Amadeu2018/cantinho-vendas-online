@@ -1,62 +1,66 @@
 
-import React from "react";
-import { Card } from "@/components/ui/card";
-import AdminOrdersList from "@/components/admin/AdminOrdersList";
-import AdminProducts from "@/components/admin/AdminProducts";
-import AdminFinance from "@/components/admin/AdminFinance";
-import AdminInventory from "@/components/admin/AdminInventory";
-import AdminReports from "@/components/admin/AdminReports";
-import AdminCustomers from "../AdminCustomers";
-import { Order } from "@/hooks/admin/use-orders-data";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  LayoutDashboard, 
+  Package, 
+  Users, 
+  DollarSign, 
+  Warehouse, 
+  BarChart3, 
+  Settings,
+  Calendar
+} from "lucide-react";
 
 interface DashboardTabsProps {
   activeTab: string;
-  orders: Order[];
-  fetchingOrders: boolean;
-  onSelectOrder: (orderId: string) => void;
-  children: React.ReactNode;
+  onTabChange: (tab: string) => void;
 }
 
-const DashboardTabs = ({ 
-  activeTab, 
-  orders, 
-  fetchingOrders, 
-  onSelectOrder,
-  children 
-}: DashboardTabsProps) => {
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "dashboard":
-        return children;
-      case "orders":
-        return (
-          <AdminOrdersList 
-            orders={orders} 
-            onSelectOrder={onSelectOrder}
-            fetchingOrders={fetchingOrders}
-          />
-        );
-      case "products":
-        return <AdminProducts />;
-      case "customers":
-        return <AdminCustomers />;
-      case "finance":
-        return <AdminFinance orders={orders} />;
-      case "inventory":
-        return <AdminInventory />;
-      case "reports":
-        return <AdminReports />;
-      default:
-        return children;
-    }
-  };
-
+const DashboardTabs = ({ activeTab, onTabChange }: DashboardTabsProps) => {
   return (
-    <Card className="overflow-hidden shadow-2xl border-0">
-      <div className="p-8 bg-gradient-to-br from-gray-50/50 to-white min-h-[400px]">
-        {renderTabContent()}
-      </div>
-    </Card>
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 bg-gray-50 p-1 rounded-lg">
+        <TabsTrigger value="dashboard" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <LayoutDashboard className="h-4 w-4" />
+          <span className="hidden sm:inline">Dashboard</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="orders" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <Package className="h-4 w-4" />
+          <span className="hidden sm:inline">Pedidos</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="products" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <Package className="h-4 w-4" />
+          <span className="hidden sm:inline">Produtos</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="customers" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <Users className="h-4 w-4" />
+          <span className="hidden sm:inline">Clientes</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="finance" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <DollarSign className="h-4 w-4" />
+          <span className="hidden sm:inline">Finanças</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="inventory" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <Warehouse className="h-4 w-4" />
+          <span className="hidden sm:inline">Estoque</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <BarChart3 className="h-4 w-4" />
+          <span className="hidden sm:inline">Relatórios</span>
+        </TabsTrigger>
+        
+        <TabsTrigger value="events" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <Calendar className="h-4 w-4" />
+          <span className="hidden sm:inline">Eventos</span>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 };
 

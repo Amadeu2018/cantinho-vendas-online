@@ -21,7 +21,7 @@ const AdminLayout = ({
 }: AdminLayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AdminSidebar 
           activeTab={activeTab}
           onTabChange={onTabChange || (() => {})}
@@ -32,9 +32,11 @@ const AdminLayout = ({
             onLogout={onLogout}
             title={title}
           />
-          <main className="p-3 sm:p-4 lg:p-6 flex-1 bg-gray-50 min-h-screen">
+          <main className="p-3 sm:p-4 lg:p-6 flex-1 min-h-screen">
             <div className="max-w-full">
-              {children}
+              <div className="animate-fade-in">
+                {children}
+              </div>
             </div>
           </main>
         </SidebarInset>

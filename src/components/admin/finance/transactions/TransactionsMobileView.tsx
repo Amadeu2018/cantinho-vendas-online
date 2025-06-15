@@ -2,8 +2,8 @@
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, CreditCard } from "lucide-react";
+import { SmoothScrollArea } from "@/components/ui/smooth-scroll-area";
+import { User, CreditCard, Calendar, Hash } from "lucide-react";
 
 interface TransactionsMobileViewProps {
   transactions: any[];
@@ -11,7 +11,7 @@ interface TransactionsMobileViewProps {
 
 const TransactionsMobileView = ({ transactions }: TransactionsMobileViewProps) => {
   return (
-    <ScrollArea className="h-96">
+    <SmoothScrollArea className="h-96" fadeEdges>
       <div className="space-y-3 pr-2">
         {transactions.map((order) => {
           let customerName = "Cliente";
@@ -51,42 +51,71 @@ const TransactionsMobileView = ({ transactions }: TransactionsMobileViewProps) =
           return (
             <div 
               key={order.id} 
-              className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-all duration-300 hover:shadow-sm transform hover:scale-[1.02]"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] border border-gray-100 hover:border-cantinho-terracotta/20"
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-mono text-sm font-medium text-gray-900">#{orderId}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(createdAt), "dd/MM/yy HH:mm")}
-                  </p>
+              {/* Header with ID and Amount */}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-2">
+                  <Hash className="h-3 w-3 text-gray-400" />
+                  <span className="font-mono text-sm font-medium text-gray-900">
+                    {orderId}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-sm">{formatCurrency(orderTotal)}</p>
-                  <Badge className={`text-xs ${
+                  <div className="font-bold text-lg text-cantinho-navy">
+                    {formatCurrency(orderTotal)}
+                  </div>
+                  <Badge className={`text-xs transition-colors ${
                     paymentStatus === "completed" 
-                      ? "bg-green-100 text-green-800 border-green-200" 
-                      : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
+                      : "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
                   }`}>
                     {paymentStatus === "completed" ? "Pago" : "Pendente"}
                   </Badge>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  <span className="truncate max-w-20">{customerName}</span>
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
+                  <Calendar className="h-3 w-3 text-gray-500" />
+                  <div>
+                    <div className="text-gray-500 text-xs">Data</div>
+                    <div className="font-medium text-gray-900">
+                      {format(new Date(createdAt), "dd/MM/yy")}
+                    </div>
+                    <div className="text-gray-500 text-xs">
+                      {format(new Date(createdAt), "HH:mm")}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <CreditCard className="h-3 w-3" />
-                  <span>{paymentMethod}</span>
+                
+                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
+                  <User className="h-3 w-3 text-gray-500" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-gray-500 text-xs">Cliente</div>
+                    <div className="font-medium text-gray-900 truncate">
+                      {customerName}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="mt-3 flex items-center gap-2 bg-gradient-to-r from-cantinho-sky/10 to-cantinho-sage/10 rounded-lg p-2">
+                <CreditCard className="h-3 w-3 text-cantinho-navy" />
+                <div>
+                  <div className="text-xs text-gray-500">Método de Pagamento</div>
+                  <div className="text-sm font-medium text-cantinho-navy">
+                    {paymentMethod}
+                  </div>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-    </ScrollArea>
+    </SmoothScrollArea>
   );
 };
 

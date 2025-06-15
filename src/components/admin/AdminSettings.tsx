@@ -7,6 +7,9 @@ import BankAccountsManager from "./settings/BankAccountsManager";
 import MulticaixaAccountsManager from "./settings/MulticaixaAccountsManager";
 import PaymentNotesSettings from "./settings/PaymentNotesSettings";
 import SystemSettings from "./settings/SystemSettings";
+import InvoiceSettings from "./settings/InvoiceSettings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, CreditCard, FileText, Settings, Printer } from "lucide-react";
 
 const AdminSettings = () => {
   const { settings, loading, saving, updateSettings } = useCompanySettings();
@@ -36,29 +39,67 @@ const AdminSettings = () => {
         onSave={handleSave} 
       />
 
-      {/* Company Information */}
-      <CompanyInfoSettings 
-        settings={localSettings}
-        onSettingsChange={handleSettingsChange}
-      />
+      <Tabs defaultValue="company" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="company" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Empresa</span>
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Faturas</span>
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            <span className="hidden sm:inline">Pagamentos</span>
+          </TabsTrigger>
+          <TabsTrigger value="system" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">Sistema</span>
+          </TabsTrigger>
+          <TabsTrigger value="printers" className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            <span className="hidden sm:inline">Impressoras</span>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Payment Methods */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <MulticaixaAccountsManager />
-        <BankAccountsManager />
-      </div>
+        <TabsContent value="company" className="space-y-6 mt-6">
+          <CompanyInfoSettings 
+            settings={localSettings}
+            onSettingsChange={handleSettingsChange}
+          />
+        </TabsContent>
 
-      {/* Payment Notes */}
-      <PaymentNotesSettings 
-        settings={localSettings}
-        onSettingsChange={handleSettingsChange}
-      />
+        <TabsContent value="invoices" className="space-y-6 mt-6">
+          <InvoiceSettings />
+        </TabsContent>
 
-      {/* System Settings */}
-      <SystemSettings 
-        settings={localSettings}
-        onSettingsChange={handleSettingsChange}
-      />
+        <TabsContent value="payments" className="space-y-6 mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MulticaixaAccountsManager />
+            <BankAccountsManager />
+          </div>
+          <PaymentNotesSettings 
+            settings={localSettings}
+            onSettingsChange={handleSettingsChange}
+          />
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-6 mt-6">
+          <SystemSettings 
+            settings={localSettings}
+            onSettingsChange={handleSettingsChange}
+          />
+        </TabsContent>
+
+        <TabsContent value="printers" className="space-y-6 mt-6">
+          <div className="text-center py-10 text-muted-foreground">
+            <Printer className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Configurações de Impressora</h3>
+            <p>As configurações de impressora estão integradas nas configurações de faturas.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

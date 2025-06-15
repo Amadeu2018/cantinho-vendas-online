@@ -2,9 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Download, Printer } from "lucide-react";
-import { format } from "date-fns";
 import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
+import PrimaveraInvoiceTemplate from "./invoice/PrimaveraInvoiceTemplate";
 import type { Invoice } from "./EventRequestDetail";
 import type { EventRequest } from "./AdminEventRequests";
 
@@ -31,6 +31,30 @@ const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePrevie
     window.print();
   };
 
+  // Transform data for the new template
+  const invoiceData = {
+    number: invoice.numero,
+    date: invoice.created_at,
+    type: invoice.tipo === 'proforma' ? 'proforma' as const : 'invoice' as const,
+    customer: {
+      name: request.nome,
+      email: request.email,
+      phone: request.telefone,
+      address: request.localizacao
+    },
+    items: [{
+      description: invoice.descricao || `Serviço de Catering para ${request.tipo_evento}`,
+      quantity: 1,
+      unit_price: invoice.valor,
+      tax_rate: 14,
+      total: invoice.valor
+    }],
+    subtotal: invoice.valor / 1.14, // Remove IVA to get subtotal
+    tax_total: invoice.valor - (invoice.valor / 1.14), // Calculate IVA
+    total: invoice.valor,
+    notes: `Evento: ${request.tipo_evento} • Data: ${request.data_evento} • Convidados: ${request.num_convidados}`
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -55,84 +79,8 @@ const InvoicePreview = ({ invoice, request, onBack, onExportPDF }: InvoicePrevie
         </div>
       </div>
 
-      <Card className="p-4 sm:p-6" ref={ref} id="invoice-container">
-        <div className="invoice-container">
-          <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-cantinho-navy">Cantinho Algarvio</h2>
-              <p>Rua Principal, 123</p>
-              <p>Luanda, Angola</p>
-              <p>Telefone: +244 123 456 789</p>
-              <p>Email: info@cantinhoalgarvio.com</p>
-            </div>
-            <div className="text-left sm:text-right mt-4 sm:mt-0">
-              <h3 className="text-lg sm:text-xl font-bold">
-                {invoice.tipo === 'proforma' ? "FATURA PROFORMA" : "FATURA"}
-              </h3>
-              <p><strong>Nº:</strong> {invoice.numero}</p>
-              <p><strong>Data:</strong> {format(new Date(invoice.created_at), "dd/MM/yyyy")}</p>
-              <p><strong>Ref. Pedido:</strong> {request.id}</p>
-            </div>
-          </div>
-          
-          <div className="mb-8">
-            <h4 className="font-bold text-lg mb-2">Cliente</h4>
-            <p><strong>Nome:</strong> {request.nome}</p>
-            <p><strong>Email:</strong> {request.email}</p>
-            <p><strong>Telefone:</strong> {request.telefone}</p>
-            <p><strong>Endereço:</strong> {request.localizacao}</p>
-          </div>
-          
-          <div className="mb-8">
-            <h4 className="font-bold text-lg mb-2">Detalhes do Evento</h4>
-            <p><strong>Tipo de Evento:</strong> {request.tipo_evento}</p>
-            <p><strong>Data do Evento:</strong> {format(new Date(request.data_evento), "dd/MM/yyyy")}</p>
-            <p><strong>Número de Convidados:</strong> {request.num_convidados}</p>
-          </div>
-          
-          <div className="mb-8">
-            <h4 className="font-bold text-lg mb-2">Detalhes da Fatura</h4>
-            {invoice.descricao && (
-              <p className="mb-4">{invoice.descricao}</p>
-            )}
-            
-            <div className="flex justify-end mt-4">
-              <div className="w-full sm:w-64">
-                <div className="flex justify-between py-2 border-t border-b">
-                  <span className="font-bold">Total:</span>
-                  <span className="font-bold">
-                    {new Intl.NumberFormat('pt-AO', {
-                      style: 'currency',
-                      currency: 'AOA',
-                      minimumFractionDigits: 0
-                    }).format(invoice.valor)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-8">
-            <p><strong>Status:</strong> {invoice.status === 'pago' ? 'Pago' : 'Pendente'}</p>
-            {invoice.data_pagamento && (
-              <p><strong>Data de Pagamento:</strong> {format(new Date(invoice.data_pagamento), "dd/MM/yyyy")}</p>
-            )}
-          </div>
-          
-          {invoice.tipo === 'proforma' && (
-            <div className="mt-8 p-4 border border-dashed border-gray-400 text-center">
-              <p className="font-bold text-lg">FATURA PROFORMA - NÃO VÁLIDA COMO FATURA</p>
-              <p>Este documento é apenas um orçamento e não constitui prova de pagamento.</p>
-              <p>Válido por 15 dias a partir da data de emissão.</p>
-            </div>
-          )}
-          
-          <div className="mt-8">
-            <p className="text-center text-gray-600 text-sm">
-              Agradecemos a sua preferência!
-            </p>
-          </div>
-        </div>
+      <Card className="print:shadow-none print:border-none" ref={ref}>
+        <PrimaveraInvoiceTemplate data={invoiceData} />
       </Card>
     </div>
   );

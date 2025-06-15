@@ -11,6 +11,7 @@ import { ReportStats } from "./reports/ReportStats";
 import { MonthlyReport } from "./reports/MonthlyReport";
 import { DailyReport } from "./reports/DailyReport";
 import { TopProductsReport } from "./reports/TopProductsReport";
+import MobileReportsTabs from "./reports/MobileReportsTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart3, Calendar, TrendingUp, FileText } from "lucide-react";
 
@@ -153,7 +154,7 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0 animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
@@ -169,7 +170,7 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
         </div>
       </div>
 
-      <div ref={targetRef} className="space-y-4 sm:space-y-6 bg-background p-2 sm:p-4 rounded-lg">
+      <div ref={targetRef} className="space-y-4 sm:space-y-6 bg-background p-2 sm:p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="hidden print:block mb-4 text-center">
           <h1 className="text-3xl font-bold">Relatório - O Cantinho do Zé</h1>
           <p className="text-sm text-muted-foreground">Gerado em: {format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
@@ -182,34 +183,44 @@ const AdminReports = ({ orders }: AdminReportsProps) => {
           avgOrderValue={avgOrderValue} 
         />
 
-        <Tabs defaultValue="monthly" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className={`w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-3'} bg-muted p-1`}>
-            <TabsTrigger value="monthly" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Calendar className="h-4 w-4" />
-              {isMobile ? "6M" : "6 Meses"}
-            </TabsTrigger>
-            <TabsTrigger value="daily" className="flex items-center gap-2 text-xs sm:text-sm">
-              <BarChart3 className="h-4 w-4" />
-              {isMobile ? "7D" : "7 Dias"}
-            </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-2 text-xs sm:text-sm">
-              <TrendingUp className="h-4 w-4" />
-              {isMobile ? "Top" : "Produtos"}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="monthly">
-            <MonthlyReport data={monthlyData} />
-          </TabsContent>
-          
-          <TabsContent value="daily">
-            <DailyReport data={dailyData} />
-          </TabsContent>
-          
-          <TabsContent value="products">
-            <TopProductsReport data={topProducts} />
-          </TabsContent>
-        </Tabs>
+        {isMobile ? (
+          <MobileReportsTabs
+            activeTab={activeTab}
+            onValueChange={setActiveTab}
+            monthlyData={monthlyData}
+            dailyData={dailyData}
+            topProducts={topProducts}
+          />
+        ) : (
+          <Tabs defaultValue="monthly" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
+            <TabsList className="w-full grid-cols-3 bg-muted p-1">
+              <TabsTrigger value="monthly" className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4" />
+                6 Meses
+              </TabsTrigger>
+              <TabsTrigger value="daily" className="flex items-center gap-2 text-sm">
+                <BarChart3 className="h-4 w-4" />
+                7 Dias
+              </TabsTrigger>
+              <TabsTrigger value="products" className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4" />
+                Produtos
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="monthly">
+              <MonthlyReport data={monthlyData} />
+            </TabsContent>
+            
+            <TabsContent value="daily">
+              <DailyReport data={dailyData} />
+            </TabsContent>
+            
+            <TabsContent value="products">
+              <TopProductsReport data={topProducts} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </div>
   );

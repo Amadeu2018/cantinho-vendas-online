@@ -38,6 +38,7 @@ const AdminDashboard = ({
           <DashboardContent 
             orders={orders}
             onSelectOrder={onSelectOrder}
+            onTabChange={onTabChange}
           />
         );
       case "orders":
@@ -67,6 +68,7 @@ const AdminDashboard = ({
           <DashboardContent 
             orders={orders}
             onSelectOrder={onSelectOrder}
+            onTabChange={onTabChange}
           />
         );
     }

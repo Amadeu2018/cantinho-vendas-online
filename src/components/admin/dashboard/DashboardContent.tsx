@@ -4,19 +4,20 @@ import { Order } from "@/hooks/admin/use-orders-data";
 import DashboardStatsGrid from "./DashboardStatsGrid";
 import DashboardCharts from "./DashboardCharts";
 import RecentOrders from "./RecentOrders";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, TrendingUp, Users, Clock } from "lucide-react";
+import QuickActionsCard from "./QuickActionsCard";
+import { Clock } from "lucide-react";
 
 interface DashboardContentProps {
   orders: Order[];
   onSelectOrder: (orderId: string) => void;
+  onTabChange?: (tab: string) => void;
 }
 
-const DashboardContent = ({ orders, onSelectOrder }: DashboardContentProps) => {
+const DashboardContent = ({ orders, onSelectOrder, onTabChange }: DashboardContentProps) => {
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-cantinho-navy via-cantinho-cornflower to-cantinho-terracotta rounded-xl p-6 sm:p-8 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-cantinho-navy via-cantinho-cornflower to-cantinho-terracotta rounded-xl p-6 sm:p-8 text-white shadow-lg hover:shadow-xl transition-shadow duration-300">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold">
@@ -36,70 +37,19 @@ const DashboardContent = ({ orders, onSelectOrder }: DashboardContentProps) => {
       </div>
 
       {/* Stats Grid */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="h-5 w-5 text-cantinho-terracotta" />
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-            Estatísticas em Tempo Real
-          </h2>
-        </div>
-        <DashboardStatsGrid orders={orders} />
-      </div>
+      <DashboardStatsGrid orders={orders} />
 
       {/* Charts Section */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="h-5 w-5 text-cantinho-terracotta" />
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-            Análise de Performance
-          </h2>
-        </div>
-        <DashboardCharts orders={orders} />
-      </div>
-
-      {/* Recent Orders Section */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="h-5 w-5 text-cantinho-terracotta" />
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-            Atividade Recente
-          </h2>
-        </div>
-        <RecentOrders 
-          orders={orders}
-          onSelectOrder={onSelectOrder}
-        />
-      </div>
+      <DashboardCharts orders={orders} />
 
       {/* Quick Actions */}
-      <Card className="bg-gradient-to-br from-cantinho-sky/10 to-cantinho-sage/10 border-cantinho-sage/20">
-        <CardHeader>
-          <CardTitle className="text-cantinho-navy flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Ações Rápidas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <button className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 text-left border border-gray-200 hover:border-cantinho-terracotta/30">
-              <div className="text-sm font-medium text-gray-900">Novo Pedido</div>
-              <div className="text-xs text-gray-500 mt-1">Criar pedido manual</div>
-            </button>
-            <button className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 text-left border border-gray-200 hover:border-cantinho-terracotta/30">
-              <div className="text-sm font-medium text-gray-900">Relatório</div>
-              <div className="text-xs text-gray-500 mt-1">Gerar relatório</div>
-            </button>
-            <button className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 text-left border border-gray-200 hover:border-cantinho-terracotta/30">
-              <div className="text-sm font-medium text-gray-900">Inventário</div>
-              <div className="text-xs text-gray-500 mt-1">Verificar estoque</div>
-            </button>
-            <button className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 text-left border border-gray-200 hover:border-cantinho-terracotta/30">
-              <div className="text-sm font-medium text-gray-900">Clientes</div>
-              <div className="text-xs text-gray-500 mt-1">Gerenciar clientes</div>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+      {onTabChange && <QuickActionsCard onTabChange={onTabChange} />}
+
+      {/* Recent Orders Section */}
+      <RecentOrders 
+        orders={orders}
+        onSelectOrder={onSelectOrder}
+      />
     </div>
   );
 };

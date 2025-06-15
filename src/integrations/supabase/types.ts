@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bank_accounts: {
+        Row: {
+          account_iban: string
+          account_name: string
+          bank_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          swift_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_iban: string
+          account_name: string
+          bank_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_iban?: string
+          account_name?: string
+          bank_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -27,6 +63,63 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          company_address: string | null
+          company_email: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          company_nif: string | null
+          company_phone: string | null
+          created_at: string
+          currency: string | null
+          email_notifications: boolean | null
+          id: string
+          payment_notes: string | null
+          sms_notifications: boolean | null
+          system_language: string | null
+          system_theme: string | null
+          timezone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_address?: string | null
+          company_email?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_nif?: string | null
+          company_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          payment_notes?: string | null
+          sms_notifications?: boolean | null
+          system_language?: string | null
+          system_theme?: string | null
+          timezone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_address?: string | null
+          company_email?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_nif?: string | null
+          company_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          payment_notes?: string | null
+          sms_notifications?: boolean | null
+          system_language?: string | null
+          system_theme?: string | null
+          timezone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -203,6 +296,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      multicaixa_accounts: {
+        Row: {
+          account_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {

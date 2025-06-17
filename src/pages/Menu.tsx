@@ -4,19 +4,45 @@ import { Star, Clock, Users, Filter, Search } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import MenuHero from "@/components/menu/MenuHero";
-import MenuFilters from "@/components/menu/MenuFilters";
 import MenuSection from "@/components/menu/MenuSection";
 import FloatingCartButton from "@/components/menu/FloatingCartButton";
-import { useDishes } from "@/hooks/use-dishes";
+import LoadMoreButton from "@/components/common/LoadMoreButton";
+import { usePaginatedDishes } from "@/hooks/use-paginated-dishes";
 import { useCart } from "@/contexts/CartContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import MenuCard from "@/components/menu/MenuCard";
 
 const Menu = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const { dishes, loading } = useDishes();
   const { items } = useCart();
+
+  const { 
+    dishes: allDishes, 
+    loading, 
+    hasMore, 
+    totalCount, 
+    loadMore 
+  } = usePaginatedDishes({ 
+    pageSize: 12, 
+    searchTerm, 
+    category: selectedCategory 
+  });
+
+  const { 
+    dishes: featuredDishes 
+  } = usePaginatedDishes({ 
+    pageSize: 3, 
+    featured: true 
+  });
+
+  const { 
+    dishes: popularDishes 
+  } = usePaginatedDishes({ 
+    pageSize: 3, 
+    popular: true 
+  });
 
   const categories = [
     "Todos",
@@ -27,20 +53,7 @@ const Menu = () => {
     "Bebidas"
   ];
 
-  const filteredDishes = dishes.filter((dish) => {
-    const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         dish.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "Todos" || selectedCategory === null || 
-                           dish.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
-
-  const featuredDishes = dishes.filter(dish => dish.rating >= 4.5).slice(0, 3);
-  const popularDishes = dishes.filter(dish => dish.rating >= 4.0).slice(0, 3);
-
-  if (loading) {
+  if (loading && allDishes.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cantinho-cream/30 via-white to-cantinho-sand/20">
         <Navbar />
@@ -92,7 +105,7 @@ const Menu = () => {
             {/* Mobile filter toggle */}
             <div className="flex items-center justify-between sm:hidden">
               <h3 className="text-lg font-semibold text-cantinho-navy">
-                {filteredDishes.length} pratos encontrados
+                {totalCount > 0 ? `${totalCount} pratos encontrados` : 'Carregando...'}
               </h3>
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -143,14 +156,44 @@ const Menu = () => {
             />
           )}
 
-          {/* All dishes - Mobile optimized */}
-          <MenuSection
-            title="Todos os Pratos"
-            description="Explore toda nossa carta de sabores únicos e autênticos"
-            icon={<Clock className="h-6 w-6 sm:h-8 sm:w-8 text-cantinho-terracotta" />}
-            dishes={filteredDishes}
-            showCount={true}
-          />
+          {/* All dishes with pagination */}
+          <section className="mb-12 sm:mb-16">
+            <div className="text-center mb-8 sm:mb-10 px-4">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cantinho-navy mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-cantinho-terracotta" />
+                  <span>Todos os Pratos</span>
+                </div>
+                {totalCount > 0 && (
+                  <div className="px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-lg bg-cantinho-sand text-cantinho-navy mt-2 sm:mt-0 sm:ml-3 rounded-full">
+                    {totalCount} pratos
+                  </div>
+                )}
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">
+                Explore toda nossa carta de sabores únicos e autênticos
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
+              {allDishes.map((dish) => (
+                <div key={dish.id} className="transform hover:scale-105 transition-transform duration-300 h-full">
+                  <MenuCard dish={dish} />
+                </div>
+              ))}
+            </div>
+
+            {/* Load more button */}
+            {allDishes.length > 0 && (
+              <LoadMoreButton
+                onClick={loadMore}
+                loading={loading}
+                hasMore={hasMore}
+                totalCount={totalCount}
+                currentCount={allDishes.length}
+              />
+            )}
+          </section>
 
           <FloatingCartButton itemsCount={items.length} />
         </div>

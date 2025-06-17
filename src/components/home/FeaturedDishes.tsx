@@ -1,33 +1,27 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDishes } from "@/hooks/use-dishes";
+import { usePaginatedDishes } from "@/hooks/use-paginated-dishes";
 import { Button } from "@/components/ui/button";
 import { Utensils, Star, TrendingUp, Heart, Users, Award } from "lucide-react";
 import MenuCard from "../menu/MenuCard";
-import { Dish } from "@/types/dish";
+import LoadMoreButton from "../common/LoadMoreButton";
 
 const FeaturedDishes = () => {
-  const { dishes, loading, isFavorite, toggleFavorite } = useDishes();
+  const { 
+    dishes: popularDishes, 
+    loading, 
+    hasMore, 
+    totalCount, 
+    loadMore,
+    isFavorite, 
+    toggleFavorite 
+  } = usePaginatedDishes({ 
+    pageSize: 6, 
+    popular: true 
+  });
+  
   const navigate = useNavigate();
-  const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
-
-  useEffect(() => {
-    if (dishes) {
-      const popular = dishes.filter((dish) => dish.popular);
-      const mappedDishes = (popular.length ? popular.slice(0, 3) : dishes.slice(0, 3)).map(dish => ({
-        ...dish,
-        image: dish.image_url || dish.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
-        rating: dish.rating || 4.5,
-        prepTime: dish.prepTime || '20-30 min',
-        serves: dish.serves || 2,
-        isSpicy: dish.isSpicy || false,
-        isVegetarian: dish.isVegetarian || false,
-        isPopular: dish.popular || dish.isPopular || false
-      }));
-      setPopularDishes(mappedDishes);
-    }
-  }, [dishes]);
 
   return (
     <section className="bg-gradient-to-br from-gray-50 via-white to-cantinho-cream/30 py-12 sm:py-16 md:py-24 relative overflow-hidden">
@@ -80,7 +74,7 @@ const FeaturedDishes = () => {
           </div>
         </div>
 
-        {loading ? (
+        {loading && popularDishes.length === 0 ? (
           <div className="flex justify-center py-12 sm:py-16">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-cantinho-terracotta border-t-transparent mx-auto mb-4"></div>
@@ -101,6 +95,15 @@ const FeaturedDishes = () => {
                 </div>
               ))}
             </div>
+
+            {/* Load more button */}
+            <LoadMoreButton
+              onClick={loadMore}
+              loading={loading}
+              hasMore={hasMore}
+              totalCount={totalCount}
+              currentCount={popularDishes.length}
+            />
 
             {/* Mobile-first call to action */}
             <div className="text-center px-4">

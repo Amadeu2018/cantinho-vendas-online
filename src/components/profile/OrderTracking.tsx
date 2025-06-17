@@ -108,7 +108,7 @@ const OrderTracking = ({ orders }: OrderTrackingProps) => {
 
   if (selectedOrder) {
     return (
-      <Card>
+      <Card className="w-full">
         <OrderTrackingDetail
           order={selectedOrder}
           onBack={handleBackToList}
@@ -122,9 +122,12 @@ const OrderTracking = ({ orders }: OrderTrackingProps) => {
   }
 
   return (
-    <Card>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Acompanhar Pedidos</h2>
+    <Card className="w-full">
+      <div className="p-4 md:p-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
+          <span className="text-2xl">📦</span>
+          Acompanhar Pedidos
+        </h2>
         <OrderTrackingList
           orders={trackableOrders}
           onSelectOrder={handleSelectOrder}

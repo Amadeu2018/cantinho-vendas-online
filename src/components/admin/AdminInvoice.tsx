@@ -7,8 +7,9 @@ import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Download, Printer } from "lucide-react";
 import { usePDF } from "react-to-pdf";
-import PrimaveraInvoiceTemplate from "./invoice/PrimaveraInvoiceTemplate";
+import EnhancedPrimaveraTemplate from "./invoice/EnhancedPrimaveraTemplate";
 import { useInvoiceSettings } from "@/hooks/company/use-invoice-settings";
+import { useToast } from "@/hooks/use-toast";
 
 type AdminInvoiceProps = {
   order: Order & { isProforma?: boolean };
@@ -17,8 +18,14 @@ type AdminInvoiceProps = {
 const AdminInvoice = ({ order }: AdminInvoiceProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const { settings } = useInvoiceSettings();
+  const { toast } = useToast();
   const { toPDF } = usePDF({
-    filename: `${order.isProforma ? 'proforma' : 'fatura'}-${order.id.slice(4, 12)}.pdf`
+    filename: `${order.isProforma ? 'proforma' : 'fatura'}-${order.id.slice(4, 12)}.pdf`,
+    page: {
+      margin: 10,
+      format: 'a4',
+      orientation: 'portrait',
+    }
   });
 
   const date = new Date(order.createdAt);
@@ -27,12 +34,62 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
     : `${settings.invoice_number_prefix}-${order.id.slice(4, 12).toUpperCase()}`;
 
   const handlePrint = () => {
-    window.print();
+    try {
+      const printWindow = window.open('', '_blank');
+      if (printWindow && invoiceRef.current) {
+        const content = invoiceRef.current.innerHTML;
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${order.isProforma ? 'Proforma' : 'Fatura'} ${invoiceNumber}</title>
+              <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+              <style>
+                @media print {
+                  body { margin: 0; padding: 20px; }
+                  .no-print { display: none !important; }
+                }
+              </style>
+            </head>
+            <body>
+              ${content}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+        
+        toast({
+          title: "Impressão iniciada",
+          description: `${order.isProforma ? 'A proforma' : 'A fatura'} ${invoiceNumber} foi enviada para impressão.`,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao imprimir:", error);
+      toast({
+        title: "Erro ao imprimir",
+        description: "Não foi possível imprimir o documento.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDownloadPDF = () => {
-    if (invoiceRef.current) {
-      toPDF();
+  const handleDownloadPDF = async () => {
+    try {
+      if (invoiceRef.current) {
+        await toPDF();
+        toast({
+          title: "PDF gerado com sucesso",
+          description: `${order.isProforma ? 'A proforma' : 'A fatura'} ${invoiceNumber} foi baixada.`,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Não foi possível gerar o arquivo PDF.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -69,7 +126,7 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
         <h3 className="text-xl font-bold">
           {order.isProforma ? "Fatura Proforma" : "Fatura"}
         </h3>
-        <div className="flex gap-2 print:hidden">
+        <div className="flex gap-2 no-print">
           <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Baixar PDF</span>
@@ -82,7 +139,7 @@ const AdminInvoice = ({ order }: AdminInvoiceProps) => {
       </div>
       
       <Card className="print:shadow-none print:border-none" ref={invoiceRef}>
-        <PrimaveraInvoiceTemplate data={invoiceData} />
+        <EnhancedPrimaveraTemplate data={invoiceData} />
       </Card>
     </div>
   );

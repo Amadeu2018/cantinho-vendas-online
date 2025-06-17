@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils";
-import { Check, FileText, Printer, Truck, Clock, Ban } from "lucide-react";
+import { Check, FileText, Printer, Truck, Clock, Ban, Download } from "lucide-react";
 
 type AdminOrderDetailProps = {
   order: Order;
@@ -47,6 +47,14 @@ const AdminOrderDetail = ({
     onPaymentStatusChange(order.id, status);
   };
 
+  const handleDownloadInvoice = () => {
+    onPrepareInvoice(order);
+  };
+
+  const handleDownloadProforma = () => {
+    onPrepareInvoice({...order, isProforma: true});
+  };
+
   return (
     <div className="space-y-4 md:space-y-6 px-2 sm:px-4 lg:px-0">
       {/* Header */}
@@ -61,18 +69,26 @@ const AdminOrderDetail = ({
           <Button 
             variant="outline" 
             className="flex items-center justify-center gap-2 text-xs md:text-sm h-8 md:h-9 px-3 md:px-4"
-            onClick={() => onPrepareInvoice(order)}
+            onClick={handleDownloadInvoice}
           >
-            <Printer className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Gerar Fatura</span>
+            <Download className="h-3 w-3 md:h-4 md:w-4" />
+            <span>Baixar Fatura</span>
           </Button>
           <Button 
             variant="outline" 
             className="flex items-center justify-center gap-2 text-xs md:text-sm h-8 md:h-9 px-3 md:px-4"
-            onClick={() => onPrepareInvoice({...order, isProforma: true})}
+            onClick={handleDownloadProforma}
           >
             <FileText className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Proforma</span>
+            <span>Baixar Proforma</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex items-center justify-center gap-2 text-xs md:text-sm h-8 md:h-9 px-3 md:px-4"
+            onClick={() => onPrepareInvoice(order)}
+          >
+            <Printer className="h-3 w-3 md:h-4 md:w-4" />
+            <span>Imprimir</span>
           </Button>
         </div>
       </div>
@@ -96,10 +112,16 @@ const AdminOrderDetail = ({
               <span className="font-medium text-gray-700">Telefone:</span>
               <span className="ml-2 text-gray-900">{order.customerInfo.phone}</span>
             </div>
-            {order.customerInfo.notes && (
+            {order.customerInfo.email && (
+              <div className="break-words">
+                <span className="font-medium text-gray-700">Email:</span>
+                <span className="ml-2 text-gray-900">{order.customerInfo.email}</span>
+              </div>
+            )}
+            {order.notes && (
               <div className="break-words">
                 <span className="font-medium text-gray-700">Observações:</span>
-                <span className="ml-2 text-gray-900">{order.customerInfo.notes}</span>
+                <span className="ml-2 text-gray-900">{order.notes}</span>
               </div>
             )}
           </CardContent>

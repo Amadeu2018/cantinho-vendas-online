@@ -9,8 +9,9 @@ import PaymentNotesSettings from "./settings/PaymentNotesSettings";
 import SystemSettings from "./settings/SystemSettings";
 import InvoiceSettings from "./settings/InvoiceSettings";
 import PrinterSettings from "./settings/PrinterSettings";
+import AllInvoicesView from "./AllInvoicesView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, CreditCard, FileText, Settings, Printer } from "lucide-react";
+import { Building2, CreditCard, FileText, Settings, Printer, Receipt } from "lucide-react";
 
 const AdminSettings = () => {
   const { settings, loading, saving, updateSettings } = useCompanySettings();
@@ -41,7 +42,7 @@ const AdminSettings = () => {
       />
 
       <Tabs defaultValue="company" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="company" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">Empresa</span>
@@ -57,6 +58,10 @@ const AdminSettings = () => {
           <TabsTrigger value="printers" className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             <span className="hidden sm:inline">Impressoras</span>
+          </TabsTrigger>
+          <TabsTrigger value="all-invoices" className="flex items-center gap-2">
+            <Receipt className="h-4 w-4" />
+            <span className="hidden sm:inline">Todas Faturas</span>
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -88,6 +93,10 @@ const AdminSettings = () => {
 
         <TabsContent value="printers" className="space-y-6 mt-6">
           <PrinterSettings />
+        </TabsContent>
+
+        <TabsContent value="all-invoices" className="space-y-6 mt-6">
+          <AllInvoicesView />
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6 mt-6">

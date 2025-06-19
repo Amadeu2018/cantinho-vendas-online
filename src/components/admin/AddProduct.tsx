@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ImagePlus, Save, X } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import ProductImageUpload from "./ProductImageUpload";
 
 interface AddProductProps {
   onSuccess?: () => void;
@@ -17,7 +17,6 @@ interface AddProductProps {
 
 const AddProduct = ({ onSuccess }: AddProductProps) => {
   const [loading, setLoading] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,8 +31,6 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     barcode: "",
     cost: "0"
   });
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -103,68 +100,8 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-    setImageFile(file);
-    
-    // Create preview URL
-    setImagePreview(URL.createObjectURL(file));
-    setImageUploading(false);
-  };
-
-  const removeImage = () => {
-    setImagePreview(null);
-    setImageFile(null);
-    setFormData(prev => ({ ...prev, image_url: "" }));
-  };
-
-  const uploadImageToStorage = async (file: File): Promise<string> => {
-    try {
-      // Check if storage is available
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      
-      let bucketName = 'product-images';
-      
-      // If no product-images bucket exists, create it
-      if (!buckets?.some(b => b.name === bucketName) || bucketError) {
-        console.log("Creating product-images bucket");
-        const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: true,
-          fileSizeLimit: 5242880, // 5MB
-        });
-        
-        if (createError) {
-          console.error("Error creating bucket:", createError);
-          throw createError;
-        }
-      }
-      
-      // Upload the file
-      const fileName = `${Date.now()}-${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file);
-      
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-      
-      return publicUrlData.publicUrl;
-    } catch (error) {
-      console.error("Error uploading image to storage:", error);
-      toast({
-        title: "Erro ao fazer upload da imagem",
-        description: "Não foi possível salvar a imagem. Usando imagem de placeholder.",
-        variant: "destructive"
-      });
-      return '/placeholder.svg';
-    }
+  const handleImageChange = (imageUrl: string) => {
+    setFormData(prev => ({ ...prev, image_url: imageUrl }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,7 +120,6 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         return;
       }
       
-      // Get the current user information
       if (!user) {
         toast({
           title: "Erro de autenticação",
@@ -191,12 +127,6 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
           variant: "destructive",
         });
         return;
-      }
-      
-      // Handle image upload if there's a file
-      let imageUrl = formData.image_url || '/placeholder.svg';
-      if (imageFile) {
-        imageUrl = await uploadImageToStorage(imageFile);
       }
       
       // Prepare data for submission
@@ -208,16 +138,15 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         min_stock_quantity: parseInt(formData.min_stock_quantity) || 5,
         unit: formData.unit || "unidade",
-        image_url: imageUrl,
+        image_url: formData.image_url || '/placeholder.svg',
         sku: formData.sku || null,
         barcode: formData.barcode || null,
         cost: parseFloat(formData.cost) || 0,
-        seller_id: user.id // Set the seller_id to the current user's ID
+        seller_id: user.id
       };
       
       console.log("Sending product data:", productData);
       
-      // Send to Supabase
       const { data, error } = await supabase
         .from("products")
         .insert(productData)
@@ -249,10 +178,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         barcode: "",
         cost: "0"
       });
-      setImagePreview(null);
-      setImageFile(null);
       
-      // Success callback
       if (onSuccess) onSuccess();
       
     } catch (error: any) {
@@ -401,51 +327,11 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
             </div>
             
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="image">Imagem do Produto</Label>
-              {imagePreview ? (
-                <div className="relative w-40 h-40 border rounded-md overflow-hidden">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="w-full h-full object-cover"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-6 w-6 rounded-full"
-                    onClick={removeImage}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <Label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-                  >
-                    {imageUploading ? (
-                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                    ) : (
-                      <>
-                        <ImagePlus className="h-8 w-8 text-gray-400" />
-                        <span className="mt-2 text-sm text-gray-500">
-                          Clique para selecionar
-                        </span>
-                      </>
-                    )}
-                    <Input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                      disabled={imageUploading}
-                    />
-                  </Label>
-                </div>
-              )}
+              <ProductImageUpload
+                currentImageUrl={formData.image_url}
+                onImageChange={handleImageChange}
+                disabled={loading}
+              />
             </div>
           </div>
           
@@ -463,7 +349,7 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
           
           <Button 
             type="submit"
-            disabled={loading || imageUploading}
+            disabled={loading}
             className="w-full md:w-auto"
           >
             {loading ? (

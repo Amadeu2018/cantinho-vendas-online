@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Upload, ImagePlus } from "lucide-react";
+import { Upload, Link } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ImagePreview from "./image-upload/ImagePreview";
@@ -115,17 +115,19 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
     <div className="space-y-4">
       <Label className="text-sm font-medium">Imagem do Produto</Label>
       
-      {/* Mode Toggle */}
-      <div className="flex gap-2 mb-4">
+      {/* Mode Toggle - Mobile First */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <Button
           type="button"
           variant={uploadMode === "file" ? "default" : "outline"}
           size="sm"
           onClick={() => setUploadMode("file")}
           disabled={disabled}
+          className="w-full sm:w-auto justify-center"
         >
           <Upload className="h-4 w-4 mr-2" />
-          Upload de Arquivo
+          <span className="hidden sm:inline">Upload de Arquivo</span>
+          <span className="sm:hidden">Arquivo</span>
         </Button>
         <Button
           type="button"
@@ -133,9 +135,12 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
           size="sm"
           onClick={() => setUploadMode("url")}
           disabled={disabled}
+          className="w-full sm:w-auto justify-center"
+          title="Adicionar URL da imagem"
         >
-          <ImagePlus className="h-4 w-4 mr-2" />
-          URL da Imagem
+          <Link className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">URL da Imagem</span>
+          <span className="sm:hidden">URL</span>
         </Button>
       </div>
 

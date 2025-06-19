@@ -1,11 +1,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ImagePlus, X, Upload } from "lucide-react";
+import { Upload, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ImagePreview from "./image-upload/ImagePreview";
+import FileUploadArea from "./image-upload/FileUploadArea";
+import UrlInput from "./image-upload/UrlInput";
 
 interface ProductImageUploadProps {
   currentImageUrl?: string;
@@ -15,7 +17,6 @@ interface ProductImageUploadProps {
 
 const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: ProductImageUploadProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(currentImageUrl || null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
   const [urlInput, setUrlInput] = useState(currentImageUrl || "");
   const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
@@ -68,15 +69,12 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    setImageFile(file);
     setImageUploading(true);
     
     try {
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
       
-      // Upload to storage
       const uploadedUrl = await uploadImageToStorage(file);
       onImageChange(uploadedUrl);
       
@@ -109,14 +107,13 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
 
   const removeImage = () => {
     setImagePreview(null);
-    setImageFile(null);
     setUrlInput("");
     onImageChange("");
   };
 
   return (
     <div className="space-y-4">
-      <Label>Imagem do Produto</Label>
+      <Label className="text-sm font-medium">Imagem do Produto</Label>
       
       {/* Mode Toggle */}
       <div className="flex gap-2 mb-4">
@@ -144,80 +141,30 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
 
       {/* Image Preview */}
       {imagePreview && (
-        <div className="relative w-40 h-40 border rounded-md overflow-hidden">
-          <img 
-            src={imagePreview} 
-            alt="Preview" 
-            className="w-full h-full object-cover"
-            onError={() => {
-              setImagePreview(null);
-              toast({
-                title: "Erro ao carregar imagem",
-                description: "Não foi possível carregar a imagem.",
-                variant: "destructive",
-              });
-            }}
-          />
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-1 right-1 h-6 w-6 rounded-full"
-            onClick={removeImage}
-            disabled={disabled}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        <ImagePreview
+          imageUrl={imagePreview}
+          onRemove={removeImage}
+          disabled={disabled}
+        />
       )}
 
       {/* Upload Mode: File */}
       {uploadMode === "file" && !imagePreview && (
-        <div className="flex items-center">
-          <Label
-            htmlFor="image-upload"
-            className="flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-          >
-            {imageUploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-            ) : (
-              <>
-                <ImagePlus className="h-8 w-8 text-gray-400" />
-                <span className="mt-2 text-sm text-gray-500 text-center">
-                  Clique para selecionar arquivo
-                </span>
-              </>
-            )}
-            <Input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileUpload}
-              disabled={imageUploading || disabled}
-            />
-          </Label>
-        </div>
+        <FileUploadArea
+          onFileUpload={handleFileUpload}
+          isUploading={imageUploading}
+          disabled={disabled}
+        />
       )}
 
       {/* Upload Mode: URL */}
       {uploadMode === "url" && !imagePreview && (
-        <div className="flex gap-2">
-          <Input
-            placeholder="Cole aqui a URL da imagem..."
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            disabled={disabled}
-          />
-          <Button
-            type="button"
-            onClick={handleUrlSubmit}
-            disabled={!urlInput.trim() || disabled}
-            size="sm"
-          >
-            Aplicar
-          </Button>
-        </div>
+        <UrlInput
+          value={urlInput}
+          onChange={setUrlInput}
+          onSubmit={handleUrlSubmit}
+          disabled={disabled}
+        />
       )}
     </div>
   );

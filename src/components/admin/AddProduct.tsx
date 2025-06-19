@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,179 +195,232 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Adicionar Novo Produto</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome do Produto *</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Ex: Bacalhau à Brás"
-                required
-              />
+    <div className="max-w-4xl mx-auto space-y-6 p-3 sm:p-6">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Adicionar Novo Produto</CardTitle>
+        </CardHeader>
+        
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Informações Básicas */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Informações Básicas</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">Nome do Produto *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Ex: Bacalhau à Brás"
+                    className="h-10"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-sm font-medium">Categoria</Label>
+                  <Select
+                    value={formData.category_id}
+                    onValueChange={(value) => handleSelectChange("category_id", value)}
+                  >
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="null">Sem categoria</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium">Descrição</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Descreva o produto, seus ingredientes, etc."
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="price">Preço (AOA) *</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="Ex: 12.50"
-                required
-              />
+
+            {/* Preços */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Preços</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-sm font-medium">Preço de Venda (AOA) *</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="Ex: 12.50"
+                    className="h-10"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cost" className="text-sm font-medium">Custo (AOA)</Label>
+                  <Input
+                    id="cost"
+                    name="cost"
+                    type="number"
+                    step="0.01"
+                    value={formData.cost}
+                    onChange={handleChange}
+                    placeholder="Ex: 5.00"
+                    className="h-10"
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="cost">Custo (AOA)</Label>
-              <Input
-                id="cost"
-                name="cost"
-                type="number"
-                step="0.01"
-                value={formData.cost}
-                onChange={handleChange}
-                placeholder="Ex: 5.00"
-              />
+
+            {/* Estoque */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Controle de Estoque</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="stock_quantity" className="text-sm font-medium">Quantidade em Estoque</Label>
+                  <Input
+                    id="stock_quantity"
+                    name="stock_quantity"
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={handleChange}
+                    placeholder="Ex: 10"
+                    className="h-10"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="min_stock_quantity" className="text-sm font-medium">Estoque Mínimo</Label>
+                  <Input
+                    id="min_stock_quantity"
+                    name="min_stock_quantity"
+                    type="number"
+                    value={formData.min_stock_quantity}
+                    onChange={handleChange}
+                    placeholder="Ex: 5"
+                    className="h-10"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="unit" className="text-sm font-medium">Unidade</Label>
+                  <Select
+                    value={formData.unit}
+                    onValueChange={(value) => handleSelectChange("unit", value)}
+                  >
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecione uma unidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unidade">Unidade</SelectItem>
+                      <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                      <SelectItem value="g">Grama (g)</SelectItem>
+                      <SelectItem value="l">Litro (L)</SelectItem>
+                      <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                      <SelectItem value="porção">Porção</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
-              <Select
-                value={formData.category_id}
-                onValueChange={(value) => handleSelectChange("category_id", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="null">Sem categoria</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Códigos de Identificação */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Códigos de Identificação</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sku" className="text-sm font-medium">SKU</Label>
+                  <Input
+                    id="sku"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleChange}
+                    placeholder="Ex: ABC-123"
+                    className="h-10"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="barcode" className="text-sm font-medium">Código de Barras</Label>
+                  <Input
+                    id="barcode"
+                    name="barcode"
+                    value={formData.barcode}
+                    onChange={handleChange}
+                    placeholder="Ex: 1234567890123"
+                    className="h-10"
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
-              <Input
-                id="stock_quantity"
-                name="stock_quantity"
-                type="number"
-                value={formData.stock_quantity}
-                onChange={handleChange}
-                placeholder="Ex: 10"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="min_stock_quantity">Estoque Mínimo</Label>
-              <Input
-                id="min_stock_quantity"
-                name="min_stock_quantity"
-                type="number"
-                value={formData.min_stock_quantity}
-                onChange={handleChange}
-                placeholder="Ex: 5"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="sku">SKU</Label>
-              <Input
-                id="sku"
-                name="sku"
-                value={formData.sku}
-                onChange={handleChange}
-                placeholder="Ex: ABC-123"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="barcode">Código de Barras</Label>
-              <Input
-                id="barcode"
-                name="barcode"
-                value={formData.barcode}
-                onChange={handleChange}
-                placeholder="Ex: 1234567890123"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unidade</Label>
-              <Select
-                value={formData.unit}
-                onValueChange={(value) => handleSelectChange("unit", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma unidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unidade">Unidade</SelectItem>
-                  <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                  <SelectItem value="g">Grama (g)</SelectItem>
-                  <SelectItem value="l">Litro (L)</SelectItem>
-                  <SelectItem value="ml">Mililitro (ml)</SelectItem>
-                  <SelectItem value="porção">Porção</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2 md:col-span-2">
+
+            {/* Imagem do Produto */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Imagem do Produto</h3>
               <ProductImageUpload
                 currentImageUrl={formData.image_url}
                 onImageChange={handleImageChange}
                 disabled={loading}
               />
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Descreva o produto, seus ingredientes, etc."
-              rows={4}
-            />
-          </div>
-          
-          <Button 
-            type="submit"
-            disabled={loading}
-            className="w-full md:w-auto"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Salvar Produto
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            
+            {/* Botões de Ação */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <Button 
+                type="submit"
+                disabled={loading}
+                className="flex-1 sm:flex-none sm:min-w-[160px] h-11"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Produto
+                  </>
+                )}
+              </Button>
+              
+              {onSuccess && (
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={onSuccess}
+                  className="flex-1 sm:flex-none sm:min-w-[120px] h-11"
+                >
+                  Cancelar
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

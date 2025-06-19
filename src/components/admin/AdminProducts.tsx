@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,7 @@ import ProductsList from "./ProductsList";
 import ProductActions from "./ProductActions";
 import ProductsListMobile from "./ProductsListMobile";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ProductView from "./ProductView";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -28,6 +28,7 @@ const AdminProducts = () => {
   const [sortField, setSortField] = useState("created_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [activeTab, setActiveTab] = useState("all");
+  const [showViewProduct, setShowViewProduct] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -117,10 +118,7 @@ const AdminProducts = () => {
 
   const handleViewProduct = (product: any) => {
     setSelectedProduct(product);
-    toast({
-      title: "Visualizar produto",
-      description: `Visualizando detalhes de: ${product.name}`,
-    });
+    setShowViewProduct(true);
   };
 
   const handleSort = (field: string) => {
@@ -193,10 +191,10 @@ const AdminProducts = () => {
 
   if (showAddForm) {
     return (
-      <div className="space-y-4 p-3 sm:p-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="text-lg font-semibold">Novo Produto</h2>
-          <Button variant="outline" onClick={() => setShowAddForm(false)} className="text-sm h-8">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-3 sm:px-0">
+          <h2 className="text-xl font-semibold">Novo Produto</h2>
+          <Button variant="outline" onClick={() => setShowAddForm(false)} className="text-sm h-9">
             Voltar para Lista
           </Button>
         </div>
@@ -207,15 +205,25 @@ const AdminProducts = () => {
 
   if (showEditForm && selectedProduct) {
     return (
-      <div className="space-y-4 p-3 sm:p-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="text-lg font-semibold">Editar Produto</h2>
-          <Button variant="outline" onClick={() => setShowEditForm(false)} className="text-sm h-8">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-3 sm:px-0">
+          <h2 className="text-xl font-semibold">Editar Produto</h2>
+          <Button variant="outline" onClick={() => setShowEditForm(false)} className="text-sm h-9">
             Voltar para Lista
           </Button>
         </div>
         <EditProduct product={selectedProduct} onSuccess={handleOnSuccess} />
       </div>
+    );
+  }
+
+  if (showViewProduct && selectedProduct) {
+    return (
+      <ProductView 
+        product={selectedProduct} 
+        onBack={() => setShowViewProduct(false)}
+        getCategoryName={getCategoryName}
+      />
     );
   }
 

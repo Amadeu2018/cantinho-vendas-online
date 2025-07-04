@@ -602,6 +602,8 @@ export type Database = {
           seller_status: Database["public"]["Enums"]["seller_status"] | null
           stripe_account_id: string | null
           total_sales: number | null
+          updated_at: string | null
+          user_id: string | null
           verification_status: string | null
         }
         Insert: {
@@ -638,6 +640,8 @@ export type Database = {
           seller_status?: Database["public"]["Enums"]["seller_status"] | null
           stripe_account_id?: string | null
           total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
           verification_status?: string | null
         }
         Update: {
@@ -674,6 +678,8 @@ export type Database = {
           seller_status?: Database["public"]["Enums"]["seller_status"] | null
           stripe_account_id?: string | null
           total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
           verification_status?: string | null
         }
         Relationships: []

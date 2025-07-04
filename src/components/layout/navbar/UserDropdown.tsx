@@ -1,8 +1,10 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { User, Settings, X } from 'lucide-react';
+import { User, Settings, X, Bell, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -14,6 +16,26 @@ import NavEventButton from "../../admin/NavEventButton";
 
 const UserDropdown = () => {
   const { user, signOut } = useAuth();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (user) {
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          setUserRole(data?.role || null);
+        } catch (error) {
+          console.error('Erro ao buscar role do usuário:', error);
+        }
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -54,7 +76,19 @@ const UserDropdown = () => {
         <DropdownMenuItem asChild>
           <Link to="/perfil" className="cursor-pointer w-full font-medium">Meu Perfil</Link>
         </DropdownMenuItem>
-        {user?.role === "admin" && (
+        <DropdownMenuItem asChild>
+          <Link to="/notificacoes" className="cursor-pointer w-full font-medium">
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/rastrear-pedido" className="cursor-pointer w-full font-medium">
+            <Package className="h-4 w-4 mr-2" />
+            Rastrear Pedido
+          </Link>
+        </DropdownMenuItem>
+        {userRole === "admin" && (
           <>
             <DropdownMenuItem asChild>
               <Link to="/admin" className="cursor-pointer w-full font-medium">

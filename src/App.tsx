@@ -22,6 +22,8 @@ import Sobre from "./pages/Sobre";
 import FirstOrder from "./pages/FirstOrder";
 import ResetPassword from "./pages/ResetPassword";
 import UpdatePassword from "./pages/UpdatePassword";
+import NotificationsPage from "./pages/NotificationsPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,8 @@ const App = () => (
                 <Route path="/auth/update-password" element={<UpdatePassword />} />
                 <Route path="/perfil" element={<Profile />} />
                 <Route path="/sobre" element={<Sobre />} />
+                <Route path="/notificacoes" element={<NotificationsPage />} />
+                <Route path="/rastrear-pedido" element={<OrderTrackingPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

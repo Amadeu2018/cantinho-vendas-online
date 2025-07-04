@@ -11,55 +11,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNotificationsData } from "@/hooks/admin/use-notifications-data";
+import { useAdminNotifications } from "@/hooks/use-admin-notifications";
 import NotificationItem from "./notifications/NotificationItem";
 
 const NotificationsDropdown = () => {
-  const { toast } = useToast();
   const {
     notifications,
     unreadCount,
-    isLoading,
-    fetchNotifications,
-    handleNewNotification,
+    loading,
     markAsRead,
     markAllAsRead
-  } = useNotificationsData();
-
-  useEffect(() => {
-    fetchNotifications();
-    
-    const channel = supabase
-      .channel('admin-notifications-dropdown')
-      .on('postgres_changes', 
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: 'user_id=eq.admin'
-        }, 
-        handleNewNotification
-      )
-      .subscribe((status) => {
-        console.log('Notifications dropdown subscription status:', status);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const handleMarkAllAsRead = async () => {
-    const success = await markAllAsRead();
-    if (success) {
-      toast({
-        title: "Notificações",
-        description: "Todas as notificações foram marcadas como lidas.",
-      });
-    }
-  };
+  } = useAdminNotifications();
 
   return (
     <DropdownMenu>
@@ -78,12 +40,12 @@ const NotificationsDropdown = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72 md:w-96" align="end">
         <DropdownMenuLabel className="flex justify-between items-center">
-          <span>Notificações de Pedidos</span>
+          <span>Notificações</span>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
               className="text-xs h-7 px-2"
-              onClick={handleMarkAllAsRead}
+              onClick={markAllAsRead}
             >
               Marcar tudo como lido
             </Button>
@@ -91,7 +53,7 @@ const NotificationsDropdown = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="max-h-[400px] overflow-y-auto">
-          {isLoading ? (
+          {loading ? (
             <div className="flex justify-center items-center p-4">
               <div className="animate-spin h-5 w-5 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
             </div>
@@ -104,7 +66,14 @@ const NotificationsDropdown = () => {
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
-                  notification={notification}
+                  notification={{
+                    id: notification.id,
+                    orderId: notification.order_id || '',
+                    message: notification.message,
+                    status: notification.type,
+                    createdAt: notification.created_at,
+                    read: notification.read
+                  }}
                   onMarkAsRead={markAsRead}
                 />
               ))}

@@ -1,12 +1,8 @@
-
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Phone, Mail, MapPin, Clock, Award, Heart } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
-  return (
-    <footer className="bg-gradient-to-b from-cantinho-navy to-gray-900 text-white">
+  return <footer className="bg-gradient-to-b from-cantinho-navy to-gray-900 text-white">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -41,20 +37,10 @@ const Footer = () => {
 
             {/* Social Media - Enhanced */}
             <div className="flex space-x-4">
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-white/10 hover:bg-cantinho-terracotta p-3 rounded-full transition-all duration-300 hover:scale-110 group"
-              >
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-cantinho-terracotta p-3 rounded-full transition-all duration-300 hover:scale-110 group">
                 <Facebook className="h-5 w-5 group-hover:text-white" />
               </a>
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-white/10 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 p-3 rounded-full transition-all duration-300 hover:scale-110 group"
-              >
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 p-3 rounded-full transition-all duration-300 hover:scale-110 group">
                 <Instagram className="h-5 w-5 group-hover:text-white" />
               </a>
             </div>
@@ -64,23 +50,27 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold mb-6 text-cantinho-sand">Links Rápidos</h3>
             <ul className="space-y-4">
-              {[
-                { to: "/menu", label: "Menu Completo" },
-                { to: "/eventos", label: "Catering & Eventos" },
-                { to: "/sobre", label: "Nossa História" },
-                { to: "/contacto", label: "Fale Conosco" },
-                { to: "/carrinho", label: "Meu Carrinho" }
-              ].map((link) => (
-                <li key={link.to}>
-                  <Link 
-                    to={link.to} 
-                    className="text-gray-300 hover:text-cantinho-sand transition-all duration-300 flex items-center group"
-                  >
+              {[{
+              to: "/menu",
+              label: "Menu Completo"
+            }, {
+              to: "/eventos",
+              label: "Catering & Eventos"
+            }, {
+              to: "/sobre",
+              label: "Nossa História"
+            }, {
+              to: "/contacto",
+              label: "Fale Conosco"
+            }, {
+              to: "/carrinho",
+              label: "Meu Carrinho"
+            }].map(link => <li key={link.to}>
+                  <Link to={link.to} className="text-gray-300 hover:text-cantinho-sand transition-all duration-300 flex items-center group">
                     <span className="w-2 h-2 bg-cantinho-terracotta rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                     {link.label}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -105,7 +95,7 @@ const Footer = () => {
                   <div>
                     <p className="font-medium text-white mb-1">Telefones</p>
                     <p className="text-gray-300 text-sm">924 678 544</p>
-                    <p className="text-gray-300 text-sm">934 625 513</p>
+                    <p className="text-gray-300 text-sm">939 423 110</p>
                   </div>
                 </div>
               </div>
@@ -146,8 +136,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

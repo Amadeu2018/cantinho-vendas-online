@@ -1,37 +1,28 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Utensils, Truck, Star, Clock, Gift, Phone } from "lucide-react";
-
 const Hero = () => {
   const [animationState, setAnimationState] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => {
-      setAnimationState((prev) => (prev + 1) % 100);
+      setAnimationState(prev => (prev + 1) % 100);
     }, 70);
     return () => clearInterval(interval);
   }, []);
-
   const backgroundOpacity = 0.7 + Math.sin(animationState / 10) * 0.1;
   const backgroundScale = 1 + Math.sin(animationState / 15) * 0.02;
-  
-  return (
-    <div className="relative min-h-[85vh] sm:min-h-[90vh] overflow-hidden">
+  return <div className="relative min-h-[85vh] sm:min-h-[90vh] overflow-hidden">
       {/* Enhanced gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-cantinho-navy/85 via-cantinho-navy/70 to-cantinho-terracotta/75 z-10"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-20"></div>
       
       {/* Dynamic background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-[7000ms] ease-in-out"
-        style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04')", 
-          opacity: backgroundOpacity,
-          transform: `scale(${backgroundScale})`,
-        }}
-      ></div>
+      <div className="absolute inset-0 bg-cover bg-center transition-all duration-[7000ms] ease-in-out" style={{
+      backgroundImage: "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04')",
+      opacity: backgroundOpacity,
+      transform: `scale(${backgroundScale})`
+    }}></div>
       
       {/* Floating elements */}
       <div className="absolute top-16 right-4 sm:top-20 sm:right-20 w-20 h-20 sm:w-32 sm:h-32 bg-cantinho-sand/20 rounded-full blur-xl animate-pulse z-5"></div>
@@ -63,7 +54,7 @@ const Hero = () => {
         
         {/* Mobile-first subtitle */}
         <p className="text-base sm:text-xl md:text-3xl mb-3 sm:mb-4 max-w-4xl hero-text-shadow animate-fade-in font-light leading-relaxed px-2">
-          Sabores autênticos da culinária <span className="text-cantinho-sand font-bold">portuguesa</span> e <span className="text-cantinho-sand font-bold">angolana</span>
+          Sabores autênticos da culinária <span className="text-cantinho-sand font-bold">angolana</span> e <span className="text-cantinho-sand font-bold">angolana</span>
         </p>
         
         <p className="text-sm sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-3xl hero-text-shadow animate-fade-in text-white/90 px-2">
@@ -136,8 +127,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Hero;

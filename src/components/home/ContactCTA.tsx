@@ -1,11 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Phone, Mail, Clock, MapPin, Utensils, Calendar, Star, Award } from "lucide-react";
-
 const ContactCTA = () => {
-  return (
-    <section className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-cantinho-navy via-cantinho-olive to-cantinho-navy relative overflow-hidden">
+  return <section className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-cantinho-navy via-cantinho-olive to-cantinho-navy relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute top-0 right-0 w-40 h-40 sm:w-80 sm:h-80 bg-cantinho-sand/20 rounded-full -translate-y-20 sm:-translate-y-40 translate-x-20 sm:translate-x-40 blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-64 sm:h-64 bg-cantinho-terracotta/20 rounded-full translate-y-16 sm:translate-y-32 -translate-x-16 sm:-translate-x-32 blur-2xl"></div>
@@ -68,7 +65,7 @@ const ContactCTA = () => {
               <div className="text-left">
                 <p className="font-semibold text-base text-white mb-1">Telefone</p>
                 <p className="text-white/90 text-sm">+244 924 678 544</p>
-                <p className="text-white/90 text-sm">+244 934 625 513</p>
+                <p className="text-white/90 text-sm">+244 939 423 110</p>
               </div>
             </div>
             <div className="flex items-center gap-3 bg-white/10 p-4 rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300">
@@ -91,8 +88,6 @@ const ContactCTA = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default ContactCTA;

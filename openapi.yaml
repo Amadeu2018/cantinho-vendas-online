@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Cantinho Algarvio Frontend
+  description: Frontend web application for Cantinho Algarvio restaurant
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Main application
+      responses:
+        '200':
+          description: HTML page
+          content:
+            text/html:
+              schema:
+                type: string

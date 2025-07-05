@@ -1,69 +1,147 @@
-# Welcome to your Lovable project
+# Cantinho Algarvio - Restaurante e Delivery
 
-## Project info
+Sistema completo de delivery e gestão para restaurante com foco em culinária angolana e portuguesa.
 
-**URL**: https://lovable.dev/projects/76a894dc-b987-4e4a-a474-6edb63441c38
+## 🚀 Funcionalidades Principais
 
-## How can I edit this code?
+### Para Clientes
+- **Menu Digital**: Navegação por categorias (Entradas, Peixes, Carnes, Vegetarianos, etc.)
+- **Filtros Avançados**: Busca por nome, ingredientes e categorias específicas
+- **Sistema de Pedidos**: Carrinho completo com checkout
+- **Rastreamento**: Acompanhe seu pedido em tempo real
+- **Perfil de Usuário**: Histórico de pedidos, favoritos e endereços
+- **Notificações**: Receba atualizações sobre seus pedidos
+- **Avaliações**: Sistema de reviews para pratos
 
-There are several ways of editing your application.
+### Para Administradores
+- **Dashboard Completo**: Visão geral de vendas, pedidos e estatísticas
+- **Gestão de Produtos**: CRUD completo com upload de imagens
+- **Gerenciamento de Pedidos**: Status, processamento e acompanhamento
+- **Controle de Estoque**: Alertas de baixo estoque e movimentações
+- **Relatórios Financeiros**: Gráficos e análises de vendas
+- **Sistema de Faturas**: Geração automática de faturas
+- **Gestão de Clientes**: Base de dados completa de clientes
+- **Configurações**: Dados da empresa, contas bancárias, etc.
 
-**Use Lovable**
+### Catering e Eventos
+- **Solicitação de Eventos**: Formulário completo para eventos
+- **Gestão de Propostas**: Sistema de orçamentos e aprovações
+- **Faturas de Eventos**: Controle financeiro específico para eventos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/76a894dc-b987-4e4a-a474-6edb63441c38) and start prompting.
+## 🛠️ Tecnologias Utilizadas
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Componentes**: Shadcn/ui, Radix UI
+- **Gráficos**: Recharts
+- **Deploy**: Docker, Nginx, Choreos
 
-**Use your preferred IDE**
+## 📦 Instalação e Desenvolvimento
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/cantinho-algarvio.git
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Instale as dependências
+npm install
 
-Follow these steps:
+# Configure as variáveis de ambiente
+cp .env.example .env.local
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Execute em modo desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Deploy
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Deploy no Choreos
+Veja o arquivo [README-DEPLOY.md](./README-DEPLOY.md) para instruções completas de deploy no Choreos.
 
-**Use GitHub Codespaces**
+### Deploy Local com Docker
+```bash
+# Build da imagem
+docker build -t cantinho-algarvio .
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Execute o container
+docker run -p 3000:80 cantinho-algarvio
+```
 
-## What technologies are used for this project?
+## 🗃️ Estrutura do Banco de Dados
 
-This project is built with .
+### Tabelas Principais
+- `products` - Produtos do restaurante
+- `categories` - Categorias dos produtos
+- `orders` - Pedidos dos clientes
+- `profiles` - Perfis dos usuários
+- `notifications` - Sistema de notificações
+- `event_requests` - Solicitações de eventos
+- `reviews` - Avaliações dos produtos
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔧 Scripts Disponíveis
 
-## How can I deploy this project?
+```bash
+# Desenvolvimento
+npm run dev
 
-Simply open [Lovable](https://lovable.dev/projects/76a894dc-b987-4e4a-a474-6edb63441c38) and click on Share -> Publish.
+# Build para produção
+npm run build
 
-## I want to use a custom domain - is that possible?
+# Preview da build
+npm run preview
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+# Linting
+npm run lint
+```
+
+## 🎨 Design System
+
+O projeto utiliza um design system personalizado com:
+- Cores temáticas (cantinho-navy, cantinho-terracotta, etc.)
+- Componentes reutilizáveis
+- Responsividade mobile-first
+- Animações e transições suaves
+
+## 📱 Responsividade
+
+- Design mobile-first
+- Breakpoints customizados
+- Componentes adaptativos
+- Navegação otimizada para touch
+
+## 🔒 Segurança
+
+- Autenticação via Supabase Auth
+- Row Level Security (RLS) no banco
+- Validação de dados no frontend e backend
+- Sanitização de inputs
+
+## 📊 Monitoramento
+
+- Logs estruturados
+- Métricas de performance
+- Alertas de erro
+- Analytics de uso
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📞 Contato
+
+- Email: contato@cantinhoalgarvio.com
+- Telefone: +244 924 678 544
+- Website: https://cantinhoalgarvio.com
+
+---
+
+**Lovable Project URL**: https://lovable.dev/projects/76a894dc-b987-4e4a-a474-6edb63441c38
+
+Desenvolvido com ❤️ para o Cantinho Algarvio

@@ -47,11 +47,15 @@ const Menu = () => {
 
   const categories = [
     "Todos",
-    "Peixes",
+    "Entradas",
+    "Peixes e Frutos do Mar",
     "Carnes",
-    "Vegetariano",
+    "Pratos Vegetarianos",
+    "Massas",
     "Sobremesas",
-    "Bebidas"
+    "Bebidas",
+    "Vinhos",
+    "Pratos Tradicionais"
   ];
 
   if (loading && allDishes.length === 0) {

@@ -29,24 +29,34 @@ const MenuFilters = ({
     <div className="mb-6 sm:mb-8 space-y-4">
       {/* Search bar - Mobile first */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Pesquisar pratos..."
+          placeholder="Pesquisar pratos, ingredientes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 sm:py-2 border-2 border-gray-200 rounded-xl focus:border-cantinho-terracotta focus:outline-none text-base sm:text-sm bg-white shadow-sm"
+          className="w-full pl-10 pr-4 py-3 sm:py-2 border-2 border-border rounded-xl focus:border-primary focus:outline-none text-base sm:text-sm bg-background shadow-sm transition-colors"
         />
       </div>
 
-      {/* Mobile filter toggle */}
-      <div className="flex items-center justify-between sm:hidden">
-        <h3 className="text-lg font-semibold text-cantinho-navy">
-          {totalCount > 0 ? `${totalCount} pratos encontrados` : 'Carregando...'}
-        </h3>
+      {/* Results count and filter toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold text-foreground">
+            {totalCount > 0 ? `${totalCount} pratos encontrados` : 'Carregando...'}
+          </h3>
+          {selectedCategory && (
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className="text-sm text-muted-foreground hover:text-destructive transition-colors"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-cantinho-terracotta text-white rounded-lg font-medium"
+          className="sm:hidden flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
         >
           <Filter className="w-4 h-4" />
           Filtros
@@ -56,19 +66,22 @@ const MenuFilters = ({
       {/* Category filters */}
       <div className={`${showFilters ? 'block' : 'hidden'} sm:block`}>
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category === "Todos" ? null : category)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all duration-300 flex-shrink-0 ${
-                (selectedCategory === category || (selectedCategory === null && category === "Todos"))
-                  ? 'bg-cantinho-terracotta text-white shadow-lg'
-                  : 'bg-white text-cantinho-navy border border-gray-200 hover:border-cantinho-terracotta hover:text-cantinho-terracotta'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const isSelected = selectedCategory === category || (selectedCategory === null && category === "Todos");
+            return (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category === "Todos" ? null : category)}
+                className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all duration-300 flex-shrink-0 ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground shadow-lg transform scale-105'
+                    : 'bg-background text-foreground border border-border hover:border-primary hover:text-primary hover:shadow-md'
+                }`}
+              >
+                {category}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

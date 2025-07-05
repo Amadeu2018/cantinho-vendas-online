@@ -1,0 +1,8 @@
+version: 0.1
+
+endpoints:
+  - name: cantinho-algarvio-frontend
+    type: web
+    port: 80
+    contextPath: /
+    schemaFilePath: openapi.yaml

@@ -45,7 +45,9 @@ export const usePaginatedDishes = ({
       }
 
       if (category && category !== "Todos") {
-        query = query.eq('categories.name', category);
+        const categoryFilters = getCategoryFilter(category);
+        const categoryConditions = categoryFilters.map(cat => `categories.name.ilike.%${cat}%`).join(',');
+        query = query.or(categoryConditions);
       }
 
       if (featured) {
@@ -177,6 +179,21 @@ export const usePaginatedDishes = ({
     if (lowerCategory.includes('entrada') || lowerCategory.includes('aperitivo')) return 'appetizer';
     if (lowerCategory.includes('sobremesa') || lowerCategory.includes('doce')) return 'dessert';
     return 'main';
+  };
+
+  const getCategoryFilter = (category: string) => {
+    const categoryMap: { [key: string]: string[] } = {
+      'Entradas': ['Entradas', 'Aperitivos'],
+      'Peixes e Frutos do Mar': ['Peixes', 'Frutos do Mar', 'Pescado'],
+      'Carnes': ['Carnes', 'Carne'],
+      'Pratos Vegetarianos': ['Vegetariano', 'Vegano', 'Vegetais'],
+      'Massas': ['Massas', 'Pasta'],
+      'Sobremesas': ['Sobremesas', 'Doces'],
+      'Bebidas': ['Bebidas', 'Drinks'],
+      'Vinhos': ['Vinhos', 'Vinho'],
+      'Pratos Tradicionais': ['Tradicionais', 'Tradicional', 'Pratos Principais']
+    };
+    return categoryMap[category] || [category];
   };
 
   const loadMore = () => {

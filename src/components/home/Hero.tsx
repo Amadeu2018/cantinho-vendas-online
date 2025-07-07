@@ -54,7 +54,7 @@ const Hero = () => {
         
         {/* Mobile-first subtitle */}
         <p className="text-base sm:text-xl md:text-3xl mb-3 sm:mb-4 max-w-4xl hero-text-shadow animate-fade-in font-light leading-relaxed px-2">
-          Sabores autênticos da culinária <span className="text-cantinho-sand font-bold">angolana</span> e <span className="text-cantinho-sand font-bold">angolana</span>
+          Sabores autênticos da culinária <span className="text-cantinho-sand font-bold">portuguesa</span> e <span className="text-cantinho-sand font-bold">angolana</span>
         </p>
         
         <p className="text-sm sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-3xl hero-text-shadow animate-fade-in text-white/90 px-2">

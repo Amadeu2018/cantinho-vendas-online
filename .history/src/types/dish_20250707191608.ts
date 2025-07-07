@@ -1,6 +1,5 @@
 export type Dish = {
   id: string;
-  title: string;
   name: string;
   description: string;
   price: number;

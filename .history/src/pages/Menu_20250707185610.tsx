@@ -63,9 +63,6 @@ const Menu = () => {
     return matchesCategory && matchesSearchTerm;
   });
 
-  console.log("Selected Category:", selectedCategory);
-  console.log("Search Term:", searchTerm);
-
   console.log(allDishes);
 
   if (loading) {
@@ -116,7 +113,6 @@ const Menu = () => {
             totalCount={totalCount}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            allDishes={allDishes}
           />
 
           {/* Featured dishes - Mobile optimized */}

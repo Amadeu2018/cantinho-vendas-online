@@ -82,9 +82,9 @@ export const formatDishFromProduct = (product: Product): Dish => {
     price: Number(product.price) || 0,
     image_url: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
     image: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
-    category: product.categories && product.categories.length > 0 ? mapCategory(product.categories[0].name) : 'main',
+    category: mapCategory(product.categories?.[0]?.name || 'main'), // Ajuste para pegar a primeira categoria
     popular: product.stock_quantity > 10,
-    tags: product.categories && product.categories.length > 0 ? [product.categories[0].name] : [],
+    tags: product.categories ? [product.categories[0].name] : [],
     promotion: product.promotions && product.promotions.length > 0 ? {
       discount: Number(product.promotions[0].discount_percentage) || 0,
       label: `${product.promotions[0].discount_percentage}% OFF`

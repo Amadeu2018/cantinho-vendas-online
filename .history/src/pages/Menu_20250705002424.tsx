@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Star, Clock, Users, Filter, Search } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -57,21 +58,6 @@ const Menu = () => {
     "Pratos Tradicionais"
   ];
 
-  const filteredDishes = allDishes.filter(dish => {
-    const matchesCategory = selectedCategory ? dish.category === selectedCategory : true;
-    const matchesSearchTerm = dish.title && dish.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearchTerm;
-  });
-
-  console.log("Selected Category:", selectedCategory);
-  console.log("Search Term:", searchTerm);
-
-  console.log(allDishes);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (loading && allDishes.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cantinho-cream/30 via-white to-cantinho-sand/20">
@@ -116,7 +102,6 @@ const Menu = () => {
             totalCount={totalCount}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            allDishes={allDishes}
           />
 
           {/* Featured dishes - Mobile optimized */}
@@ -159,7 +144,7 @@ const Menu = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
-              {filteredDishes.map((dish) => (
+              {allDishes.map((dish) => (
                 <div key={dish.id} className="transform hover:scale-105 transition-transform duration-300 h-full">
                   <MenuCard dish={dish} />
                 </div>
@@ -167,13 +152,13 @@ const Menu = () => {
             </div>
 
             {/* Load more button */}
-            {filteredDishes.length > 0 && (
+            {allDishes.length > 0 && (
               <LoadMoreButton
                 onClick={loadMore}
                 loading={loading}
                 hasMore={hasMore}
                 totalCount={totalCount}
-                currentCount={filteredDishes.length}
+                currentCount={allDishes.length}
               />
             )}
           </section>

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
-import { Dish } from "@/types/dish";
 
 interface MenuFiltersProps {
   searchTerm: string;
@@ -13,11 +13,9 @@ interface MenuFiltersProps {
   totalCount: number;
   showFilters: boolean;
   setShowFilters: (show: boolean) => void;
-  allDishes: Dish[];
 }
 
 const MenuFilters = ({ 
-  allDishes,
   searchTerm, 
   setSearchTerm, 
   selectedCategory, 
@@ -27,18 +25,6 @@ const MenuFilters = ({
   showFilters,
   setShowFilters
 }: MenuFiltersProps) => {
-  const [selectedCategoryState, setSelectedCategoryState] = useState("Todos");
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-  };
-
-  const filteredDishes = allDishes.filter(dish => {
-    const matchesCategory = selectedCategory === "Todos" || dish.category === selectedCategory;
-    const matchesSearchTerm = dish.title && dish.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearchTerm;
-  });
-
   return (
     <div className="mb-6 sm:mb-8 space-y-4">
       {/* Search bar - Mobile first */}
@@ -85,7 +71,7 @@ const MenuFilters = ({
             return (
               <button
                 key={category}
-                onClick={() => handleCategoryChange(category === "Todos" ? null : category)}
+                onClick={() => setSelectedCategory(category === "Todos" ? null : category)}
                 className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all duration-300 flex-shrink-0 ${
                   isSelected
                     ? 'bg-primary text-primary-foreground shadow-lg transform scale-105'

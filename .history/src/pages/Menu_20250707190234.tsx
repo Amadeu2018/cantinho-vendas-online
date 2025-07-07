@@ -116,7 +116,6 @@ const Menu = () => {
             totalCount={totalCount}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            allDishes={allDishes}
           />
 
           {/* Featured dishes - Mobile optimized */}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
-import { Dish } from "@/types/dish";
 
 interface MenuFiltersProps {
   searchTerm: string;
@@ -13,7 +12,7 @@ interface MenuFiltersProps {
   totalCount: number;
   showFilters: boolean;
   setShowFilters: (show: boolean) => void;
-  allDishes: Dish[];
+  allDishes: any[];
 }
 
 const MenuFilters = ({ 

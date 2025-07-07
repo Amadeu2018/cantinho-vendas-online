@@ -59,12 +59,9 @@ const Menu = () => {
 
   const filteredDishes = allDishes.filter(dish => {
     const matchesCategory = selectedCategory ? dish.category === selectedCategory : true;
-    const matchesSearchTerm = dish.title && dish.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearchTerm = dish.title.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearchTerm;
   });
-
-  console.log("Selected Category:", selectedCategory);
-  console.log("Search Term:", searchTerm);
 
   console.log(allDishes);
 
@@ -116,7 +113,6 @@ const Menu = () => {
             totalCount={totalCount}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            allDishes={allDishes}
           />
 
           {/* Featured dishes - Mobile optimized */}

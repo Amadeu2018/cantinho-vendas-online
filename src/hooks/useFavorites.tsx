@@ -55,8 +55,14 @@ export const useFavorites = () => {
             image_url: product.image_url || '/placeholder.svg',
             image: product.image_url || '/placeholder.svg',
             category,
-            popular: false,
             tags: [],
+            popular: false,
+            rating: 4.5,
+            prepTime: '20-30 min',
+            serves: 2,
+            isSpicy: false,
+            isVegetarian: false,
+            isPopular: false
           };
         });
         

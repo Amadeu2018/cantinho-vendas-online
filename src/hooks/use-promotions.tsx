@@ -48,6 +48,8 @@ export const usePromotions = () => {
             image_url: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
             image: promo.products?.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
             category: "main" as const,
+            tags: [],
+            popular: false,
             rating: 4.5,
             prepTime: '20-30 min',
             serves: 2,

@@ -44,22 +44,22 @@ const Menu = () => {
     popular: true 
   });
 
+  // Get unique categories from dishes and add static categories
+  const dynamicCategories = [...new Set(allDishes.map(dish => dish.categoryName || dish.category))];
   const categories = [
     "Todos",
-    "Entradas",
-    "Peixes e Frutos do Mar",
-    "Carnes",
-    "Pratos Vegetarianos",
-    "Massas",
-    "Sobremesas",
-    "Bebidas",
-    "Vinhos",
-    "Pratos Tradicionais"
+    ...dynamicCategories,
+    "Churrascaria",
+    "Produtos do Grill"
   ];
 
   const filteredDishes = allDishes.filter(dish => {
-    const matchesCategory = selectedCategory ? dish.category === selectedCategory : true;
-    const matchesSearchTerm = dish.title && dish.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !selectedCategory || selectedCategory === "Todos" || 
+                          dish.category === selectedCategory || 
+                          dish.categoryName === selectedCategory;
+    const matchesSearchTerm = !searchTerm || 
+                             dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             dish.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearchTerm;
   });
 

@@ -74,7 +74,16 @@ type Product = {
 
 // Atualize a função para usar o tipo Product
 export const formatDishFromProduct = (product: Product): Dish => {
-  console.log("Product:", product);
+  const categoryName = product.categories && product.categories.length > 0 ? product.categories[0].name : 'Outros';
+  
+  // Determine product type based on category
+  const getProductType = (category: string): 'food' | 'grill' | 'beverage' => {
+    const lowerCategory = category.toLowerCase();
+    if (lowerCategory.includes('churrasco') || lowerCategory.includes('grill') || lowerCategory.includes('carne')) return 'grill';
+    if (lowerCategory.includes('bebida') || lowerCategory.includes('vinho') || lowerCategory.includes('drink')) return 'beverage';
+    return 'food';
+  };
+
   return {
     id: product.id,
     name: product.name || 'Produto sem nome',
@@ -82,7 +91,8 @@ export const formatDishFromProduct = (product: Product): Dish => {
     price: Number(product.price) || 0,
     image_url: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
     image: product.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3',
-    category: product.categories && product.categories.length > 0 ? mapCategory(product.categories[0].name) : 'main',
+    category: categoryName,
+    categoryName: categoryName,
     popular: product.stock_quantity > 10,
     tags: product.categories && product.categories.length > 0 ? [product.categories[0].name] : [],
     promotion: product.promotions && product.promotions.length > 0 ? {
@@ -94,7 +104,8 @@ export const formatDishFromProduct = (product: Product): Dish => {
     serves: 2,
     isSpicy: false,
     isVegetarian: false,
-    isPopular: product.stock_quantity > 10
+    isPopular: product.stock_quantity > 10,
+    productType: getProductType(categoryName)
   };
 };
 

@@ -1,12 +1,12 @@
 export type Dish = {
   id: string;
-  title: string;
   name: string;
   description: string;
   price: number;
   image_url: string;
   image: string;
   category: string;
+  categoryName?: string;
   tags: string[];
   popular: boolean;
   promotion?: {
@@ -19,4 +19,5 @@ export type Dish = {
   isSpicy: boolean;
   isVegetarian: boolean;
   isPopular: boolean;
+  productType?: 'food' | 'grill' | 'beverage';
 };

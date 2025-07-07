@@ -3,11 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --cantinho-navy: #1d3557;
-  --cantinho-cornflower: #457b9d;
-  --cantinho-sky: #a8dadc;
-  --cantinho-offwhite: #f1faee;
-  --cantinho-terracotta: #e63946;
+  --cantinho-navy: 210 54% 20%;
+  --cantinho-cornflower: 200 39% 44%;
+  --cantinho-sky: 185 33% 73%;
+  --cantinho-offwhite: 82 44% 95%;
+  --cantinho-terracotta: 356 80% 59%;
+  --cantinho-cream: 60 29% 96%;
+  --cantinho-sand: 45 37% 86%;
 }
 
 @layer base {
@@ -67,58 +69,76 @@
 }
 
 .text-cantinho-navy {
-  color: var(--cantinho-navy);
+  color: hsl(var(--cantinho-navy));
 }
 .text-cantinho-cornflower {
-  color: var(--cantinho-cornflower);
+  color: hsl(var(--cantinho-cornflower));
 }
 .text-cantinho-sky {
-  color: var(--cantinho-sky);
+  color: hsl(var(--cantinho-sky));
 }
 .text-cantinho-offwhite {
-  color: var(--cantinho-offwhite);
+  color: hsl(var(--cantinho-offwhite));
 }
 .text-cantinho-terracotta {
-  color: var(--cantinho-terracotta);
+  color: hsl(var(--cantinho-terracotta));
+}
+.text-cantinho-cream {
+  color: hsl(var(--cantinho-cream));
+}
+.text-cantinho-sand {
+  color: hsl(var(--cantinho-sand));
 }
 
 .bg-cantinho-navy {
-  background-color: var(--cantinho-navy);
+  background-color: hsl(var(--cantinho-navy));
 }
 .bg-cantinho-cornflower {
-  background-color: var(--cantinho-cornflower);
+  background-color: hsl(var(--cantinho-cornflower));
 }
 .bg-cantinho-sky {
-  background-color: var(--cantinho-sky);
+  background-color: hsl(var(--cantinho-sky));
 }
 .bg-cantinho-offwhite {
-  background-color: var(--cantinho-offwhite);
+  background-color: hsl(var(--cantinho-offwhite));
 }
 .bg-cantinho-terracotta {
-  background-color: var(--cantinho-terracotta);
+  background-color: hsl(var(--cantinho-terracotta));
+}
+.bg-cantinho-cream {
+  background-color: hsl(var(--cantinho-cream));
+}
+.bg-cantinho-sand {
+  background-color: hsl(var(--cantinho-sand));
 }
 
 .hover\:bg-cantinho-navy:hover {
-  background-color: var(--cantinho-navy);
+  background-color: hsl(var(--cantinho-navy));
 }
 .hover\:bg-cantinho-cornflower:hover {
-  background-color: var(--cantinho-cornflower);
+  background-color: hsl(var(--cantinho-cornflower));
 }
 .hover\:bg-cantinho-sky:hover {
-  background-color: var(--cantinho-sky);
+  background-color: hsl(var(--cantinho-sky));
 }
 .hover\:bg-cantinho-offwhite:hover {
-  background-color: var(--cantinho-offwhite);
+  background-color: hsl(var(--cantinho-offwhite));
 }
 .hover\:bg-cantinho-terracotta:hover {
-  background-color: var(--cantinho-terracotta);
+  background-color: hsl(var(--cantinho-terracotta));
 }
 .hover\:bg-cantinho-terracotta\/90:hover {
-  background-color: color-mix(in srgb, var(--cantinho-terracotta) 90%, transparent);
+  background-color: hsl(var(--cantinho-terracotta) / 0.9);
+}
+.hover\:bg-cantinho-cream:hover {
+  background-color: hsl(var(--cantinho-cream));
+}
+.hover\:bg-cantinho-sand:hover {
+  background-color: hsl(var(--cantinho-sand));
 }
 
 .hover\:text-cantinho-terracotta:hover {
-  color: var(--cantinho-terracotta);
+  color: hsl(var(--cantinho-terracotta));
 }
 
 /* Animação do hero header */

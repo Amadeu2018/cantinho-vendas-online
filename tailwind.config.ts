@@ -69,11 +69,13 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         cantinho: {
-          gold: "#D4AF37",
-          cream: "#F5F5DC",
-          terracotta: "#E2725B",
-          sage: "#87A96B",
-          navy: "#2C3E50",
+          navy: "hsl(var(--cantinho-navy))",
+          cornflower: "hsl(var(--cantinho-cornflower))",
+          sky: "hsl(var(--cantinho-sky))",
+          offwhite: "hsl(var(--cantinho-offwhite))",
+          terracotta: "hsl(var(--cantinho-terracotta))",
+          cream: "hsl(var(--cantinho-cream))",
+          sand: "hsl(var(--cantinho-sand))",
         },
       },
       borderRadius: {

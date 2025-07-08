@@ -302,6 +302,44 @@ export type Database = {
           },
         ]
       }
+      grill_customizations: {
+        Row: {
+          available_marinades: string[] | null
+          created_at: string | null
+          id: string
+          meat_doneness: string[] | null
+          product_id: string | null
+          side_dishes: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_marinades?: string[] | null
+          created_at?: string | null
+          id?: string
+          meat_doneness?: string[] | null
+          product_id?: string | null
+          side_dishes?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_marinades?: string[] | null
+          created_at?: string | null
+          id?: string
+          meat_doneness?: string[] | null
+          product_id?: string | null
+          side_dishes?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grill_customizations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       multicaixa_accounts: {
         Row: {
           account_name: string
@@ -488,19 +526,25 @@ export type Database = {
         Row: {
           barcode: string | null
           category_id: string | null
+          combo_serves: number | null
           cost: number | null
           created_at: string
           description: string | null
           id: string
           image_url: string | null
+          is_grill_product: boolean | null
           manufacturer: string | null
+          meat_options: Json | null
           min_stock_quantity: number | null
           name: string
+          prep_time_minutes: number | null
           price: number
+          sale_unit: string | null
           seller_contact: string | null
           seller_id: string | null
           seller_name: string | null
           sku: string | null
+          spice_level: number | null
           stock_quantity: number | null
           tax_rate: number | null
           unit: string | null
@@ -509,19 +553,25 @@ export type Database = {
         Insert: {
           barcode?: string | null
           category_id?: string | null
+          combo_serves?: number | null
           cost?: number | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
+          is_grill_product?: boolean | null
           manufacturer?: string | null
+          meat_options?: Json | null
           min_stock_quantity?: number | null
           name: string
+          prep_time_minutes?: number | null
           price: number
+          sale_unit?: string | null
           seller_contact?: string | null
           seller_id?: string | null
           seller_name?: string | null
           sku?: string | null
+          spice_level?: number | null
           stock_quantity?: number | null
           tax_rate?: number | null
           unit?: string | null
@@ -530,19 +580,25 @@ export type Database = {
         Update: {
           barcode?: string | null
           category_id?: string | null
+          combo_serves?: number | null
           cost?: number | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
+          is_grill_product?: boolean | null
           manufacturer?: string | null
+          meat_options?: Json | null
           min_stock_quantity?: number | null
           name?: string
+          prep_time_minutes?: number | null
           price?: number
+          sale_unit?: string | null
           seller_contact?: string | null
           seller_id?: string | null
           seller_name?: string | null
           sku?: string | null
+          spice_level?: number | null
           stock_quantity?: number | null
           tax_rate?: number | null
           unit?: string | null
@@ -691,33 +747,52 @@ export type Database = {
       }
       promotions: {
         Row: {
+          applies_to_category_id: string | null
+          combo_products: Json | null
           created_at: string
           discount_percentage: number
           end_date: string
           id: string
+          min_quantity: number | null
           product_id: string | null
+          promotion_type: string | null
           start_date: string
           updated_at: string
         }
         Insert: {
+          applies_to_category_id?: string | null
+          combo_products?: Json | null
           created_at?: string
           discount_percentage: number
           end_date: string
           id?: string
+          min_quantity?: number | null
           product_id?: string | null
+          promotion_type?: string | null
           start_date: string
           updated_at?: string
         }
         Update: {
+          applies_to_category_id?: string | null
+          combo_products?: Json | null
           created_at?: string
           discount_percentage?: number
           end_date?: string
           id?: string
+          min_quantity?: number | null
           product_id?: string | null
+          promotion_type?: string | null
           start_date?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "promotions_applies_to_category_id_fkey"
+            columns: ["applies_to_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "promotions_product_id_fkey"
             columns: ["product_id"]

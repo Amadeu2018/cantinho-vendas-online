@@ -6,6 +6,7 @@ import MenuHero from "@/components/menu/MenuHero";
 import MenuSection from "@/components/menu/MenuSection";
 import FloatingCartButton from "@/components/menu/FloatingCartButton";
 import LoadMoreButton from "@/components/common/LoadMoreButton";
+import GrillSection from "@/components/menu/GrillSection";
 import MenuFilters from "@/components/menu/MenuFilters";
 import { usePaginatedDishes } from "@/hooks/use-paginated-dishes";
 import { useCart } from "@/contexts/CartContext";
@@ -43,6 +44,12 @@ const Menu = () => {
     pageSize: 3, 
     popular: true 
   });
+
+  // Separate grill products
+  const grillProducts = allDishes.filter(dish => 
+    dish.productType === 'grill' || 
+    (dish.categoryName && ['Churrascaria', 'Carnes Grelhadas', 'Produtos do Grill', 'Espetadas', 'Acompanhamentos Grill'].includes(dish.categoryName))
+  );
 
   // Get unique categories from dishes and add static categories
   const dynamicCategories = [...new Set(allDishes.map(dish => dish.categoryName || dish.category))];
@@ -138,6 +145,9 @@ const Menu = () => {
               dishes={popularDishes}
             />
           )}
+
+          {/* Grill/Churrascaria Section */}
+          <GrillSection grillProducts={grillProducts} loading={loading} />
 
           {/* All dishes with pagination */}
           <section className="mb-12 sm:mb-16">

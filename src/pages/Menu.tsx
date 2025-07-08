@@ -45,10 +45,14 @@ const Menu = () => {
     popular: true 
   });
 
-  // Separate grill products
+  // Separate grill products - include new categories
   const grillProducts = allDishes.filter(dish => 
-    dish.productType === 'grill' || 
-    (dish.categoryName && ['Churrascaria', 'Carnes Grelhadas', 'Produtos do Grill', 'Espetadas', 'Acompanhamentos Grill'].includes(dish.categoryName))
+    dish.is_grill_product || dish.productType === 'grill' || 
+    (dish.categoryName && [
+      'Churrascaria', 'Carnes Grelhadas', 'Produtos do Grill', 'Espetadas', 
+      'Acompanhamentos Grill', 'Carnes Bovinas', 'Carnes Suínas', 
+      'Carnes de Frango', 'Carnes de Peixe', 'Bebidas Grill', 'Combos Churrascaria'
+    ].includes(dish.categoryName))
   );
 
   // Get unique categories from dishes and add static categories

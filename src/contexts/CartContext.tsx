@@ -11,6 +11,7 @@ export type CartItem = {
   price: number;
   quantity: number;
   image: string;
+  customizations?: any;
 };
 
 export type DeliveryLocation = {

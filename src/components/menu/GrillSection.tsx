@@ -2,6 +2,7 @@ import React from "react";
 import { Flame, Clock } from "lucide-react";
 import { Dish } from "@/types/dish";
 import MenuCard from "./MenuCard";
+import GrillProductCard from "./GrillProductCard";
 
 interface GrillSectionProps {
   grillProducts: Dish[];
@@ -72,7 +73,11 @@ const GrillSection = ({ grillProducts, loading }: GrillSectionProps) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
         {grillProducts.map((product) => (
           <div key={product.id} className="transform hover:scale-105 transition-transform duration-300 h-full">
-            <MenuCard dish={product} />
+            {product.is_grill_product ? (
+              <GrillProductCard dish={product} />
+            ) : (
+              <MenuCard dish={product} />
+            )}
           </div>
         ))}
       </div>

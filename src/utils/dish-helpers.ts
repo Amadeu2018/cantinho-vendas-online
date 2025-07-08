@@ -70,6 +70,13 @@ type Product = {
   categories?: { name: string }[];
   stock_quantity: number;
   promotions?: { discount_percentage: number }[];
+  // Novos campos para churrascaria
+  sale_unit?: string;
+  prep_time_minutes?: number;
+  meat_options?: any;
+  spice_level?: number;
+  is_grill_product?: boolean;
+  combo_serves?: number;
 };
 
 // Atualize a função para usar o tipo Product
@@ -79,9 +86,24 @@ export const formatDishFromProduct = (product: Product): Dish => {
   // Determine product type based on category
   const getProductType = (category: string): 'food' | 'grill' | 'beverage' => {
     const lowerCategory = category.toLowerCase();
-    if (lowerCategory.includes('churrasco') || lowerCategory.includes('grill') || lowerCategory.includes('carne')) return 'grill';
+    if (lowerCategory.includes('churrasco') || lowerCategory.includes('grill') || lowerCategory.includes('carne') || 
+        lowerCategory.includes('bovinas') || lowerCategory.includes('suínas') || lowerCategory.includes('frango') ||
+        lowerCategory.includes('peixe') || lowerCategory.includes('espetadas') || lowerCategory.includes('combo')) return 'grill';
     if (lowerCategory.includes('bebida') || lowerCategory.includes('vinho') || lowerCategory.includes('drink')) return 'beverage';
     return 'food';
+  };
+
+  // Parse meat options from JSONB
+  const parseMeatOptions = (meatOptions: any) => {
+    if (Array.isArray(meatOptions)) return meatOptions;
+    if (typeof meatOptions === 'string') {
+      try {
+        return JSON.parse(meatOptions);
+      } catch {
+        return [];
+      }
+    }
+    return [];
   };
 
   return {
@@ -100,12 +122,19 @@ export const formatDishFromProduct = (product: Product): Dish => {
       label: `${product.promotions[0].discount_percentage}% OFF`
     } : undefined,
     rating: 4.5,
-    prepTime: '20-30 min',
-    serves: 2,
-    isSpicy: false,
+    prepTime: product.prep_time_minutes ? `${product.prep_time_minutes} min` : '20-30 min',
+    serves: product.combo_serves || 2,
+    isSpicy: (product.spice_level || 0) > 2,
     isVegetarian: false,
     isPopular: product.stock_quantity > 10,
-    productType: getProductType(categoryName)
+    productType: getProductType(categoryName),
+    // Novos campos para churrascaria
+    sale_unit: product.sale_unit as any,
+    prep_time_minutes: product.prep_time_minutes,
+    meat_options: parseMeatOptions(product.meat_options),
+    spice_level: product.spice_level,
+    is_grill_product: product.is_grill_product,
+    combo_serves: product.combo_serves
   };
 };
 

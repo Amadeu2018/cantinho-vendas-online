@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/sobre/HeroSection';
 import CompanyHistory from '@/components/sobre/CompanyHistory';
 import ServicesSection from '@/components/sobre/ServicesSection';
+import GallerySection from '@/components/sobre/GallerySection';
 import MenuCategories from '@/components/sobre/MenuCategories';
 import FishSpecialties from '@/components/sobre/FishSpecialties';
 import ClientsSection from '@/components/sobre/ClientsSection';
@@ -18,6 +19,7 @@ const Sobre = () => {
         <HeroSection />
         <CompanyHistory />
         <ServicesSection />
+        <GallerySection />
         <MenuCategories />
         <FishSpecialties />
         <ClientsSection />

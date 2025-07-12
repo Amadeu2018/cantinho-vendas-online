@@ -50,13 +50,13 @@ const CompanyHistory = () => {
           <div className="relative animate-scale-in">
             <div className="grid grid-cols-2 gap-4">
               <img
-                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80"
-                alt="Prato sofisticado do Cantinho Algarvio"
+                src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9"
+                alt="Pratos especiais da casa"
                 className="rounded-xl shadow-lg w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80"
-                alt="Ambiente acolhedor e elegante"
+                src="https://images.unsplash.com/photo-1721322800607-8c38375eef04"
+                alt="Ambiente acolhedor"
                 className="rounded-xl shadow-lg w-full h-48 object-cover hover:scale-105 transition-transform duration-300 mt-8"
               />
             </div>

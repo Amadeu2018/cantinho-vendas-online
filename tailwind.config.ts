@@ -1,12 +1,8 @@
-
 import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: ["class"],
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx,js,jsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     container: {
       center: true,
@@ -16,22 +12,26 @@ const config: Config = {
       },
     },
     screens: {
-      'xs': '375px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+      xs: "375px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
       // Mobile-first breakpoints
-      'mobile': '320px',
-      'mobile-lg': '425px',
-      'tablet': '768px',
-      'tablet-lg': '1024px',
-      'desktop': '1280px',
-      'desktop-lg': '1440px',
+      mobile: "320px",
+      "mobile-lg": "425px",
+      tablet: "768px",
+      "tablet-lg": "1024px",
+      desktop: "1280px",
+      "desktop-lg": "1440px",
       // Safe area breakpoints for mobile devices
-      'safe-mobile': { 'raw': '(max-width: 767px) and (display-mode: standalone)' },
-      'safe-tablet': { 'raw': '(min-width: 768px) and (max-width: 1023px) and (display-mode: standalone)' },
+      "safe-mobile": {
+        raw: "(max-width: 767px) and (display-mode: standalone)",
+      },
+      "safe-tablet": {
+        raw: "(min-width: 768px) and (max-width: 1023px) and (display-mode: standalone)",
+      },
     },
     extend: {
       colors: {
@@ -96,72 +96,72 @@ const config: Config = {
         "fade-in": {
           "0%": {
             opacity: "0",
-            transform: "translateY(10px)"
+            transform: "translateY(10px)",
           },
           "100%": {
             opacity: "1",
-            transform: "translateY(0)"
-          }
+            transform: "translateY(0)",
+          },
         },
         "fade-out": {
           "0%": {
             opacity: "1",
-            transform: "translateY(0)"
+            transform: "translateY(0)",
           },
           "100%": {
             opacity: "0",
-            transform: "translateY(10px)"
-          }
+            transform: "translateY(10px)",
+          },
         },
         // Scale animations
         "scale-in": {
           "0%": {
             transform: "scale(0.95)",
-            opacity: "0"
+            opacity: "0",
           },
           "100%": {
             transform: "scale(1)",
-            opacity: "1"
-          }
+            opacity: "1",
+          },
         },
         "scale-out": {
           from: { transform: "scale(1)", opacity: "1" },
-          to: { transform: "scale(0.95)", opacity: "0" }
+          to: { transform: "scale(0.95)", opacity: "0" },
         },
         // Slide animations
         "slide-in-right": {
           "0%": { transform: "translateX(100%)" },
-          "100%": { transform: "translateX(0)" }
+          "100%": { transform: "translateX(0)" },
         },
         "slide-out-right": {
           "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(100%)" }
+          "100%": { transform: "translateX(100%)" },
         },
         "slide-in-left": {
           "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(0)" }
+          "100%": { transform: "translateX(0)" },
         },
         "slide-out-left": {
           "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-100%)" }
+          "100%": { transform: "translateX(-100%)" },
         },
         // Bounce animations
         "bounce-in": {
           "0%": {
             transform: "scale(0.3)",
-            opacity: "0"
+            opacity: "0",
           },
           "50%": {
-            transform: "scale(1.05)"
+            transform: "scale(1.05)",
           },
           "70%": {
-            transform: "scale(0.9)"
+            transform: "scale(0.9)",
           },
           "100%": {
             transform: "scale(1)",
-            opacity: "1"
-          }
-        }
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -176,74 +176,82 @@ const config: Config = {
         "slide-out-left": "slide-out-left 0.3s ease-out",
         "bounce-in": "bounce-in 0.6s ease-out",
         // Combined animations
-        "enter": "fade-in 0.3s ease-out, scale-in 0.2s ease-out",
-        "exit": "fade-out 0.3s ease-out, scale-out 0.2s ease-out"
+        enter: "fade-in 0.3s ease-out, scale-in 0.2s ease-out",
+        exit: "fade-out 0.3s ease-out, scale-out 0.2s ease-out",
+      },
+      transitionDuration: {
+        "7000": "7000ms",
       },
       spacing: {
-        'safe-top': 'env(safe-area-inset-top)',
-        'safe-bottom': 'env(safe-area-inset-bottom)',
-        'safe-left': 'env(safe-area-inset-left)',
-        'safe-right': 'env(safe-area-inset-right)',
+        "safe-top": "env(safe-area-inset-top)",
+        "safe-bottom": "env(safe-area-inset-bottom)",
+        "safe-left": "env(safe-area-inset-left)",
+        "safe-right": "env(safe-area-inset-right)",
       },
       backdropBlur: {
-        xs: '2px',
+        xs: "2px",
       },
     },
   },
   plugins: [
     require("tailwindcss-animate"),
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       const newUtilities = {
         // Scroll utilities
-        '.scroll-smooth': {
-          'scroll-behavior': 'smooth',
+        ".scroll-smooth": {
+          "scroll-behavior": "smooth",
         },
-        '.scroll-auto': {
-          'scroll-behavior': 'auto',
+        ".scroll-auto": {
+          "scroll-behavior": "auto",
         },
         // Mask utilities for fade edges
-        '.mask-fade': {
-          '-webkit-mask-image': 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)',
-          'mask-image': 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)',
+        ".mask-fade": {
+          "-webkit-mask-image":
+            "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
+          "mask-image":
+            "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
         },
-        '.mask-fade-horizontal': {
-          '-webkit-mask-image': 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
-          'mask-image': 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+        ".mask-fade-horizontal": {
+          "-webkit-mask-image":
+            "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+          "mask-image":
+            "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
         },
         // Touch utilities
-        '.touch-manipulation': {
-          'touch-action': 'manipulation',
+        ".touch-manipulation": {
+          "touch-action": "manipulation",
         },
-        '.touch-pan-x': {
-          'touch-action': 'pan-x',
+        ".touch-pan-x": {
+          "touch-action": "pan-x",
         },
-        '.touch-pan-y': {
-          'touch-action': 'pan-y',
+        ".touch-pan-y": {
+          "touch-action": "pan-y",
         },
         // Safe area utilities
-        '.pb-safe': {
-          'padding-bottom': 'env(safe-area-inset-bottom)',
+        ".pb-safe": {
+          "padding-bottom": "env(safe-area-inset-bottom)",
         },
-        '.pt-safe': {
-          'padding-top': 'env(safe-area-inset-top)',
+        ".pt-safe": {
+          "padding-top": "env(safe-area-inset-top)",
         },
-        '.pl-safe': {
-          'padding-left': 'env(safe-area-inset-left)',
+        ".pl-safe": {
+          "padding-left": "env(safe-area-inset-left)",
         },
-        '.pr-safe': {
-          'padding-right': 'env(safe-area-inset-right)',
+        ".pr-safe": {
+          "padding-right": "env(safe-area-inset-right)",
         },
         // Hover scale utility
-        '.hover-scale': {
-          '@apply transition-transform duration-200 hover:scale-105': {},
+        ".hover-scale": {
+          "@apply transition-transform duration-200 hover:scale-105": {},
         },
         // Story link animation
-        '.story-link': {
-          '@apply relative inline-block after:content-[""] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left': {},
+        ".story-link": {
+          '@apply relative inline-block after:content-[""] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left':
+            {},
         },
-      }
-      addUtilities(newUtilities, ['responsive', 'hover'])
-    }
+      };
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
   ],
 };
 

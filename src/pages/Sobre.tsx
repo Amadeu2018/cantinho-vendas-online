@@ -19,6 +19,15 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import { HeroParallax } from "@aceternity/ui/hero-parallax";
+import { CardHoverEffect } from "@aceternity/ui/card-hover-effect";
+import { Timeline } from "@aceternity/ui/timeline";
+import { BackgroundGradient } from "@aceternity/ui/background-gradient";
+import { TextGenerateEffect } from "@aceternity/ui/text-generate-effect";
+import { FloatingNav } from "@aceternity/ui/floating-navbar";
+import { Spotlight } from "@aceternity/ui/spotlight";
+import { WobbleCard } from "@aceternity/ui/wobble-card";
+import { BentoGrid, BentoGridItem } from "@aceternity/ui/bento-grid";
 
 const Sobre = () => {
   const companyStats = [
@@ -90,72 +99,87 @@ const Sobre = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <main className="flex-grow pt-16 sm:pt-20">
-        {/* Hero Section */}
-        <section
-          className="relative min-h-[600px] flex items-center justify-center text-white"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=1200&q=80')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="absolute inset-0 bg-black/60"></div>
+        {/* Hero Section with Spotlight */}
+        <section className="relative min-h-[600px] flex items-center justify-center text-white overflow-hidden">
+          <Spotlight
+            className="-top-40 left-0 md:left-60 md:-top-20"
+            fill="white"
+          />
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=1200&q=80')",
+            }}
+          >
+            <div className="absolute inset-0 bg-black/60"></div>
+          </div>
           <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Cantinho Algarvio
-            </h1>
+            <TextGenerateEffect
+              words="Cantinho Algarvio"
+              className="text-5xl md:text-6xl font-bold mb-6 text-white"
+            />
             <p className="text-xl md:text-2xl mb-8 text-gray-200">
               Mais de 8 anos oferecendo sabor, tradição e excelência em
               alimentação e catering em Angola!
             </p>
             <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <Badge
-                variant="secondary"
-                className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
-              >
-                <Calendar className="w-5 h-5" />
-                Desde 2014
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
-              >
-                <Award className="w-5 h-5" />
-                HACCP Certificado
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
-              >
-                <Utensils className="w-5 h-5" />
-                Culinária Nacional e Internacional
-              </Badge>
+              <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
+                <Badge
+                  variant="secondary"
+                  className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Desde 2014
+                </Badge>
+              </BackgroundGradient>
+              <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
+                <Badge
+                  variant="secondary"
+                  className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
+                >
+                  <Award className="w-5 h-5" />
+                  HACCP Certificado
+                </Badge>
+              </BackgroundGradient>
+              <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
+                <Badge
+                  variant="secondary"
+                  className="bg-cantinho-sand text-cantinho-navy px-6 py-3 text-lg flex items-center gap-2"
+                >
+                  <Utensils className="w-5 h-5" />
+                  Culinária Nacional e Internacional
+                </Badge>
+              </BackgroundGradient>
             </div>
           </div>
         </section>
 
-        {/* Company Stats */}
+        {/* Company Stats with Wobble Cards */}
         <section className="py-20 bg-cantinho-cream/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-cantinho-navy mb-4">
-                Nossa Trajetória em Números
-              </h2>
+              <TextGenerateEffect
+                words="Nossa Trajetória em Números"
+                className="text-4xl font-bold text-cantinho-navy mb-4"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {companyStats.map((stat, index) => (
-                <Card
+                <WobbleCard
                   key={index}
-                  className="p-6 text-center hover:shadow-lg transition-shadow"
+                  containerClassName="col-span-1 h-full bg-cantinho-cream min-h-[200px] lg:min-h-[250px]"
+                  className=""
                 >
-                  <div className="text-3xl font-bold text-cantinho-terracotta mb-2">
-                    {stat.value}
+                  <div className="max-w-xs">
+                    <div className="text-3xl font-bold text-cantinho-terracotta mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-cantinho-navy font-medium">
+                      {stat.label}
+                    </div>
                   </div>
-                  <div className="text-cantinho-navy font-medium">
-                    {stat.label}
-                  </div>
-                </Card>
+                </WobbleCard>
               ))}
             </div>
           </div>
@@ -218,74 +242,69 @@ const Sobre = () => {
               </div>
             </div>
 
-            {/* Timeline */}
+            {/* Timeline with Aceternity */}
             <div className="mt-16">
-              <h3 className="text-3xl font-bold text-center text-cantinho-navy mb-12">
-                Marcos da Nossa Jornada
-              </h3>
-              <div className="space-y-8">
-                {timelineEvents.map((event, index) => (
-                  <div key={index} className="flex items-start space-x-6">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-cantinho-terracotta rounded-full flex items-center justify-center text-white font-bold">
-                        {event.year.slice(-2)}
-                      </div>
-                    </div>
-                    <div className="flex-grow">
+              <TextGenerateEffect
+                words="Marcos da Nossa Jornada"
+                className="text-3xl font-bold text-center text-cantinho-navy mb-12"
+              />
+              <Timeline
+                data={timelineEvents.map((event) => ({
+                  title: event.year,
+                  content: (
+                    <div>
                       <h4 className="text-xl font-bold text-cantinho-navy mb-2">
                         {event.title}
                       </h4>
                       <p className="text-gray-600">{event.description}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ),
+                }))}
+              />
             </div>
           </div>
         </section>
 
-        {/* Services Section */}
+        {/* Services Section with Card Hover Effect */}
         <section className="py-20 bg-cantinho-cream/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-cantinho-navy mb-4">
-                Nossos Serviços
-              </h2>
+              <TextGenerateEffect
+                words="Nossos Serviços"
+                className="text-4xl font-bold text-cantinho-navy mb-4"
+              />
               <p className="text-gray-600 text-lg">
                 Oferecemos uma gama completa de serviços gastronômicos
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {services.map((service, index) => (
-                <Card
-                  key={index}
-                  className="p-6 text-center hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex justify-center mb-4 text-cantinho-terracotta">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-cantinho-navy mb-3">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-600">{service.description}</p>
-                </Card>
-              ))}
-            </div>
+            <CardHoverEffect
+              items={services.map((service, index) => ({
+                title: service.title,
+                description: service.description,
+                link: "#",
+                icon: service.icon,
+              }))}
+            />
           </div>
         </section>
 
-        {/* Menu Categories */}
+        {/* Menu Categories with Bento Grid */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-center text-cantinho-navy mb-12">
-              Especialidades Culinárias
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-cantinho-navy mb-4 text-center">
-                  Pratos de Carnes
-                </h3>
-                <div className="flex flex-wrap gap-2">
+            <TextGenerateEffect
+              words="Especialidades Culinárias"
+              className="text-4xl font-bold text-center text-cantinho-navy mb-12"
+            />
+            <BentoGrid className="max-w-4xl mx-auto">
+              <BentoGridItem
+                title="Pratos de Carnes"
+                description="Especialidades em carnes selecionadas"
+                header={
+                  <div className="flex min-h-[6rem] w-full rounded-xl bg-gradient-to-br from-cantinho-terracotta to-cantinho-navy"></div>
+                }
+                className="md:col-span-2"
+              >
+                <div className="flex flex-wrap gap-2 mt-4">
                   {[
                     "Bife de cogumelos",
                     "Peito de frango grelhado",
@@ -306,13 +325,16 @@ const Sobre = () => {
                     </Badge>
                   ))}
                 </div>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-cantinho-navy mb-4 text-center">
-                  Guarnições
-                </h3>
-                <div className="flex flex-wrap gap-2">
+              </BentoGridItem>
+              <BentoGridItem
+                title="Guarnições"
+                description="Acompanhamentos tradicionais"
+                header={
+                  <div className="flex min-h-[6rem] w-full rounded-xl bg-gradient-to-br from-cantinho-sand to-cantinho-cream"></div>
+                }
+                className="md:col-span-1"
+              >
+                <div className="flex flex-wrap gap-2 mt-4">
                   {[
                     "Batata frita",
                     "Batata cozida",
@@ -333,13 +355,16 @@ const Sobre = () => {
                     </Badge>
                   ))}
                 </div>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-cantinho-navy mb-4 text-center">
-                  Molhos
-                </h3>
-                <div className="flex flex-wrap gap-2">
+              </BentoGridItem>
+              <BentoGridItem
+                title="Molhos"
+                description="Sabores especiais da casa"
+                header={
+                  <div className="flex min-h-[6rem] w-full rounded-xl bg-gradient-to-br from-cantinho-navy to-cantinho-cornflower"></div>
+                }
+                className="md:col-span-1"
+              >
+                <div className="flex flex-wrap gap-2 mt-4">
                   {[
                     "Molho de vinagrete",
                     "Vinagrete lima",
@@ -358,23 +383,26 @@ const Sobre = () => {
                     </Badge>
                   ))}
                 </div>
-              </Card>
-            </div>
+              </BentoGridItem>
+            </BentoGrid>
           </div>
         </section>
 
-        {/* Fish Specialties */}
+        {/* Fish Specialties with Background Gradient */}
         <section className="py-20 bg-gradient-to-br from-cantinho-cream/40 to-cantinho-sand/20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-4">
-                <div className="bg-cantinho-terracotta/10 p-4 rounded-full">
-                  <Fish className="w-8 h-8 text-cantinho-terracotta" />
-                </div>
+                <BackgroundGradient className="rounded-full p-1">
+                  <div className="bg-cantinho-terracotta/10 p-4 rounded-full">
+                    <Fish className="w-8 h-8 text-cantinho-terracotta" />
+                  </div>
+                </BackgroundGradient>
               </div>
-              <h2 className="text-4xl font-bold text-cantinho-navy mb-4">
-                Pratos de Peixes
-              </h2>
+              <TextGenerateEffect
+                words="Pratos de Peixes"
+                className="text-4xl font-bold text-cantinho-navy mb-4"
+              />
               <p className="text-gray-600 text-lg max-w-3xl mx-auto">
                 Especializamo-nos em pratos de peixe fresco, preparados com
                 técnicas tradicionais e ingredientes selecionados.
@@ -382,56 +410,53 @@ const Sobre = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="overflow-hidden hover:shadow-xl transition-shadow">
+              <BackgroundGradient className="rounded-[22px] p-4 sm:p-10 bg-white dark:bg-zinc-900">
                 <img
                   src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=600&q=80"
                   alt="Peixe Grelhado"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover rounded-lg mb-4"
                 />
-                <div className="p-6">
-                  <Badge className="bg-cantinho-terracotta text-white mb-3">
-                    Especialidade da Casa
-                  </Badge>
-                  <h3 className="text-xl font-bold text-cantinho-navy mb-2">
-                    Peixe Grelhado
-                  </h3>
-                  <p className="text-gray-600">
-                    Corvina, piazete, garoupa - grelhados na perfeição com
-                    temperos especiais da casa
-                  </p>
-                </div>
-              </Card>
+                <Badge className="bg-cantinho-terracotta text-white mb-3">
+                  Especialidade da Casa
+                </Badge>
+                <h3 className="text-xl font-bold text-cantinho-navy mb-2">
+                  Peixe Grelhado
+                </h3>
+                <p className="text-gray-600">
+                  Corvina, piazete, garoupa - grelhados na perfeição com
+                  temperos especiais da casa
+                </p>
+              </BackgroundGradient>
 
-              <Card className="overflow-hidden hover:shadow-xl transition-shadow">
+              <BackgroundGradient className="rounded-[22px] p-4 sm:p-10 bg-white dark:bg-zinc-900">
                 <img
                   src="https://images.unsplash.com/photo-1472396961693-142e6e269027?w=600&q=80"
                   alt="Cozido de Peixe"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover rounded-lg mb-4"
                 />
-                <div className="p-6">
-                  <Badge className="bg-cantinho-terracotta text-white mb-3">
-                    Receita Tradicional
-                  </Badge>
-                  <h3 className="text-xl font-bold text-cantinho-navy mb-2">
-                    Cozido de Peixe
-                  </h3>
-                  <p className="text-gray-600">
-                    Filetes de pescadas cozidos com temperos especiais e
-                    acompanhamentos tradicionais
-                  </p>
-                </div>
-              </Card>
+                <Badge className="bg-cantinho-terracotta text-white mb-3">
+                  Receita Tradicional
+                </Badge>
+                <h3 className="text-xl font-bold text-cantinho-navy mb-2">
+                  Cozido de Peixe
+                </h3>
+                <p className="text-gray-600">
+                  Filetes de pescadas cozidos com temperos especiais e
+                  acompanhamentos tradicionais
+                </p>
+              </BackgroundGradient>
             </div>
           </div>
         </section>
 
-        {/* Testimonials/Clients */}
+        {/* Testimonials/Clients with Wobble Cards */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-cantinho-navy mb-4">
-                Nossos Clientes
-              </h2>
+              <TextGenerateEffect
+                words="Nossos Clientes"
+                className="text-4xl font-bold text-cantinho-navy mb-4"
+              />
               <p className="text-gray-600 text-lg max-w-3xl mx-auto">
                 Orgulhamo-nos de servir empresas líderes em Angola, construindo
                 parcerias duradouras baseadas na confiança e excelência.
@@ -439,27 +464,30 @@ const Sobre = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
-                <Card
+                <WobbleCard
                   key={index}
-                  className="p-6 hover:shadow-lg transition-shadow"
+                  containerClassName="col-span-1 h-full bg-cantinho-cream min-h-[300px]"
+                  className=""
                 >
-                  <div className="flex items-start space-x-4">
-                    <img
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full"
-                    />
-                    <div className="flex-grow">
-                      <h4 className="font-bold text-cantinho-navy">
-                        {testimonial.name}
-                      </h4>
-                      <p className="text-sm text-cantinho-terracotta mb-3">
-                        {testimonial.role}
-                      </p>
-                      <p className="text-gray-600">{testimonial.content}</p>
+                  <div className="max-w-sm">
+                    <div className="flex items-start space-x-4">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full"
+                      />
+                      <div className="flex-grow">
+                        <h4 className="font-bold text-cantinho-navy">
+                          {testimonial.name}
+                        </h4>
+                        <p className="text-sm text-cantinho-terracotta mb-3">
+                          {testimonial.role}
+                        </p>
+                        <p className="text-gray-600">{testimonial.content}</p>
+                      </div>
                     </div>
                   </div>
-                </Card>
+                </WobbleCard>
               ))}
             </div>
           </div>

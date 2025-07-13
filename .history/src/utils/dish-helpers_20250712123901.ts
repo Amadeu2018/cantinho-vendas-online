@@ -73,7 +73,7 @@ type Product = {
   // Novos campos para churrascaria
   sale_unit?: SaleUnit; // Assuming SaleUnit is a defined type in your codebase
   prep_time_minutes?: number;
-  meat_options?: MeatDoneness[]; // Updated to match the expected type
+  meat_options?: string[]; // Assuming meat_options is an array of strings
   spice_level?: number;
   is_grill_product?: boolean;
   combo_serves?: number;

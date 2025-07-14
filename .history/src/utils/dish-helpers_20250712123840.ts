@@ -1,4 +1,4 @@
-import { Dish, MeatDoneness, SaleUnit } from "@/types/dish";
+import { Dish } from "@/types/dish";
 
 export const mapCategory = (categoryName: string): 'appetizer' | 'main' | 'dessert' => {
   const lowerCategory = categoryName.toLowerCase();
@@ -71,9 +71,9 @@ type Product = {
   stock_quantity: number;
   promotions?: { discount_percentage: number }[];
   // Novos campos para churrascaria
-  sale_unit?: SaleUnit; // Assuming SaleUnit is a defined type in your codebase
+  sale_unit?: string;
   prep_time_minutes?: number;
-  meat_options?: MeatDoneness[]; // Updated to match the expected type
+  meat_options?: string[]; // Assuming meat_options is an array of strings
   spice_level?: number;
   is_grill_product?: boolean;
   combo_serves?: number;
@@ -94,11 +94,11 @@ export const formatDishFromProduct = (product: Product): Dish => {
   };
 
   // Parse meat options from JSONB
-  const parseMeatOptions = (meatOptions: string | string[]): MeatDoneness[] => {
-    if (Array.isArray(meatOptions)) return meatOptions as MeatDoneness[];
+  const parseMeatOptions = (meatOptions: string | string[]): string[] => {
+    if (Array.isArray(meatOptions)) return meatOptions;
     if (typeof meatOptions === 'string') {
       try {
-        return JSON.parse(meatOptions) as MeatDoneness[];
+        return JSON.parse(meatOptions);
       } catch {
         return [];
       }
@@ -129,7 +129,7 @@ export const formatDishFromProduct = (product: Product): Dish => {
     isPopular: product.stock_quantity > 10,
     productType: getProductType(categoryName),
     // Novos campos para churrascaria
-    sale_unit: product.sale_unit as SaleUnit,
+    sale_unit: product.sale_unit as any,
     prep_time_minutes: product.prep_time_minutes,
     meat_options: parseMeatOptions(product.meat_options),
     spice_level: product.spice_level,

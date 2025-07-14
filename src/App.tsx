@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { EventProvider } from "./contexts/EventContext";
+import routes from "tempo-routes";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Contacto from "./pages/Contacto";
@@ -28,8 +29,12 @@ import routes from "tempo-routes";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
+<<<<<<< HEAD
   // Tempo routes
   const tempoRoutes = import.meta.env.VITE_TEMPO && useRoutes(routes);
+=======
+  const tempoRoutes = import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
+>>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
 
   if (tempoRoutes) {
     return tempoRoutes;
@@ -54,7 +59,10 @@ const AppRoutes = () => {
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/notificacoes" element={<NotificationsPage />} />
       <Route path="/rastrear-pedido" element={<OrderTrackingPage />} />
+<<<<<<< HEAD
       {/* Add this before the catchall route */}
+=======
+>>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
       {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />

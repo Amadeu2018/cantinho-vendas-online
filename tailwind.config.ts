@@ -162,6 +162,12 @@ const config: Config = {
             opacity: "1",
           },
         },
+<<<<<<< HEAD
+=======
+      },
+      transitionDuration: {
+        "7000": "7000ms",
+>>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -178,9 +184,12 @@ const config: Config = {
         // Combined animations
         enter: "fade-in 0.3s ease-out, scale-in 0.2s ease-out",
         exit: "fade-out 0.3s ease-out, scale-out 0.2s ease-out",
+<<<<<<< HEAD
       },
       transitionDuration: {
         "7000": "7000ms",
+=======
+>>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
       },
       spacing: {
         "safe-top": "env(safe-area-inset-top)",
@@ -195,7 +204,17 @@ const config: Config = {
   },
   plugins: [
     require("tailwindcss-animate"),
+<<<<<<< HEAD
     function ({ addUtilities }) {
+=======
+    function ({ addUtilities, addBase }) {
+      // Fix duration utility conflicts
+      addBase({
+        ":root": {
+          "--duration-7000": "7000ms",
+        },
+      });
+>>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
       const newUtilities = {
         // Scroll utilities
         ".scroll-smooth": {

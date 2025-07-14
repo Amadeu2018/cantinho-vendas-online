@@ -172,7 +172,7 @@
 /* Painel Administrativo: Grid/Cards responsivos e cabeçalhos */
 @layer components {
   .admin-dashboard-cards {
-    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4;
   }
   .admin-dashboard-card {
     @apply p-3 sm:p-4 md:p-6;
@@ -192,6 +192,44 @@
   .admin-table th,
   .admin-table td {
     @apply px-3 py-2;
+  }
+
+  /* Enhanced Menu Cards */
+  .menu-card-enhanced {
+    @apply relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-gray-50/50 border border-gray-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:scale-[1.02] hover:border-cantinho-terracotta/30;
+  }
+
+  .menu-card-enhanced::before {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-cantinho-terracotta/5 opacity-0 transition-opacity duration-500;
+  }
+
+  .menu-card-enhanced:hover::before {
+    @apply opacity-100;
+  }
+
+  .menu-card-image-container {
+    @apply relative overflow-hidden rounded-t-xl;
+  }
+
+  .menu-card-content-enhanced {
+    @apply p-4 space-y-3 bg-white/80 backdrop-blur-sm;
+  }
+
+  .menu-card-title {
+    @apply text-lg font-bold text-cantinho-navy group-hover:text-cantinho-terracotta transition-colors duration-300;
+  }
+
+  .menu-card-description {
+    @apply text-sm text-gray-600 line-clamp-2 leading-relaxed;
+  }
+
+  .menu-card-price {
+    @apply text-xl font-bold text-cantinho-terracotta;
+  }
+
+  .menu-card-button {
+    @apply w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg;
   }
 }
 
@@ -230,19 +268,19 @@
   }
 }
 
-/* Print para admin: como já estava */
+/* Print para admin */
 @media print {
   /* Esconde elementos não relevantes para a impressão */
   body * {
     visibility: hidden;
   }
-  
+
   /* Mostra apenas o conteúdo do container da fatura */
-  #invoice-container, 
+  #invoice-container,
   #invoice-container * {
     visibility: visible;
   }
-  
+
   /* Posiciona o container da fatura no topo da página */
   #invoice-container {
     position: absolute;
@@ -252,32 +290,34 @@
     padding: 20px;
     background-color: white;
   }
-  
+
   /* Remove bordas arredondadas e sombras para impressão limpa */
   #invoice-container.card {
     border-radius: 0;
     box-shadow: none;
   }
-  
+
   /* Esconde botões e outros elementos desnecessários */
   .print\:hidden {
     display: none !important;
   }
-  
+
   /* Ajusta cores para impressão */
   .text-cantinho-navy {
     color: #000 !important;
   }
-  
+
   /* Garante que tabelas e conteúdo caibam bem na página */
   #invoice-container table {
     width: 100%;
     page-break-inside: avoid;
   }
-  
+
   /* Evita quebrar elementos importantes */
-  h2, h3, h4, 
-  #invoice-container .invoice-header, 
+  h2,
+  h3,
+  h4,
+  #invoice-container .invoice-header,
   #invoice-container .customer-info,
   #invoice-container .invoice-summary {
     page-break-inside: avoid;
@@ -292,14 +332,6 @@
   }
 }
 
-
-/* Remove duplicidade: se encontrar regras antigas similares, favor priorizar estas atuais! */
-
-/* Estilização para menus responsivos */
-.mobile-menu-container {
-  @apply max-h-[70vh] overflow-y-auto;
-}
-
 /* Responsividade para tabelas */
 @media (max-width: 640px) {
   .responsive-table {
@@ -307,122 +339,22 @@
     width: 100%;
     overflow-x: auto;
   }
-  
+
   .responsive-table th,
   .responsive-table td {
     white-space: nowrap;
     padding: 0.5rem;
   }
-  
+
   .mobile-card-view {
     @apply flex flex-col border rounded-lg p-4 mb-4 shadow-sm;
   }
-  
+
   .mobile-card-label {
     @apply text-sm text-gray-500 mb-1;
   }
-  
+
   .mobile-card-value {
     @apply font-medium mb-2;
-  }
-}
-
-/* Regras específicas para impressão de faturas */
-@media print {
-  /* Esconde elementos não relevantes para a impressão */
-  body * {
-    visibility: hidden;
-  }
-  
-  /* Mostra apenas o conteúdo do container da fatura */
-  #invoice-container, 
-  #invoice-container * {
-    visibility: visible;
-  }
-  
-  /* Posiciona o container da fatura no topo da página */
-  #invoice-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 20px;
-    background-color: white;
-  }
-  
-  /* Remove bordas arredondadas e sombras para impressão limpa */
-  #invoice-container.card {
-    border-radius: 0;
-    box-shadow: none;
-  }
-  
-  /* Esconde botões e outros elementos desnecessários */
-  .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Ajusta cores para impressão */
-  .text-cantinho-navy {
-    color: #000 !important;
-  }
-  
-  /* Garante que tabelas e conteúdo caibam bem na página */
-  #invoice-container table {
-    width: 100%;
-    page-break-inside: avoid;
-  }
-  
-  /* Evita quebrar elementos importantes */
-  h2, h3, h4, 
-  #invoice-container .invoice-header, 
-  #invoice-container .customer-info,
-  #invoice-container .invoice-summary {
-    page-break-inside: avoid;
-  }
-}
-
-/* RESPONSIVO PARA CARDS E GRIDS DO PAINEL ADMINISTRATIVO */
-@layer components {
-  .admin-dashboard-cards {
-    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4;
-  }
-  .admin-dashboard-card {
-    @apply p-3 sm:p-4 md:p-6;
-  }
-  .admin-section-header {
-    @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 mb-4;
-  }
-  .admin-section-title {
-    @apply text-lg md:text-2xl font-bold;
-  }
-}
-
-/* Responsividade reforçada para tabelas administrativas */
-@media (max-width: 640px) {
-  .responsive-table {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-  }
-  .responsive-table th,
-  .responsive-table td {
-    white-space: nowrap;
-    padding: 0.5rem;
-  }
-  .mobile-card-view {
-    @apply flex flex-col border rounded-lg p-4 mb-4 shadow-sm bg-white;
-  }
-  .mobile-card-label {
-    @apply text-xs sm:text-sm text-gray-500 mb-1;
-  }
-  .mobile-card-value {
-    @apply font-medium mb-2;
-  }
-}
-
-/* Ajuste global para grid das views de pedidos, produtos, estoque, etc */
-@media (max-width: 1024px) {
-  .admin-grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
   }
 }

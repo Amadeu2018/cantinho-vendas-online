@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/contexts/CartContext";
@@ -28,9 +27,10 @@ interface MenuCardProps {
 
 const MenuCard = ({ dish }: MenuCardProps) => {
   const { toast } = useToast();
-  const { addItem, isFavorite, addToFavorites, removeFromFavorites } = useCart();
+  const { addItem, isFavorite, addToFavorites, removeFromFavorites } =
+    useCart();
   const { isFirstOrder, discount } = useFirstOrder();
-  
+
   const isFav = isFavorite(parseInt(dish.id));
   const finalPrice = isFirstOrder ? dish.price * (1 - discount) : dish.price;
   const savings = dish.price - finalPrice;
@@ -46,9 +46,9 @@ const MenuCard = ({ dish }: MenuCardProps) => {
     if (isFirstOrder && savings > 0) {
       toast({
         title: "Primeiro pedido!",
-        description: `Você economizou ${savings.toLocaleString('pt-AO', { 
-          style: 'currency', 
-          currency: 'AOA' 
+        description: `Você economizou ${savings.toLocaleString("pt-AO", {
+          style: "currency",
+          currency: "AOA",
         })} neste prato! 🎉`,
       });
     }
@@ -63,7 +63,7 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   };
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] border-0 bg-white flex flex-col h-full">
+    <Card className="group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-[1.03] border border-gray-100 bg-white flex flex-col h-full rounded-xl backdrop-blur-sm hover:border-cantinho-terracotta/20">
       <MenuCardImage
         image={dish.image}
         name={dish.name}
@@ -76,7 +76,7 @@ const MenuCard = ({ dish }: MenuCardProps) => {
         onToggleFavorite={toggleFavorite}
       />
 
-      <div className="flex-grow flex flex-col">
+      <div className="flex-grow flex flex-col p-1">
         <MenuCardContent
           name={dish.name}
           category={dish.category}

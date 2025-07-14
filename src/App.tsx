@@ -24,17 +24,11 @@ import ResetPassword from "./pages/ResetPassword";
 import UpdatePassword from "./pages/UpdatePassword";
 import NotificationsPage from "./pages/NotificationsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
-import routes from "tempo-routes";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-<<<<<<< HEAD
-  // Tempo routes
-  const tempoRoutes = import.meta.env.VITE_TEMPO && useRoutes(routes);
-=======
   const tempoRoutes = import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
->>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
 
   if (tempoRoutes) {
     return tempoRoutes;
@@ -59,12 +53,7 @@ const AppRoutes = () => {
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/notificacoes" element={<NotificationsPage />} />
       <Route path="/rastrear-pedido" element={<OrderTrackingPage />} />
-<<<<<<< HEAD
-      {/* Add this before the catchall route */}
-=======
->>>>>>> 6ed44829dc71013a8591e5c472631f02dde3ebec
       {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -24,7 +24,7 @@ const HeroSection = ({ companyStats, logo }: HeroSectionProps) => {
         {logo && (
           <div className="mb-8 animate-fade-in">
             <img 
-              src="/logo_algarvio.png" 
+              src={logo} 
               alt="Cantinho Algarvio Logo" 
               className="w-32 h-32 md:w-48 md:h-48 object-contain mx-auto rounded-full shadow-2xl bg-white/10 backdrop-blur-sm p-4"
             />

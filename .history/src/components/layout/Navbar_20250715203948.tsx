@@ -39,7 +39,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group" onClick={closeMenu}>
               <div className="bg-gradient-to-br from-cantinho-terracotta to-cantinho-navy p-2 sm:p-2.5 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
                 <div className="w-7 h-7 sm:w-9 sm:h-9 bg-transparent rounded-lg flex items-center justify-center">
-                  <img src="/logo_algarvio.png" alt="Cantinho Logo" className="h-10 w-auto" />
+                  <img src="/logo.png" alt="Cantinho Logo" className="h-7 w-auto bg-transparent" style={{ backgroundColor: 'transparent' }} />
                 </div>
               </div>
               <div className="min-w-0">

@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { EventProvider } from "./contexts/EventContext";
@@ -22,6 +21,7 @@ import Sobre from "./pages/Sobre";
 import FirstOrder from "./pages/FirstOrder";
 import ResetPassword from "./pages/ResetPassword";
 import UpdatePassword from "./pages/UpdatePassword";
+import routes from "tempo-routes";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +34,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              {/* Tempo routes */}
+              {import.meta.env.VITE_TEMPO && useRoutes(routes)}
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/menu" element={<Menu />} />
@@ -50,6 +52,10 @@ const App = () => (
                 <Route path="/auth/update-password" element={<UpdatePassword />} />
                 <Route path="/perfil" element={<Profile />} />
                 <Route path="/sobre" element={<Sobre />} />
+                
+                {/* Add this before the catchall route */}
+                {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

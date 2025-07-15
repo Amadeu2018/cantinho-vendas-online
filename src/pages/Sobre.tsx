@@ -1,4 +1,5 @@
 import React from "react";
+import { Utensils, ChefHat, Fish } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/sobre/HeroSection";
@@ -75,6 +76,26 @@ const Sobre = () => {
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=spic",
     },
   ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main>
+        <HeroSection 
+          companyStats={companyStats}
+          logo="/cantinho-logo.jpeg"
+        />
+        <CompanyHistory timelineEvents={timelineEvents} />
+        <ServicesSection services={services} />
+        <MenuCategories />
+        <FishSpecialties />
+        <GallerySection />
+        <ClientsSection testimonials={testimonials} />
+        <ContactCTA />
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default Sobre;

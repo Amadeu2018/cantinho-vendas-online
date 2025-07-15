@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    // @ts-ignore
     allowedHosts: process.env.TEMPO === "true" ? true : undefined,
   },
   plugins: [
@@ -21,5 +20,14 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    exclude: [
+      "tempo-devtools",
+      "cmdk",
+      "react-resizable-panels",
+      "lovable-tagger",
+    ],
+    include: ["react-router-dom", "lucide-react"],
   },
 }));

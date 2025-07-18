@@ -1,5 +1,6 @@
 
 import { Utensils, Truck, Calendar, Award, Clock, Headphones, Star, MapPin } from "lucide-react";
+import { FeatureCard } from "@/components/ui/aceternity-card";
 
 const Services = () => {
   const services = [
@@ -59,39 +60,16 @@ const Services = () => {
           ))}
         </div>
         
-        {/* Mobile-first services grid */}
+        {/* Modern services grid with Aceternity cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
           {services.map((service, index) => (
-            <div 
-              key={index} 
-              className="group bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center transition-all duration-300 hover:shadow-2xl hover:scale-105 animate-scale-in border border-cantinho-sand/20"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {/* Mobile-optimized icon */}
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="bg-gradient-to-br from-cantinho-terracotta/10 to-cantinho-terracotta/20 p-3 sm:p-4 rounded-full group-hover:scale-110 transition-transform duration-300">
-                  {service.icon}
-                </div>
-              </div>
-              
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-cantinho-navy group-hover:text-cantinho-terracotta transition-colors duration-300">
-                {service.title}
-              </h3>
-              
-              <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-                {service.description}
-              </p>
-              
-              {/* Mobile-optimized feature list */}
-              <div className="space-y-2 sm:space-y-2">
-                {service.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center justify-center gap-2 text-xs sm:text-sm text-cantinho-navy">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-cantinho-terracotta rounded-full flex-shrink-0"></div>
-                    <span className="font-medium">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <FeatureCard
+              key={index}
+              title={service.title}
+              description={`${service.description} ${service.features.join(' • ')}`}
+              icon={service.icon}
+              className="animate-scale-in"
+            />
           ))}
         </div>
 

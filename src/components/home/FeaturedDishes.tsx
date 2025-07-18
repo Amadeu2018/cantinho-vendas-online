@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Utensils, Star, TrendingUp, Heart, Users, Award } from "lucide-react";
 import MenuCard from "../menu/MenuCard";
 import LoadMoreButton from "../common/LoadMoreButton";
+import { ProductCard } from "@/components/ui/aceternity-card";
 
 const FeaturedDishes = () => {
   const { 
@@ -83,16 +84,18 @@ const FeaturedDishes = () => {
           </div>
         ) : (
           <>
-            {/* Mobile-first dishes grid with consistent height */}
+            {/* Modern dishes grid with Aceternity cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
               {popularDishes.map((dish, index) => (
-                <div
+                <ProductCard
                   key={dish.id}
-                  className="animate-scale-in h-full flex"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <MenuCard dish={dish} />
-                </div>
+                  name={dish.name}
+                  description={dish.description || ''}
+                  price={dish.price}
+                  image={dish.image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80'}
+                  onAddToCart={() => console.log(`Added ${dish.name} to cart`)}
+                  className="animate-scale-in"
+                />
               ))}
             </div>
 

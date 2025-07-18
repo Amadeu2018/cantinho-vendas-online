@@ -2,7 +2,18 @@
 import React from 'react';
 import { Handshake, Building2 } from 'lucide-react';
 
-const ClientsSection = () => {
+interface Testimonial {
+  name: string;
+  role: string;
+  content: string;
+  avatar: string;
+}
+
+interface ClientsSectionProps {
+  testimonials: Testimonial[];
+}
+
+const ClientsSection = ({ testimonials }: ClientsSectionProps) => {
   const clients = [
     { 
       name: "ETAL", 

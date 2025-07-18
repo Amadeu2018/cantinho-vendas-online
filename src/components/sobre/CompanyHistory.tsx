@@ -2,7 +2,17 @@
 import React from 'react';
 import { MapPin, Users, Star, Trophy } from 'lucide-react';
 
-const CompanyHistory = () => {
+interface TimelineEvent {
+  year: string;
+  title: string;
+  description: string;
+}
+
+interface CompanyHistoryProps {
+  timelineEvents: TimelineEvent[];
+}
+
+const CompanyHistory = ({ timelineEvents }: CompanyHistoryProps) => {
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-4">

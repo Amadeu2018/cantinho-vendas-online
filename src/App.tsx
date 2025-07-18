@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { EventProvider } from "./contexts/EventContext";
-import routes from "tempo-routes";
+// import routes from "tempo-routes";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Contacto from "./pages/Contacto";
@@ -28,11 +28,11 @@ import OrderTrackingPage from "./pages/OrderTrackingPage";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const tempoRoutes = import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
+  // const tempoRoutes = import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
 
-  if (tempoRoutes) {
-    return tempoRoutes;
-  }
+  // if (tempoRoutes) {
+  //   return tempoRoutes;
+  // }
 
   return (
     <Routes>

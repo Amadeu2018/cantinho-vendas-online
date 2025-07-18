@@ -4,23 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Utensils, ShoppingCart, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const ServicesSection = () => {
-  const navigate = useNavigate();
+interface Service {
+  icon: React.ReactElement;
+  title: string;
+  description: string;
+}
 
-  const services = [
-    {
-      title: "Pequeno Almoço",
-      description: "Opções nutritivas, saborosas e frescas logo cedo",
-    },
-    {
-      title: "Almoço",
-      description: "Pratos tradicionais e contemporâneos para seu almoço",
-    },
-    {
-      title: "Jantar",
-      description: "Gastronomia única para noites inesquecíveis",
-    },
-  ];
+interface ServicesSectionProps {
+  services: Service[];
+}
+
+const ServicesSection = ({ services }: ServicesSectionProps) => {
+  const navigate = useNavigate();
 
   const handleOrderNow = () => {
     navigate("/cardapio");
@@ -44,7 +39,9 @@ const ServicesSection = () => {
               className="hover:shadow-lg transition-shadow animate-scale-in"
             >
               <CardContent className="p-8 text-center flex flex-col items-center">
-                <Utensils className="w-12 h-12 text-cantinho-terracotta mb-5" />
+                <div className="w-12 h-12 text-cantinho-terracotta mb-5">
+                  {service.icon}
+                </div>
                 <h3 className="text-xl font-semibold text-cantinho-navy mb-3">
                   {service.title}
                 </h3>

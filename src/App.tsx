@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { EventProvider } from "./contexts/EventContext";
+import PWAInstallPrompt from "./components/pwa/PWAInstallPrompt";
+import PWAUpdater from "./components/pwa/PWAUpdater";
+import PWAOfflineIndicator from "./components/pwa/PWAOfflineIndicator";
+import PWALayout from "./components/layout/PWALayout";
 // import routes from "tempo-routes";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
@@ -65,11 +69,16 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <EventProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
+            <PWALayout>
+              <Toaster />
+              <Sonner />
+              <PWAInstallPrompt />
+              <PWAUpdater />
+              <PWAOfflineIndicator />
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </PWALayout>
           </EventProvider>
         </CartProvider>
       </AuthProvider>

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 
 interface ProductCodesProps {
   formData: any;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 const ProductCodes = ({ formData, onChange }: ProductCodesProps) => {

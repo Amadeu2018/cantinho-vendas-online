@@ -125,7 +125,10 @@ const EditProduct = ({ product, onSuccess }: EditProductProps) => {
         description: "O produto foi atualizado com sucesso",
       });
       
-      if (onSuccess) onSuccess();
+      // Force refresh after small delay to ensure data is updated
+      setTimeout(() => {
+        if (onSuccess) onSuccess();
+      }, 500);
       
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error);

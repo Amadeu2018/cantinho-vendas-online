@@ -179,7 +179,10 @@ const AddProduct = ({ onSuccess }: AddProductProps) => {
         cost: "0"
       });
       
-      if (onSuccess) onSuccess();
+      // Force refresh after small delay to ensure data is updated
+      setTimeout(() => {
+        if (onSuccess) onSuccess();
+      }, 500);
       
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);

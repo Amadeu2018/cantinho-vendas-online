@@ -24,6 +24,8 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
 
   const uploadImageToStorage = async (file: File): Promise<string> => {
     try {
+      setImageUploading(true);
+      
       const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
       
       let bucketName = 'product-images';
@@ -35,16 +37,32 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
           fileSizeLimit: 5242880, // 5MB
         });
         
-        if (createError) {
+        if (createError && !createError.message.includes('already exists')) {
           console.error("Error creating bucket:", createError);
           throw createError;
         }
       }
       
-      const fileName = `${Date.now()}-${file.name}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+      
+      // Delete existing file if updating
+      if (currentImageUrl && currentImageUrl.includes(bucketName)) {
+        try {
+          const existingFileName = currentImageUrl.split('/').pop();
+          if (existingFileName) {
+            await supabase.storage.from(bucketName).remove([existingFileName]);
+          }
+        } catch (deleteError) {
+          console.log("Could not delete existing file:", deleteError);
+        }
+      }
+      
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
       
       if (uploadError) throw uploadError;
       
@@ -52,15 +70,18 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
         .from(bucketName)
         .getPublicUrl(fileName);
       
+      console.log("Image uploaded successfully:", publicUrlData.publicUrl);
       return publicUrlData.publicUrl;
     } catch (error) {
       console.error("Error uploading image to storage:", error);
       toast({
         title: "Erro ao fazer upload da imagem",
-        description: "Não foi possível salvar a imagem. Usando imagem de placeholder.",
+        description: "Não foi possível salvar a imagem. Tente novamente.",
         variant: "destructive"
       });
-      return '/placeholder.svg';
+      throw error;
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -69,13 +90,33 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    setImageUploading(true);
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione apenas arquivos de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5242880) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
       
       const uploadedUrl = await uploadImageToStorage(file);
+      setImagePreview(uploadedUrl); // Update preview with actual URL
       onImageChange(uploadedUrl);
       
       toast({
@@ -84,13 +125,12 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
       });
     } catch (error) {
       console.error("Error handling file upload:", error);
+      setImagePreview(null); // Reset preview on error
       toast({
         title: "Erro no upload",
         description: "Não foi possível fazer o upload da imagem.",
         variant: "destructive",
       });
-    } finally {
-      setImageUploading(false);
     }
   };
 

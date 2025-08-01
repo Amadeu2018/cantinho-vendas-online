@@ -4,4 +4,5 @@ import App from './App.tsx'
 import './index.css'
 import './styles/pwa-responsive.css'
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = createRoot(document.getElementById("root")!);
+root.render(<App />);

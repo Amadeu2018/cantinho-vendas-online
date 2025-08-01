@@ -10,8 +10,10 @@ import SystemSettings from "./settings/SystemSettings";
 import InvoiceSettings from "./settings/InvoiceSettings";
 import PrinterSettings from "./settings/PrinterSettings";
 import AllInvoicesView from "./AllInvoicesView";
+import DeliverySettings from "./settings/DeliverySettings";
+import PromotionSettings from "./settings/PromotionSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, CreditCard, FileText, Settings, Printer, Receipt } from "lucide-react";
+import { Building2, CreditCard, FileText, Settings, Printer, Receipt, Truck, Tag } from "lucide-react";
 
 const AdminSettings = () => {
   const { settings, loading, saving, updateSettings } = useCompanySettings();
@@ -42,30 +44,38 @@ const AdminSettings = () => {
       />
 
       <Tabs defaultValue="company" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
           <TabsTrigger value="company" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Empresa</span>
+            <span className="hidden lg:inline">Empresa</span>
+          </TabsTrigger>
+          <TabsTrigger value="delivery" className="flex items-center gap-2">
+            <Truck className="h-4 w-4" />
+            <span className="hidden lg:inline">Entrega</span>
+          </TabsTrigger>
+          <TabsTrigger value="promotions" className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            <span className="hidden lg:inline">Promoções</span>
           </TabsTrigger>
           <TabsTrigger value="invoices" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Faturas</span>
+            <span className="hidden lg:inline">Faturas</span>
           </TabsTrigger>
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            <span className="hidden sm:inline">Pagamentos</span>
+            <span className="hidden lg:inline">Pagamentos</span>
           </TabsTrigger>
           <TabsTrigger value="printers" className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
-            <span className="hidden sm:inline">Impressoras</span>
+            <span className="hidden lg:inline">Impressoras</span>
           </TabsTrigger>
           <TabsTrigger value="all-invoices" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
-            <span className="hidden sm:inline">Todas Faturas</span>
+            <span className="hidden lg:inline">Todas Faturas</span>
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Sistema</span>
+            <span className="hidden lg:inline">Sistema</span>
           </TabsTrigger>
         </TabsList>
 
@@ -74,6 +84,14 @@ const AdminSettings = () => {
             settings={localSettings}
             onSettingsChange={handleSettingsChange}
           />
+        </TabsContent>
+
+        <TabsContent value="delivery" className="space-y-6 mt-6">
+          <DeliverySettings />
+        </TabsContent>
+
+        <TabsContent value="promotions" className="space-y-6 mt-6">
+          <PromotionSettings />
         </TabsContent>
 
         <TabsContent value="invoices" className="space-y-6 mt-6">

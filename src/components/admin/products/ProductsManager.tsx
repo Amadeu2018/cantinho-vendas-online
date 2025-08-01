@@ -142,6 +142,15 @@ const ProductsManager = ({
     fetchProducts();
   };
 
+  // Add refresh after product operations
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchProducts();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="space-y-4 p-3 sm:p-0">
       <ProductsHeader 

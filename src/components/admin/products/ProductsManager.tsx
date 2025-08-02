@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductsList from "../ProductsList";
-import ProductsListMobile from "../ProductsListMobile";
 import ProductsHeader from "./ProductsHeader";
 import ProductsFilters from "./ProductsFilters";
 
@@ -142,14 +141,14 @@ const ProductsManager = ({
     fetchProducts();
   };
 
-  // Add refresh after product operations
+  // Add refresh after product operations with dependency optimization
   useEffect(() => {
     const interval = setInterval(() => {
       fetchProducts();
-    }, 5000); // Refresh every 5 seconds
+    }, 30000); // Refresh every 30 seconds (less aggressive)
 
     return () => clearInterval(interval);
-  }, []);
+  }, [sortField, sortDirection]); // Add dependencies to prevent unnecessary refreshes
 
   return (
     <div className="space-y-4 p-3 sm:p-0">
@@ -177,28 +176,17 @@ const ProductsManager = ({
                 <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
               </div>
             ) : (
-              isMobile ? (
-                <ProductsListMobile
-                  products={filteredProducts}
-                  onView={onViewProduct}
-                  onEdit={onEditProduct}
-                  onDelete={onDeleteProduct}
-                  onUpdateStock={handleUpdateStock}
-                  getCategoryName={getCategoryName}
-                />
-              ) : (
-                <ProductsList 
-                  products={filteredProducts}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  onView={onViewProduct}
-                  onEdit={onEditProduct}
-                  onDelete={onDeleteProduct}
-                  onUpdateStock={handleUpdateStock}
-                  getCategoryName={getCategoryName}
-                />
-              )
+              <ProductsList 
+                products={filteredProducts}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                onView={onViewProduct}
+                onEdit={onEditProduct}
+                onDelete={onDeleteProduct}
+                onUpdateStock={handleUpdateStock}
+                getCategoryName={getCategoryName}
+              />
             )}
           </TabsContent>
         </CardContent>

@@ -221,6 +221,54 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
             
             <SidebarMenuItem>
               <SidebarMenuButton 
+                isActive={isActive("promotions")}
+                onClick={() => handleTabClick("promotions")}
+                tooltip="Promoções"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
+              >
+                <TrendingUp className="h-5 w-5 flex-shrink-0" />
+                <span>Promoções</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                isActive={isActive("delivery-settings")}
+                onClick={() => handleTabClick("delivery-settings")}
+                tooltip="Taxa de Entrega"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
+              >
+                <Wallet className="h-5 w-5 flex-shrink-0" />
+                <span>Taxa de Entrega</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                isActive={isActive("image-manager")}
+                onClick={() => handleTabClick("image-manager")}
+                tooltip="Gestor de Imagens"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
+              >
+                <Package className="h-5 w-5 flex-shrink-0" />
+                <span>Gestor de Imagens</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                isActive={isActive("security-logs")}
+                onClick={() => handleTabClick("security-logs")}
+                tooltip="Logs de Segurança"
+                className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
+              >
+                <FileText className="h-5 w-5 flex-shrink-0" />
+                <span>Logs de Segurança</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            
+            <SidebarMenuItem>
+              <SidebarMenuButton 
                 isActive={isActive("settings")}
                 onClick={() => handleTabClick("settings")}
                 tooltip="Configurações"

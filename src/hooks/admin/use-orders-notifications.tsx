@@ -39,10 +39,11 @@ export const useOrdersNotifications = (refreshOrders: () => void) => {
 
             // Create notification in database
             try {
+              const adminUser = await supabase.auth.getUser();
               const { error: notificationError } = await supabase
                 .from('notifications')
                 .insert({
-                  user_id: 'admin',
+                  user_id: adminUser.data.user?.id,
                   title: 'Novo pedido recebido',
                   message: `Pedido #${payload.new.id.slice(0, 8)} de ${customerName} - Total: ${Number(payload.new.total).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`,
                   type: 'order',
@@ -72,11 +73,12 @@ export const useOrdersNotifications = (refreshOrders: () => void) => {
             if (payload.old && payload.old.status !== payload.new.status) {
               console.log('Admin: Status do pedido alterado:', payload.old.status, '->', payload.new.status);
               
-              try {
-                const { error: statusNotificationError } = await supabase
-                  .from('notifications')
-                  .insert({
-                    user_id: 'admin',
+                try {
+                  const adminUser = await supabase.auth.getUser();
+                  const { error: statusNotificationError } = await supabase
+                    .from('notifications')
+                    .insert({
+                      user_id: adminUser.data.user?.id,
                     title: 'Status do pedido atualizado',
                     message: `Pedido #${payload.new.id.slice(0, 8)} alterado para: ${payload.new.status}`,
                     type: 'status_update',

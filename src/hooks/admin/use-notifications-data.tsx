@@ -23,7 +23,7 @@ export const useNotificationsData = () => {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', 'admin')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .order('created_at', { ascending: false })
         .limit(20);
         
@@ -52,11 +52,12 @@ export const useNotificationsData = () => {
     }
   };
 
-  const handleNewNotification = (payload: any) => {
+  const handleNewNotification = async (payload: any) => {
     console.log('Nova notificação recebida no dropdown:', payload);
     const newNotif = payload.new;
+    const currentUser = await supabase.auth.getUser();
     
-    if (newNotif && newNotif.user_id === 'admin') {
+    if (newNotif && newNotif.user_id === currentUser.data.user?.id) {
       const formattedNotification: OrderNotification = {
         id: newNotif.id,
         orderId: newNotif.message.split(' ')[1] || '',

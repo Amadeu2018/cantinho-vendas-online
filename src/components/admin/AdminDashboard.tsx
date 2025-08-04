@@ -10,6 +10,10 @@ import AdminInventory from "./AdminInventory";
 import AdminReports from "./AdminReports";
 import AdminSettings from "./AdminSettings";
 import AdminEventRequests from "./AdminEventRequests";
+import PromotionsManager from "./promotions/PromotionsManager";
+import DeliverySettingsManager from "./delivery/DeliverySettingsManager";
+import ImageUploadManager from "./image-upload/ImageUploadManager";
+import SecurityLogsManager from "./security/SecurityLogsManager";
 import { Order } from "@/hooks/admin/use-orders-data";
 
 interface AdminDashboardProps {
@@ -63,6 +67,14 @@ const AdminDashboard = ({
         return <AdminSettings />;
       case "events":
         return <AdminEventRequests />;
+      case "promotions":
+        return <PromotionsManager />;
+      case "delivery-settings":
+        return <DeliverySettingsManager />;
+      case "image-manager":
+        return <ImageUploadManager />;
+      case "security-logs":
+        return <SecurityLogsManager />;
       default:
         return (
           <DashboardContent 

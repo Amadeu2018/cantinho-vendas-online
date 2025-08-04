@@ -148,7 +148,7 @@ const ProductsManager = ({
     }, 30000); // Refresh every 30 seconds (less aggressive)
 
     return () => clearInterval(interval);
-  }, [sortField, sortDirection]); // Add dependencies to prevent unnecessary refreshes
+  }, []); // Remove dependencies to prevent unnecessary refreshes
 
   return (
     <div className="space-y-4 p-3 sm:p-0">

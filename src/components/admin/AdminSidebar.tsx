@@ -27,7 +27,11 @@ import {
   TrendingUp,
   CreditCard,
   Archive,
-  Home
+  Home,
+  Percent,
+  Truck,
+  ImageIcon,
+  Shield
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -226,7 +230,7 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 tooltip="Promoções"
                 className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <TrendingUp className="h-5 w-5 flex-shrink-0" />
+                <Percent className="h-5 w-5 flex-shrink-0" />
                 <span>Promoções</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -238,7 +242,7 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 tooltip="Taxa de Entrega"
                 className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Wallet className="h-5 w-5 flex-shrink-0" />
+                <Truck className="h-5 w-5 flex-shrink-0" />
                 <span>Taxa de Entrega</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -250,7 +254,7 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 tooltip="Gestor de Imagens"
                 className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <Package className="h-5 w-5 flex-shrink-0" />
+                <ImageIcon className="h-5 w-5 flex-shrink-0" />
                 <span>Gestor de Imagens</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -262,7 +266,7 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout }: AdminSidebarProps) =
                 tooltip="Logs de Segurança"
                 className="data-[active=true]:bg-white/20 data-[active=true]:text-white hover:bg-white/10 hover:text-white"
               >
-                <FileText className="h-5 w-5 flex-shrink-0" />
+                <Shield className="h-5 w-5 flex-shrink-0" />
                 <span>Logs de Segurança</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

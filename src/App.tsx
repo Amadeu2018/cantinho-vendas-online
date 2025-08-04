@@ -65,26 +65,26 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
         <TooltipProvider>
           <AuthProvider>
             <CartProvider>
               <EventProvider>
                 <PWALayout>
-                  <Toaster />
-                  <Sonner />
+                  <AppRoutes />
                   <PWAInstallPrompt />
                   <PWAUpdater />
                   <PWAOfflineIndicator />
-                  <AppRoutes />
                 </PWALayout>
               </EventProvider>
             </CartProvider>
           </AuthProvider>
         </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        <Toaster />
+        <Sonner />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 

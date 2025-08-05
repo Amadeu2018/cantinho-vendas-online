@@ -76,13 +76,13 @@ const App = () => {
                   <PWAInstallPrompt />
                   <PWAUpdater />
                   <PWAOfflineIndicator />
+                  <Toaster />
+                  <Sonner />
                 </PWALayout>
               </EventProvider>
             </CartProvider>
           </AuthProvider>
         </TooltipProvider>
-        <Toaster />
-        <Sonner />
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -48,6 +48,7 @@ const ProductsManager = ({
         .order(sortField, { ascending: sortDirection === "asc" });
 
       if (error) throw error;
+      console.log("Produtos carregados:", data?.length || 0, data);
       setProducts(data || []);
     } catch (error: any) {
       console.error("Erro ao buscar produtos:", error);
@@ -148,7 +149,7 @@ const ProductsManager = ({
     }, 30000); // Refresh every 30 seconds (less aggressive)
 
     return () => clearInterval(interval);
-  }, []); // Remove dependencies to prevent unnecessary refreshes
+  }, [sortField, sortDirection]); // Add dependencies to prevent unnecessary refreshes
 
   return (
     <div className="space-y-4 p-3 sm:p-0">

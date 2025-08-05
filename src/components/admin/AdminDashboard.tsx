@@ -11,7 +11,7 @@ import AdminReports from "./AdminReports";
 import AdminSettings from "./AdminSettings";
 import AdminEventRequests from "./AdminEventRequests";
 import PromotionsManager from "./promotions/PromotionsManager";
-import DeliverySettingsManager from "./delivery/DeliverySettingsManager";
+import DeliverySettings from "./settings/DeliverySettings";
 import ImageUploadManager from "./image-upload/ImageUploadManager";
 import SecurityLogsManager from "./security/SecurityLogsManager";
 import { Order } from "@/hooks/admin/use-orders-data";
@@ -70,7 +70,7 @@ const AdminDashboard = ({
       case "promotions":
         return <PromotionsManager />;
       case "delivery-settings":
-        return <DeliverySettingsManager />;
+        return <DeliverySettings />;
       case "image-manager":
         return <ImageUploadManager />;
       case "security-logs":

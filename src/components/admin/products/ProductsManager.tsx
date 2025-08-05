@@ -39,15 +39,21 @@ const ProductsManager = ({
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      console.log("Iniciando busca de produtos...");
+      
       const { data, error } = await supabase
         .from("products")
         .select(`
           *,
-          categories:categories!products_category_id_fkey(id, name)
+          categories(id, name)
         `)
         .order(sortField, { ascending: sortDirection === "asc" });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro na query:", error);
+        throw error;
+      }
+      
       console.log("Produtos carregados:", data?.length || 0, data);
       setProducts(data || []);
     } catch (error: any) {
@@ -115,6 +121,7 @@ const ProductsManager = ({
   };
 
   const getCategoryName = (product: any) => {
+    console.log("Category for product:", product.name, "categories:", product.categories);
     if (product.categories && product.categories.name) {
       return product.categories.name;
     }
@@ -136,6 +143,14 @@ const ProductsManager = ({
     }
     
     return matchesSearch && matchesTab;
+  });
+
+  console.log("Estado atual:", {
+    loading,
+    products: products.length,
+    filteredProducts: filteredProducts.length,
+    activeTab,
+    searchTerm
   });
 
   const refreshProducts = () => {
@@ -177,17 +192,22 @@ const ProductsManager = ({
                 <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
               </div>
             ) : (
-              <ProductsList 
-                products={filteredProducts}
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-                onView={onViewProduct}
-                onEdit={onEditProduct}
-                onDelete={onDeleteProduct}
-                onUpdateStock={handleUpdateStock}
-                getCategoryName={getCategoryName}
-              />
+              <>
+                <div className="text-sm text-gray-500 mb-4">
+                  Exibindo {filteredProducts.length} de {products.length} produtos
+                </div>
+                <ProductsList 
+                  products={filteredProducts}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  onView={onViewProduct}
+                  onEdit={onEditProduct}
+                  onDelete={onDeleteProduct}
+                  onUpdateStock={handleUpdateStock}
+                  getCategoryName={getCategoryName}
+                />
+              </>
             )}
           </TabsContent>
         </CardContent>

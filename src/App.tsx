@@ -67,10 +67,10 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <TooltipProvider>
-          <AuthProvider>
-            <CartProvider>
-              <EventProvider>
+        <AuthProvider>
+          <CartProvider>
+            <EventProvider>
+              <TooltipProvider>
                 <PWALayout>
                   <AppRoutes />
                   <PWAInstallPrompt />
@@ -79,10 +79,10 @@ const App = () => {
                 </PWALayout>
                 <Toaster />
                 <Sonner />
-              </EventProvider>
-            </CartProvider>
-          </AuthProvider>
-        </TooltipProvider>
+              </TooltipProvider>
+            </EventProvider>
+          </CartProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -1,173 +1,163 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, Shield, AlertTriangle, Info, CheckCircle } from "lucide-react";
-import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield, Search, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
 interface SecurityLog {
   id: string;
-  user_id: string;
+  timestamp: string;
   action: string;
-  details: any;
-  ip_address: string | null;
-  user_agent: string | null;
-  created_at: string;
+  user: string;
+  ip: string;
+  status: 'success' | 'warning' | 'error';
+  details: string;
 }
 
 const SecurityLogsManager = () => {
-  const [logs, setLogs] = useState<SecurityLog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
+  const [logs] = useState<SecurityLog[]>([
+    {
+      id: "1",
+      timestamp: "2024-01-15T14:30:00Z",
+      action: "Login Administrativo",
+      user: "admin@cantinho.pt",
+      ip: "192.168.1.100",
+      status: "success",
+      details: "Login realizado com sucesso"
+    },
+    {
+      id: "2",
+      timestamp: "2024-01-15T14:25:00Z", 
+      action: "Tentativa de Login Falhada",
+      user: "unknown@email.com",
+      ip: "45.123.45.67",
+      status: "error",
+      details: "Credenciais inválidas"
+    }
+  ]);
 
-  const fetchLogs = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('security_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-      if (error) throw error;
-      setLogs((data || []).map(log => ({
-        ...log,
-        ip_address: log.ip_address as string | null,
-        user_agent: log.user_agent as string | null
-      })));
-    } catch (error) {
-      console.error('Erro ao carregar logs:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os logs de segurança",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case 'error':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
-  const getActionIcon = (action: string) => {
-    if (action.includes('login') || action.includes('auth')) {
-      return <Shield className="h-4 w-4" />;
-    }
-    if (action.includes('error') || action.includes('failed')) {
-      return <AlertTriangle className="h-4 w-4" />;
-    }
-    if (action.includes('success')) {
-      return <CheckCircle className="h-4 w-4" />;
-    }
-    return <Info className="h-4 w-4" />;
-  };
-
-  const getActionVariant = (action: string) => {
-    if (action.includes('error') || action.includes('failed')) {
-      return 'destructive';
-    }
-    if (action.includes('success') || action.includes('login')) {
-      return 'default';
-    }
-    return 'secondary';
-  };
-
-  const filteredLogs = logs.filter(log =>
-    log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.user_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  if (loading) {
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      success: "default",
+      warning: "secondary", 
+      error: "destructive"
+    } as const;
+    
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+        {status === 'success' ? 'Sucesso' : 
+         status === 'warning' ? 'Aviso' : 
+         status === 'error' ? 'Erro' : status}
+      </Badge>
     );
-  }
+  };
+
+  const filteredLogs = logs.filter(log => {
+    const matchesSearch = 
+      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.ip.includes(searchTerm) ||
+      log.details.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || log.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString('pt-PT', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Logs de Segurança</h2>
-          <p className="text-muted-foreground">Monitore atividades e eventos de segurança</p>
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Shield className="h-6 w-6" />
+          Logs de Segurança
+        </h2>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar logs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
         </div>
-        <Button onClick={fetchLogs} variant="outline">
-          <Shield className="mr-2 h-4 w-4" />
-          Atualizar
-        </Button>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filtrar por status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Status</SelectItem>
+            <SelectItem value="success">Sucesso</SelectItem>
+            <SelectItem value="warning">Aviso</SelectItem>
+            <SelectItem value="error">Erro</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-          <CardDescription>Pesquise por ação ou usuário</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Pesquisar logs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Eventos Recentes</CardTitle>
-          <CardDescription>Últimos {filteredLogs.length} eventos de segurança</CardDescription>
+          <CardTitle>Registos de Atividade</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredLogs.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Shield className="mx-auto h-12 w-12 mb-4" />
-              <p>Nenhum log encontrado</p>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Nenhum log encontrado</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredLogs.map((log) => (
-                <div key={log.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                  <div className="flex-shrink-0 mt-1">
-                    {getActionIcon(log.action)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={getActionVariant(log.action)}>
-                        {log.action}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss')}
-                      </span>
+                <Card key={log.id} className="border-l-4 border-l-blue-500">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-start gap-3">
+                        {getStatusIcon(log.status)}
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h4 className="font-medium">{log.action}</h4>
+                            {getStatusBadge(log.status)}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            {log.details}
+                          </p>
+                          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                            <span>Usuário: {log.user}</span>
+                            <span>IP: {log.ip}</span>
+                            <span>Data: {formatTimestamp(log.timestamp)}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Usuário: {log.user_id?.slice(0, 8) || 'Sistema'}
-                    </p>
-                    {log.details && Object.keys(log.details).length > 0 && (
-                      <details className="text-sm">
-                        <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                          Ver detalhes
-                        </summary>
-                        <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
-                          {JSON.stringify(log.details, null, 2)}
-                        </pre>
-                      </details>
-                    )}
-                    {log.ip_address && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        IP: {log.ip_address}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

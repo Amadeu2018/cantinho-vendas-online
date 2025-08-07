@@ -70,16 +70,16 @@ const App = () => {
         <AuthProvider>
           <CartProvider>
             <EventProvider>
-              <TooltipProvider>
-                <PWALayout>
+              <PWALayout>
+                <TooltipProvider>
                   <AppRoutes />
                   <PWAInstallPrompt />
                   <PWAUpdater />
                   <PWAOfflineIndicator />
-                </PWALayout>
-                <Toaster />
-                <Sonner />
-              </TooltipProvider>
+                </TooltipProvider>
+              </PWALayout>
+              <Toaster />
+              <Sonner />
             </EventProvider>
           </CartProvider>
         </AuthProvider>

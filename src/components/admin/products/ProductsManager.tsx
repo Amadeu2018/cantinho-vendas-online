@@ -39,25 +39,27 @@ const ProductsManager = ({
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      console.log("Iniciando busca de produtos...");
+      console.log("🔍 Iniciando busca de produtos...");
       
+      // Simplificar a query primeiro
       const { data, error } = await supabase
         .from("products")
-        .select(`
-          *,
-          categories(id, name)
-        `)
+        .select("*")
         .order(sortField, { ascending: sortDirection === "asc" });
 
       if (error) {
-        console.error("Erro na query:", error);
+        console.error("❌ Erro na query de produtos:", error);
         throw error;
       }
       
-      console.log("Produtos carregados:", data?.length || 0, data);
+      console.log("✅ Produtos carregados:", {
+        count: data?.length || 0,
+        products: data || []
+      });
+      
       setProducts(data || []);
     } catch (error: any) {
-      console.error("Erro ao buscar produtos:", error);
+      console.error("❌ Erro ao buscar produtos:", error);
       toast({
         title: "Erro ao carregar produtos",
         description: error.message || "Não foi possível carregar a lista de produtos",
@@ -70,15 +72,21 @@ const ProductsManager = ({
 
   const fetchCategories = async () => {
     try {
+      console.log("🔍 Carregando categorias...");
       const { data, error } = await supabase
         .from("categories")
         .select("*")
         .order("name");
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Erro ao carregar categorias:", error);
+        throw error;
+      }
+      
+      console.log("✅ Categorias carregadas:", data?.length || 0);
       setCategories(data || []);
     } catch (error: any) {
-      console.error("Erro ao carregar categorias:", error);
+      console.error("❌ Erro ao carregar categorias:", error);
     }
   };
 
@@ -121,11 +129,14 @@ const ProductsManager = ({
   };
 
   const getCategoryName = (product: any) => {
-    console.log("Category for product:", product.name, "categories:", product.categories);
-    if (product.categories && product.categories.name) {
-      return product.categories.name;
-    }
-    return "Sem categoria";
+    console.log("🏷️ Buscando categoria para produto:", product.name);
+    
+    // Como removemos o join, buscar categoria manualmente
+    const category = categories.find(cat => cat.id === product.category_id);
+    const categoryName = category?.name || "Sem categoria";
+    
+    console.log("✅ Categoria encontrada:", categoryName);
+    return categoryName;
   };
 
   const filteredProducts = products.filter(product => {

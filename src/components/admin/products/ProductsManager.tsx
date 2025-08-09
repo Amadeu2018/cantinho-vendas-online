@@ -32,6 +32,7 @@ const ProductsManager = ({
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    console.log("🚀 Iniciando carregamento de dados...");
     fetchProducts();
     fetchCategories();
   }, [sortField, sortDirection]);
@@ -41,7 +42,6 @@ const ProductsManager = ({
       setLoading(true);
       console.log("🔍 Iniciando busca de produtos...");
       
-      // Simplificar a query primeiro
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -49,20 +49,21 @@ const ProductsManager = ({
 
       if (error) {
         console.error("❌ Erro na query de produtos:", error);
-        throw error;
+        toast({
+          title: "Erro ao carregar produtos",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
       
-      console.log("✅ Produtos carregados:", {
-        count: data?.length || 0,
-        products: data || []
-      });
-      
+      console.log("✅ Produtos carregados:", data?.length || 0);
       setProducts(data || []);
     } catch (error: any) {
       console.error("❌ Erro ao buscar produtos:", error);
       toast({
-        title: "Erro ao carregar produtos",
-        description: error.message || "Não foi possível carregar a lista de produtos",
+        title: "Erro ao carregar produtos", 
+        description: "Não foi possível carregar a lista de produtos",
         variant: "destructive",
       });
     } finally {
@@ -207,17 +208,26 @@ const ProductsManager = ({
                 <div className="text-sm text-gray-500 mb-4">
                   Exibindo {filteredProducts.length} de {products.length} produtos
                 </div>
-                <ProductsList 
-                  products={filteredProducts}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  onView={onViewProduct}
-                  onEdit={onEditProduct}
-                  onDelete={onDeleteProduct}
-                  onUpdateStock={handleUpdateStock}
-                  getCategoryName={getCategoryName}
-                />
+                {filteredProducts.length > 0 ? (
+                  <ProductsList 
+                    products={filteredProducts}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    onView={onViewProduct}
+                    onEdit={onEditProduct}
+                    onDelete={onDeleteProduct}
+                    onUpdateStock={handleUpdateStock}
+                    getCategoryName={getCategoryName}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Nenhum produto encontrado</p>
+                    {products.length > 0 && (
+                      <p className="text-sm text-gray-400">Verifique os filtros aplicados</p>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </TabsContent>

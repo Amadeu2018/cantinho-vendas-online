@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,7 +31,7 @@ const ProductsManager = ({
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    console.log("🚀 Iniciando carregamento de dados...");
+    console.log("🚀 Iniciando carregamento...");
     fetchProducts();
     fetchCategories();
   }, [sortField, sortDirection]);
@@ -40,7 +39,7 @@ const ProductsManager = ({
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      console.log("🔍 Iniciando busca de produtos...");
+      console.log("🔍 Buscando produtos...");
       
       const { data, error } = await supabase
         .from("products")
@@ -48,7 +47,7 @@ const ProductsManager = ({
         .order(sortField, { ascending: sortDirection === "asc" });
 
       if (error) {
-        console.error("❌ Erro na query de produtos:", error);
+        console.error("❌ Erro:", error);
         toast({
           title: "Erro ao carregar produtos",
           description: error.message,
@@ -60,7 +59,7 @@ const ProductsManager = ({
       console.log("✅ Produtos carregados:", data?.length || 0);
       setProducts(data || []);
     } catch (error: any) {
-      console.error("❌ Erro ao buscar produtos:", error);
+      console.error("❌ Erro geral:", error);
       toast({
         title: "Erro ao carregar produtos", 
         description: "Não foi possível carregar a lista de produtos",
@@ -80,14 +79,14 @@ const ProductsManager = ({
         .order("name");
 
       if (error) {
-        console.error("❌ Erro ao carregar categorias:", error);
-        throw error;
+        console.error("❌ Erro categorias:", error);
+        return;
       }
       
       console.log("✅ Categorias carregadas:", data?.length || 0);
       setCategories(data || []);
     } catch (error: any) {
-      console.error("❌ Erro ao carregar categorias:", error);
+      console.error("❌ Erro categorias:", error);
     }
   };
 
@@ -130,14 +129,8 @@ const ProductsManager = ({
   };
 
   const getCategoryName = (product: any) => {
-    console.log("🏷️ Buscando categoria para produto:", product.name);
-    
-    // Como removemos o join, buscar categoria manualmente
     const category = categories.find(cat => cat.id === product.category_id);
-    const categoryName = category?.name || "Sem categoria";
-    
-    console.log("✅ Categoria encontrada:", categoryName);
-    return categoryName;
+    return category?.name || "Sem categoria";
   };
 
   const filteredProducts = products.filter(product => {
@@ -165,19 +158,6 @@ const ProductsManager = ({
     searchTerm
   });
 
-  const refreshProducts = () => {
-    fetchProducts();
-  };
-
-  // Add refresh after product operations with dependency optimization
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchProducts();
-    }, 30000); // Refresh every 30 seconds (less aggressive)
-
-    return () => clearInterval(interval);
-  }, [sortField, sortDirection]); // Add dependencies to prevent unnecessary refreshes
-
   return (
     <div className="space-y-4 p-3 sm:p-0">
       <ProductsHeader 
@@ -198,7 +178,7 @@ const ProductsManager = ({
             isMobile={isMobile}
           />
           
-          <TabsContent value={activeTab} className="mt-0">
+          <div className="mt-4">
             {loading ? (
               <div className="flex justify-center items-center h-48">
                 <div className="animate-spin h-6 w-6 border-4 border-cantinho-terracotta border-opacity-50 border-t-cantinho-terracotta rounded-full"></div>
@@ -230,7 +210,7 @@ const ProductsManager = ({
                 )}
               </>
             )}
-          </TabsContent>
+          </div>
         </CardContent>
       </Card>
     </div>

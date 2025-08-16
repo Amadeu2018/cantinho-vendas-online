@@ -39,15 +39,39 @@ const ProductsManager = ({
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      console.log("🔍 Buscando produtos...");
+      console.log("🔍 Iniciando busca de produtos...");
       
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("👤 Usuário atual:", user?.id);
+      
+      if (!user) {
+        console.error("❌ Usuário não autenticado");
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para ver os produtos",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          categories (
+            id,
+            name
+          )
+        `)
         .order(sortField, { ascending: sortDirection === "asc" });
 
+      console.log("🔍 Query executada");
+      console.log("📊 Dados recebidos:", data);
+      console.log("❗ Erro recebido:", error);
+
       if (error) {
-        console.error("❌ Erro:", error);
+        console.error("❌ Erro na query:", error);
         toast({
           title: "Erro ao carregar produtos",
           description: error.message,
@@ -56,7 +80,8 @@ const ProductsManager = ({
         return;
       }
       
-      console.log("✅ Produtos carregados:", data?.length || 0);
+      console.log("✅ Produtos carregados com sucesso:", data?.length || 0);
+      console.log("📝 Produtos:", data);
       setProducts(data || []);
     } catch (error: any) {
       console.error("❌ Erro geral:", error);
@@ -150,13 +175,19 @@ const ProductsManager = ({
     return matchesSearch && matchesTab;
   });
 
-  console.log("Estado atual:", {
+  console.log("📊 Estado atual do componente:", {
     loading,
     products: products.length,
     filteredProducts: filteredProducts.length,
     activeTab,
-    searchTerm
+    searchTerm,
+    categoriesLoaded: categories.length
   });
+
+  // Debug adicional dos produtos
+  if (products.length > 0) {
+    console.log("🔍 Primeiros 3 produtos:", products.slice(0, 3));
+  }
 
   return (
     <div className="space-y-4 p-3 sm:p-0">

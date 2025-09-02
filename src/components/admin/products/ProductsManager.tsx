@@ -59,7 +59,7 @@ const ProductsManager = ({
         .from("products")
         .select(`
           *,
-          categories (
+          categories:categories!products_category_id_fkey (
             id,
             name
           )

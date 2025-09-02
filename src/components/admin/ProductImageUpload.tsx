@@ -26,22 +26,8 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
     try {
       setImageUploading(true);
       
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      
-      let bucketName = 'product-images';
-      
-      if (!buckets?.some(b => b.name === bucketName) || bucketError) {
-        console.log("Creating product-images bucket");
-        const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: true,
-          fileSizeLimit: 5242880, // 5MB
-        });
-        
-        if (createError && !createError.message.includes('already exists')) {
-          console.error("Error creating bucket:", createError);
-          throw createError;
-        }
-      }
+      // Use existing bucket - don't try to create it dynamically
+      const bucketName = 'product-images';
       
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
       
@@ -57,14 +43,17 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
         }
       }
       
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from(bucketName)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
       
       const { data: publicUrlData } = supabase.storage
         .from(bucketName)
@@ -72,11 +61,11 @@ const ProductImageUpload = ({ currentImageUrl, onImageChange, disabled }: Produc
       
       console.log("Image uploaded successfully:", publicUrlData.publicUrl);
       return publicUrlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading image to storage:", error);
       toast({
         title: "Erro ao fazer upload da imagem",
-        description: "Não foi possível salvar a imagem. Tente novamente.",
+        description: error.message || "Não foi possível salvar a imagem. Tente novamente.",
         variant: "destructive"
       });
       throw error;

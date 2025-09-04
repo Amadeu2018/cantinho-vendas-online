@@ -55,6 +55,15 @@ const ProductsManager = ({
         return;
       }
 
+      // Verificar role do usuário
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      
+      console.log("👔 Role do usuário:", profile?.role);
+
       const { data, error } = await supabase
         .from("products")
         .select(`

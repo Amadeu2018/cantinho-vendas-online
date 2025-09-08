@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import InventoryList from "./InventoryList";
 import LowStockAlerts from "./LowStockAlerts";
 import InventorySearch from "./InventorySearch";
+import AddProduct from "./AddProduct";
 import { useStockNotifications } from "@/hooks/admin/use-stock-notifications";
 import { useIsMobile, useIsMobileOrTablet } from "@/hooks/use-mobile";
-import { RefreshCw, Plus, AlertTriangle } from "lucide-react";
+import { RefreshCw, Plus, AlertTriangle, ArrowLeft } from "lucide-react";
 
 const AdminInventory = () => {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const AdminInventory = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddProduct, setShowAddProduct] = useState(false);
 
   useStockNotifications();
 
@@ -161,10 +163,33 @@ const AdminInventory = () => {
 
   const lowStockItems = inventory.filter(item => item.stock_quantity <= item.min_stock_quantity);
 
+  const handleAddProductSuccess = () => {
+    setShowAddProduct(false);
+    fetchInventory();
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin h-8 w-8 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (showAddProduct) {
+    return (
+      <div className="space-y-4 p-2 sm:p-0">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => setShowAddProduct(false)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar ao Estoque
+          </Button>
+        </div>
+        <AddProduct onSuccess={handleAddProductSuccess} />
       </div>
     );
   }
@@ -188,6 +213,13 @@ const AdminInventory = () => {
             searchTerm={searchTerm} 
             onSearchChange={setSearchTerm}
           />
+          <Button 
+            onClick={() => setShowAddProduct(true)}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Produto
+          </Button>
           <Button 
             onClick={fetchInventory}
             variant="outline"

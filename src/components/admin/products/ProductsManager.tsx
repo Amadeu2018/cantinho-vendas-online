@@ -66,7 +66,13 @@ const ProductsManager = ({
 
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories!products_category_id_fkey(id, name)")
+        .select(`
+          *,
+          categories (
+            id,
+            name
+          )
+        `)
         .order(sortField, { ascending: sortDirection === "asc" });
 
       console.log("🔍 Query executada");

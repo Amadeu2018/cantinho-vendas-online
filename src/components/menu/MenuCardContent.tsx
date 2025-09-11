@@ -4,6 +4,7 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Flame, Leaf } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface MenuCardContentProps {
   name: string;
@@ -35,6 +36,7 @@ const MenuCardContent = ({
   promotion,
   onAddToCart
 }: MenuCardContentProps) => {
+  const { formatPrice } = useCurrency();
   return (
     <CardContent className="p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50/30 flex flex-col h-full">
       <div className="flex items-start justify-between mb-3">
@@ -70,7 +72,7 @@ const MenuCardContent = ({
             <>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg sm:text-xl font-bold text-cantinho-navy">
-                  {finalPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                  {formatPrice(finalPrice)}
                 </span>
                 <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs px-2 py-1">
                   {promotion && promotion.discount > 0 ? 
@@ -80,7 +82,7 @@ const MenuCardContent = ({
                 </Badge>
               </div>
               <span className="text-sm text-gray-500 line-through">
-                {price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                {formatPrice(price)}
               </span>
               {promotion && promotion.label && (
                 <span className="text-xs text-green-600 font-medium">
@@ -90,7 +92,7 @@ const MenuCardContent = ({
             </>
           ) : (
             <span className="text-lg sm:text-xl font-bold text-cantinho-navy">
-              {price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+              {formatPrice(price)}
             </span>
           )}
         </div>

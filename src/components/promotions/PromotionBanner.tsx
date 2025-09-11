@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePromotions } from "@/hooks/use-promotions";
 import { Clock, Tag, Percent } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface PromotionBannerProps {
   className?: string;
@@ -11,6 +12,7 @@ interface PromotionBannerProps {
 const PromotionBanner = ({ className = "" }: PromotionBannerProps) => {
   const { promotions, loading } = usePromotions();
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+  const { formatPrice } = useCurrency();
 
   // Auto-rotate promotions every 5 seconds
   useEffect(() => {
@@ -103,16 +105,10 @@ const PromotionBanner = ({ className = "" }: PromotionBannerProps) => {
               </h4>
               <div className="flex items-center gap-2 text-sm">
                 <span className="line-through text-white/60">
-                  {currentPromotion.dish.price.toLocaleString('pt-AO', { 
-                    style: 'currency', 
-                    currency: 'AOA' 
-                  })}
+                  {formatPrice(currentPromotion.dish.price)}
                 </span>
                 <span className="font-bold text-white">
-                  {(currentPromotion.dish.price * (1 - currentPromotion.discountPercentage / 100)).toLocaleString('pt-AO', { 
-                    style: 'currency', 
-                    currency: 'AOA' 
-                  })}
+                  {formatPrice(currentPromotion.dish.price * (1 - currentPromotion.discountPercentage / 100))}
                 </span>
               </div>
             </div>

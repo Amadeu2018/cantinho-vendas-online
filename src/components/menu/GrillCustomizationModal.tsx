@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Flame, Users, Scale } from "lucide-react";
 import { Dish, MeatDoneness } from "@/types/dish";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface GrillCustomizationModalProps {
   dish: Dish;
@@ -22,6 +23,7 @@ const GrillCustomizationModal = ({ dish, isOpen, onClose, onAddToCart }: GrillCu
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState('');
+  const { formatPrice } = useCurrency();
 
   const availableMarinades = [
     'tradicional',
@@ -81,7 +83,7 @@ const GrillCustomizationModal = ({ dish, isOpen, onClose, onAddToCart }: GrillCu
           <div className="bg-cantinho-sand/20 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="font-semibold text-cantinho-navy">
-                {dish.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                {formatPrice(dish.price)}
               </span>
               <div className="flex gap-2">
                 {dish.combo_serves && dish.combo_serves > 1 && (
@@ -202,7 +204,7 @@ const GrillCustomizationModal = ({ dish, isOpen, onClose, onAddToCart }: GrillCu
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-cantinho-navy">Total:</span>
               <span className="text-2xl font-bold text-cantinho-terracotta">
-                {totalPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                {formatPrice(totalPrice)}
               </span>
             </div>
             

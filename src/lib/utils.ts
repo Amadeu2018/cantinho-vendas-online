@@ -6,10 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("pt-AO", {
+export function formatCurrency(value: number, currency: string = "AOA", locale: string = "pt-AO"): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "AOA",
+    currency: currency,
     minimumFractionDigits: 0,
   }).format(value);
 }

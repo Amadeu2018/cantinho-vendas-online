@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/use-currency";
 import { 
   CreditCard, 
   Smartphone, 
@@ -35,6 +36,7 @@ interface PaymentMethodsProps {
 
 const PaymentMethods = ({ selectedMethod, onMethodSelect, total }: PaymentMethodsProps) => {
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const paymentMethods: PaymentMethod[] = [
@@ -257,7 +259,7 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, total }: PaymentMethod
                     </div>
                     {method.fee > 0 && (
                       <div className="font-medium text-gray-700">
-                        Taxa: {method.fee.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                        Taxa: {formatPrice(method.fee)}
                       </div>
                     )}
                   </div>

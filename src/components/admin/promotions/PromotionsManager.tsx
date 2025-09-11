@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface Promotion {
   id: string;
@@ -43,6 +44,7 @@ const PromotionsManager = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [activeTab, setActiveTab] = useState("list");
+  const { formatPrice } = useCurrency();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -455,7 +457,7 @@ const PromotionsManager = () => {
                     <SelectContent>
                       {products.map((product) => (
                         <SelectItem key={product.id} value={product.id}>
-                          {product.name} - €{product.price}
+                          {product.name} - {formatPrice(product.price)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -486,7 +488,7 @@ const PromotionsManager = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="percentage">Percentual</SelectItem>
-                      <SelectItem value="fixed">Valor Fixo</SelectItem>
+                      <SelectItem value="fixed_amount">Valor Fixo</SelectItem>
                       <SelectItem value="combo">Combo</SelectItem>
                     </SelectContent>
                   </Select>

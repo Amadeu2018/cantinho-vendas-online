@@ -15,6 +15,10 @@ interface MenuCardContentProps {
   isSpicy?: boolean;
   isVegetarian?: boolean;
   isFirstOrder: boolean;
+  promotion?: {
+    discount: number;
+    label?: string;
+  };
   onAddToCart: () => void;
 }
 
@@ -28,6 +32,7 @@ const MenuCardContent = ({
   isSpicy,
   isVegetarian,
   isFirstOrder,
+  promotion,
   onAddToCart
 }: MenuCardContentProps) => {
   return (
@@ -61,19 +66,27 @@ const MenuCardContent = ({
 
       <div className="flex items-end justify-between mt-auto pt-2">
         <div className="flex flex-col justify-end">
-          {isFirstOrder && savings > 0 ? (
+          {(promotion && promotion.discount > 0) || (isFirstOrder && savings > 0) ? (
             <>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg sm:text-xl font-bold text-cantinho-navy">
                   {finalPrice.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
                 </span>
-                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-1">
-                  -10%
+                <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs px-2 py-1">
+                  {promotion && promotion.discount > 0 ? 
+                    `${promotion.discount}% OFF` : 
+                    '-10%'
+                  }
                 </Badge>
               </div>
               <span className="text-sm text-gray-500 line-through">
                 {price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
               </span>
+              {promotion && promotion.label && (
+                <span className="text-xs text-green-600 font-medium">
+                  {promotion.label}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-lg sm:text-xl font-bold text-cantinho-navy">

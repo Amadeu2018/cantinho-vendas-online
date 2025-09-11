@@ -8,6 +8,7 @@ import FloatingCartButton from "@/components/menu/FloatingCartButton";
 import LoadMoreButton from "@/components/common/LoadMoreButton";
 import GrillSection from "@/components/menu/GrillSection";
 import MenuFilters from "@/components/menu/MenuFilters";
+import PromotionBanner from "@/components/promotions/PromotionBanner";
 import { usePaginatedDishes } from "@/hooks/use-paginated-dishes";
 import { useCart } from "@/contexts/CartContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -117,6 +118,11 @@ const Menu = () => {
       <main className="pt-16 sm:pt-20 pb-16">
         <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
           <MenuHero />
+          
+          {/* Promotion Banner */}
+          <div className="mb-8">
+            <PromotionBanner />
+          </div>
           
           <MenuFilters
             searchTerm={searchTerm}

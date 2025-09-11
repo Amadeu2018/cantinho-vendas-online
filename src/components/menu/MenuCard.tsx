@@ -19,6 +19,10 @@ export interface Dish {
   isSpicy?: boolean;
   isVegetarian?: boolean;
   isPopular?: boolean;
+  promotion?: {
+    discount: number;
+    label?: string;
+  };
 }
 
 interface MenuCardProps {
@@ -32,7 +36,14 @@ const MenuCard = ({ dish }: MenuCardProps) => {
   const { isFirstOrder, discount } = useFirstOrder();
 
   const isFav = isFavorite(parseInt(dish.id));
-  const finalPrice = isFirstOrder ? dish.price * (1 - discount) : dish.price;
+  
+  // Calculate price with promotions
+  let promotionalPrice = dish.price;
+  if (dish.promotion && dish.promotion.discount > 0) {
+    promotionalPrice = dish.price * (1 - dish.promotion.discount / 100);
+  }
+  
+  const finalPrice = isFirstOrder ? promotionalPrice * (1 - discount) : promotionalPrice;
   const savings = dish.price - finalPrice;
 
   const handleAddToCart = () => {
@@ -87,6 +98,7 @@ const MenuCard = ({ dish }: MenuCardProps) => {
           isSpicy={dish.isSpicy}
           isVegetarian={dish.isVegetarian}
           isFirstOrder={isFirstOrder}
+          promotion={dish.promotion}
           onAddToCart={handleAddToCart}
         />
       </div>

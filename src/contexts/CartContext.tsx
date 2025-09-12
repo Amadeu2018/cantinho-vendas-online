@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext } from "react";
-import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCartState } from "@/hooks/use-cart-state";
 import { deliveryLocations, paymentMethods } from "@/utils/cart-helpers";
@@ -108,16 +107,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existingItemIndex > -1) {
         const updatedItems = [...currentItems];
         updatedItems[existingItemIndex].quantity += 1;
-        toast({
-          title: "Item atualizado",
-          description: `Quantidade de ${item.name} aumentada para ${updatedItems[existingItemIndex].quantity}`,
-        });
+        console.log(`Item atualizado - Quantidade de ${item.name} aumentada para ${updatedItems[existingItemIndex].quantity}`);
         return updatedItems;
       } else {
-        toast({
-          title: "Item adicionado",
-          description: `${item.name} foi adicionado ao carrinho`,
-        });
+        console.log(`Item adicionado - ${item.name} foi adicionado ao carrinho`);
         return [...currentItems, { ...item, quantity: 1 }];
       }
     });
@@ -127,10 +120,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems(currentItems => {
       const itemToRemove = currentItems.find(item => item.id === id);
       if (itemToRemove) {
-        toast({
-          title: "Item removido",
-          description: `${itemToRemove.name} foi removido do carrinho`,
-        });
+        console.log(`Item removido - ${itemToRemove.name} foi removido do carrinho`);
       }
       return currentItems.filter(item => item.id !== id);
     });
@@ -153,19 +143,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems([]);
     setSelectedLocation(null);
     setSelectedPaymentMethod(null);
-    toast({
-      title: "Carrinho limpo",
-      description: "Todos os itens foram removidos do carrinho",
-    });
+    console.log("Carrinho limpo - Todos os itens foram removidos do carrinho");
   };
 
   const submitOrder = async (customerInfo: CustomerInfo): Promise<string> => {
     if (!selectedLocation || !selectedPaymentMethod) {
-      toast({
-        title: "Não foi possível processar",
-        description: "Por favor, selecione uma localização e um método de pagamento",
-        variant: "destructive"
-      });
+      console.error("Não foi possível processar - Por favor, selecione uma localização e um método de pagamento");
       throw new Error("Localização ou método de pagamento não selecionado");
     }
 
@@ -217,21 +200,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setOrders(prev => [...prev, newOrder]);
       
-      toast({
-        title: "Pedido recebido",
-        description: "Seu pedido foi registrado e está aguardando confirmação.",
-      });
+      console.log("Pedido recebido - Seu pedido foi registrado e está aguardando confirmação.");
       
       console.log("Novo pedido criado:", newOrder);
       
       return orderId;
     } catch (error: any) {
       console.error('Erro ao processar pedido:', error);
-      toast({
-        title: "Erro ao processar pedido",
-        description: error.message || "Ocorreu um erro. Tente novamente.",
-        variant: "destructive"
-      });
+      console.error('Erro ao processar pedido:', error.message || "Ocorreu um erro. Tente novamente.");
       throw error;
     }
   };
@@ -247,10 +223,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       )
     );
     
-    toast({
-      title: "Status atualizado",
-      description: `O pedido ${orderId} foi atualizado para "${status}".`,
-    });
+    console.log(`Status atualizado - O pedido ${orderId} foi atualizado para "${status}".`);
   };
   
   const updateOrderPaymentStatus = (orderId: string, paymentStatus: "pending" | "completed") => {
@@ -260,28 +233,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       )
     );
     
-    toast({
-      title: "Pagamento atualizado",
-      description: `O pagamento do pedido ${orderId} foi marcado como "${paymentStatus}".`,
-    });
+    console.log(`Pagamento atualizado - O pagamento do pedido ${orderId} foi marcado como "${paymentStatus}".`);
   };
 
   const addToFavorites = (dishId: number) => {
     if (!favorites.includes(dishId)) {
       setFavorites(prev => [...prev, dishId]);
-      toast({
-        title: "Adicionado aos favoritos",
-        description: "Prato adicionado à sua lista de favoritos"
-      });
+      console.log("Adicionado aos favoritos - Prato adicionado à sua lista de favoritos");
     }
   };
 
   const removeFromFavorites = (dishId: number) => {
     setFavorites(prev => prev.filter(id => id !== dishId));
-    toast({
-      title: "Removido dos favoritos",
-      description: "Prato removido da sua lista de favoritos"
-    });
+    console.log("Removido dos favoritos - Prato removido da sua lista de favoritos");
   };
 
   const isFavorite = (dishId: number) => favorites.includes(dishId);

@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 type AuthContextType = {
   session: Session | null;
@@ -24,7 +23,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Verificar sessão atual
@@ -52,18 +50,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        toast({
-          title: "Erro ao fazer login",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao fazer login:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo de volta!",
-      });
+      console.log('Login realizado com sucesso');
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       throw error;
@@ -84,18 +75,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao criar conta:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Conta criada com sucesso",
-        description: "Verifique seu email para confirmar sua conta.",
-      });
+      console.log('Conta criada com sucesso - Verifique seu email para confirmar sua conta.');
     } catch (error) {
       console.error('Erro ao criar conta:', error);
       throw error;
@@ -113,18 +97,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao fazer login",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao fazer login:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo de volta!",
-      });
+      console.log('Login realizado com sucesso');
     } catch (error) {
       console.error('Erro ao fazer login com telefone:', error);
       throw error;
@@ -142,18 +119,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao criar conta:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Conta criada com sucesso",
-        description: "Você já pode fazer login com seu número de telefone.",
-      });
+      console.log('Conta criada com sucesso - Você já pode fazer login com seu número de telefone.');
     } catch (error) {
       console.error('Erro ao criar conta com telefone:', error);
       throw error;
@@ -173,11 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao fazer login com Google",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao fazer login com Google:', error.message);
         throw error;
       }
     } catch (error) {
@@ -199,11 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao fazer login com Facebook",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao fazer login com Facebook:', error.message);
         throw error;
       }
     } catch (error) {
@@ -218,17 +180,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       await supabase.auth.signOut();
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado.",
-      });
+      console.log('Logout realizado com sucesso');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
-      toast({
-        title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar desconectar.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -242,18 +196,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast({
-          title: "Erro ao enviar email",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao enviar email:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Email enviado",
-        description: "Verifique seu email para redefinir sua senha.",
-      });
+      console.log('Email enviado - Verifique seu email para redefinir sua senha.');
     } catch (error) {
       console.error('Erro ao enviar email de recuperação:', error);
       throw error;
@@ -268,18 +215,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.updateUser({ password });
       
       if (error) {
-        toast({
-          title: "Erro ao atualizar senha",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Erro ao atualizar senha:', error.message);
         throw error;
       }
       
-      toast({
-        title: "Senha atualizada",
-        description: "Sua senha foi atualizada com sucesso.",
-      });
+      console.log('Senha atualizada com sucesso');
     } catch (error) {
       console.error('Erro ao atualizar senha:', error);
       throw error;

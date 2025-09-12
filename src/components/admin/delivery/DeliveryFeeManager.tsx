@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/use-currency";
 import { Truck, MapPin, Plus, Edit2, Trash2 } from "lucide-react";
 
 interface DeliveryZone {
@@ -17,6 +18,7 @@ interface DeliveryZone {
 
 const DeliveryFeeManager = () => {
   const { toast } = useToast();
+  const { formatPrice, currency } = useCurrency();
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingZone, setEditingZone] = useState<DeliveryZone | null>(null);
@@ -36,18 +38,16 @@ const DeliveryFeeManager = () => {
     try {
       setLoading(true);
       
-      // Since we don't have a delivery_zones table, we'll use the existing company_settings
-      // and create a mock implementation for demonstration
-      const mockZones: DeliveryZone[] = [
-        { id: "1", name: "Bairro Azul", fee: 1000, estimated_time: "20-30 min", is_active: true },
-        { id: "2", name: "Maculusso", fee: 1500, estimated_time: "25-35 min", is_active: true },
-        { id: "3", name: "Maianga", fee: 1500, estimated_time: "25-35 min", is_active: true },
-        { id: "4", name: "Talatona", fee: 2500, estimated_time: "35-50 min", is_active: true },
-        { id: "5", name: "Miramar", fee: 1800, estimated_time: "30-40 min", is_active: true },
-        { id: "6", name: "Kilamba", fee: 3000, estimated_time: "40-60 min", is_active: true },
-      ];
-      
-      setZones(mockZones);
+      const { data, error } = await supabase
+        .from('delivery_zones')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      setZones(data || []);
     } catch (error) {
       console.error('Error fetching delivery zones:', error);
       toast({
@@ -73,12 +73,17 @@ const DeliveryFeeManager = () => {
 
       if (editingZone) {
         // Update existing zone
-        const updatedZones = zones.map(zone =>
-          zone.id === editingZone.id
-            ? { ...zone, ...formData }
-            : zone
-        );
-        setZones(updatedZones);
+        const { error } = await supabase
+          .from('delivery_zones')
+          .update({
+            name: formData.name,
+            fee: formData.fee,
+            estimated_time: formData.estimated_time,
+            is_active: formData.is_active
+          })
+          .eq('id', editingZone.id);
+
+        if (error) throw error;
         
         toast({
           title: "Sucesso",
@@ -86,11 +91,16 @@ const DeliveryFeeManager = () => {
         });
       } else {
         // Add new zone
-        const newZone: DeliveryZone = {
-          id: Date.now().toString(),
-          ...formData
-        };
-        setZones([...zones, newZone]);
+        const { error } = await supabase
+          .from('delivery_zones')
+          .insert([{
+            name: formData.name,
+            fee: formData.fee,
+            estimated_time: formData.estimated_time,
+            is_active: formData.is_active
+          }]);
+
+        if (error) throw error;
         
         toast({
           title: "Sucesso",
@@ -99,6 +109,7 @@ const DeliveryFeeManager = () => {
       }
 
       resetForm();
+      fetchDeliveryZones(); // Refresh the list
     } catch (error) {
       console.error('Error saving delivery zone:', error);
       toast({
@@ -122,13 +133,19 @@ const DeliveryFeeManager = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const updatedZones = zones.filter(zone => zone.id !== id);
-      setZones(updatedZones);
+      const { error } = await supabase
+        .from('delivery_zones')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       
       toast({
         title: "Sucesso",
         description: "Zona de entrega removida com sucesso",
       });
+      
+      fetchDeliveryZones(); // Refresh the list
     } catch (error) {
       console.error('Error deleting delivery zone:', error);
       toast({
@@ -150,12 +167,6 @@ const DeliveryFeeManager = () => {
     setShowForm(false);
   };
 
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-AO', { 
-      style: 'currency', 
-      currency: 'AOA' 
-    });
-  };
 
   if (loading) {
     return (
@@ -207,7 +218,7 @@ const DeliveryFeeManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="fee">Taxa de Entrega (AOA) *</Label>
+                <Label htmlFor="fee">Taxa de Entrega ({currency}) *</Label>
                 <Input
                   id="fee"
                   type="number"
@@ -278,7 +289,7 @@ const DeliveryFeeManager = () => {
                       <div>
                         <h4 className="font-medium text-cantinho-navy">{zone.name}</h4>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span>Taxa: {formatCurrency(zone.fee)}</span>
+                          <span>Taxa: {formatPrice(zone.fee)}</span>
                           <span>Tempo: {zone.estimated_time}</span>
                           <span className={`px-2 py-1 rounded-full text-xs ${
                             zone.is_active 

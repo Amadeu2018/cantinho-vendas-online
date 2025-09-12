@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Image, Trash2, Download, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UploadedImage {
   id: string;
@@ -11,33 +12,54 @@ interface UploadedImage {
   url: string;
   size: number;
   type: string;
-  uploadedAt: string;
+  created_at: string;
 }
 
 const ImageUploadManager = () => {
-  const [images, setImages] = useState<UploadedImage[]>([
-    {
-      id: "1",
-      name: "pizza-margherita.jpg",
-      url: "/placeholder.svg",
-      size: 245760,
-      type: "image/jpeg",
-      uploadedAt: "2024-01-15T10:30:00Z"
-    },
-    {
-      id: "2", 
-      name: "restaurant-interior.jpg",
-      url: "/placeholder.svg",
-      size: 512000,
-      type: "image/jpeg",
-      uploadedAt: "2024-01-14T15:45:00Z"
-    }
-  ]);
-
+  const [images, setImages] = useState<UploadedImage[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  const fetchImages = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .list('', {
+          limit: 100,
+          offset: 0,
+        });
+
+      if (error) throw error;
+
+      const imagesList: UploadedImage[] = data.map(file => ({
+        id: file.id || file.name,
+        name: file.name,
+        url: supabase.storage.from('product-images').getPublicUrl(file.name).data.publicUrl,
+        size: file.metadata?.size || 0,
+        type: file.metadata?.mimetype || 'image/jpeg',
+        created_at: file.created_at || file.updated_at || new Date().toISOString()
+      }));
+
+      setImages(imagesList);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar imagens",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -55,23 +77,24 @@ const ImageUploadManager = () => {
 
     try {
       for (const file of files) {
-        const newImage: UploadedImage = {
-          id: String(Date.now() + Math.random()),
-          name: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-          type: file.type,
-          uploadedAt: new Date().toISOString()
-        };
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-        setImages(prev => [newImage, ...prev]);
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
       }
 
       toast({
         title: "Upload concluído",
         description: `${files.length} imagem(ns) carregada(s) com sucesso!`
       });
+
+      fetchImages(); // Refresh the list
     } catch (error) {
+      console.error('Error uploading files:', error);
       toast({
         title: "Erro no upload",
         description: "Não foi possível carregar as imagens",
@@ -85,12 +108,28 @@ const ImageUploadManager = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    setImages(images.filter(img => img.id !== id));
-    toast({
-      title: "Imagem removida",
-      description: "Imagem removida com sucesso!"
-    });
+  const handleDelete = async (fileName: string) => {
+    try {
+      const { error } = await supabase.storage
+        .from('product-images')
+        .remove([fileName]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Imagem removida",
+        description: "Imagem removida com sucesso!"
+      });
+
+      fetchImages(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover imagem",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredImages = images.filter(image =>
@@ -131,7 +170,11 @@ const ImageUploadManager = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredImages.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin h-8 w-8 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
+            </div>
+          ) : filteredImages.length === 0 ? (
             <div className="text-center py-8">
               <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
@@ -156,20 +199,21 @@ const ImageUploadManager = () => {
                       </h4>
                       <div className="text-xs text-muted-foreground">
                         <p>{formatFileSize(image.size)}</p>
-                        <p>{new Date(image.uploadedAt).toLocaleDateString()}</p>
+                        <p>{new Date(image.created_at).toLocaleDateString()}</p>
                       </div>
                       <div className="flex gap-1">
                         <Button 
                           variant="outline" 
                           size="sm" 
                           className="flex-1"
+                          onClick={() => window.open(image.url, '_blank')}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleDelete(image.id)}
+                          onClick={() => handleDelete(image.name)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

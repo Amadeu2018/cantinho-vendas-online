@@ -1,82 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Shield, Search, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
 interface SecurityLog {
   id: string;
-  timestamp: string;
+  created_at: string;
   action: string;
-  user: string;
-  ip: string;
-  status: 'success' | 'warning' | 'error';
-  details: string;
+  user_id: string | null;
+  ip_address: unknown;
+  user_agent: string | null;
+  details: any;
 }
 
 const SecurityLogsManager = () => {
-  const [logs] = useState<SecurityLog[]>([
-    {
-      id: "1",
-      timestamp: "2024-01-15T14:30:00Z",
-      action: "Login Administrativo",
-      user: "admin@cantinho.pt",
-      ip: "192.168.1.100",
-      status: "success",
-      details: "Login realizado com sucesso"
-    },
-    {
-      id: "2",
-      timestamp: "2024-01-15T14:25:00Z", 
-      action: "Tentativa de Login Falhada",
-      user: "unknown@email.com",
-      ip: "45.123.45.67",
-      status: "error",
-      details: "Credenciais inválidas"
-    }
-  ]);
-
+  const { toast } = useToast();
+  const [logs, setLogs] = useState<SecurityLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'error':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+  useEffect(() => {
+    fetchSecurityLogs();
+  }, []);
+
+  const fetchSecurityLogs = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('security_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+      setLogs(data || []);
+    } catch (error) {
+      console.error('Error fetching security logs:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar logs de segurança",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      success: "default",
-      warning: "secondary", 
-      error: "destructive"
-    } as const;
-    
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
-        {status === 'success' ? 'Sucesso' : 
-         status === 'warning' ? 'Aviso' : 
-         status === 'error' ? 'Erro' : status}
-      </Badge>
-    );
+  const getStatusIcon = (action: string) => {
+    if (action.toLowerCase().includes('login') && !action.toLowerCase().includes('falhada')) {
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    } else if (action.toLowerCase().includes('falhada') || action.toLowerCase().includes('erro')) {
+      return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    } else {
+      return <Clock className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
+  const getStatusBadge = (action: string) => {
+    if (action.toLowerCase().includes('login') && !action.toLowerCase().includes('falhada')) {
+      return <Badge variant="default">Sucesso</Badge>;
+    } else if (action.toLowerCase().includes('falhada') || action.toLowerCase().includes('erro')) {
+      return <Badge variant="destructive">Erro</Badge>;
+    } else {
+      return <Badge variant="secondary">Info</Badge>;
+    }
   };
 
   const filteredLogs = logs.filter(log => {
     const matchesSearch = 
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.ip.includes(searchTerm) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
+      (log.ip_address && String(log.ip_address).includes(searchTerm)) ||
+      (log.details && JSON.stringify(log.details).toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesStatus = statusFilter === "all" || log.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || 
+      (statusFilter === "success" && log.action.toLowerCase().includes('login') && !log.action.toLowerCase().includes('falhada')) ||
+      (statusFilter === "error" && (log.action.toLowerCase().includes('falhada') || log.action.toLowerCase().includes('erro'))) ||
+      (statusFilter === "info" && !log.action.toLowerCase().includes('login') && !log.action.toLowerCase().includes('falhada') && !log.action.toLowerCase().includes('erro'));
     
     return matchesSearch && matchesStatus;
   });
@@ -117,8 +121,8 @@ const SecurityLogsManager = () => {
           <SelectContent>
             <SelectItem value="all">Todos os Status</SelectItem>
             <SelectItem value="success">Sucesso</SelectItem>
-            <SelectItem value="warning">Aviso</SelectItem>
             <SelectItem value="error">Erro</SelectItem>
+            <SelectItem value="info">Info</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -128,7 +132,11 @@ const SecurityLogsManager = () => {
           <CardTitle>Registos de Atividade</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredLogs.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin h-8 w-8 border-2 border-cantinho-terracotta border-t-transparent rounded-full"></div>
+            </div>
+          ) : filteredLogs.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">Nenhum log encontrado</p>
             </div>
@@ -139,19 +147,19 @@ const SecurityLogsManager = () => {
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-start gap-3">
-                        {getStatusIcon(log.status)}
+                        {getStatusIcon(log.action)}
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <h4 className="font-medium">{log.action}</h4>
-                            {getStatusBadge(log.status)}
+                            {getStatusBadge(log.action)}
                           </div>
                           <p className="text-sm text-muted-foreground mb-1">
-                            {log.details}
+                            {log.details ? JSON.stringify(log.details) : 'Sem detalhes'}
                           </p>
                           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                            <span>Usuário: {log.user}</span>
-                            <span>IP: {log.ip}</span>
-                            <span>Data: {formatTimestamp(log.timestamp)}</span>
+                            <span>Usuário: {log.user_id || 'Sistema'}</span>
+                            <span>IP: {String(log.ip_address) || 'N/A'}</span>
+                            <span>Data: {formatTimestamp(log.created_at)}</span>
                           </div>
                         </div>
                       </div>

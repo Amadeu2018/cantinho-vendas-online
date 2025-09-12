@@ -175,6 +175,42 @@ export type Database = {
           },
         ]
       }
+      delivery_zones: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_time: string
+          fee: number
+          id: string
+          is_active: boolean
+          max_distance: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_time: string
+          fee?: number
+          id?: string
+          is_active?: boolean
+          max_distance?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_time?: string
+          fee?: number
+          id?: string
+          is_active?: boolean
+          max_distance?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_invoices: {
         Row: {
           created_at: string | null

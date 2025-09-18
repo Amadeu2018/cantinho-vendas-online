@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { CartItem, DeliveryLocation, PaymentMethod, Order } from "@/contexts/CartContext";
 
 export const useCartState = () => {

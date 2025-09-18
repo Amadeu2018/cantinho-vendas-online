@@ -15,7 +15,12 @@ const SimplePaymentSelector = ({
   selectedPaymentMethod, 
   onMethodSelect 
 }: SimplePaymentSelectorProps) => {
-  const getPaymentIcon = (iconName: string) => {
+  const getPaymentIcon = (methodId: string, iconName: string) => {
+    if (methodId === 'cash') return <Banknote className="h-5 w-5" />;
+    if (methodId.startsWith('bank_')) return <Landmark className="h-5 w-5" />;
+    if (methodId.startsWith('multicaixa_')) return <CreditCard className="h-5 w-5" />;
+    
+    // Fallback to icon name
     switch (iconName) {
       case "banknote":
         return <Banknote className="h-5 w-5" />;
@@ -55,9 +60,24 @@ const SimplePaymentSelector = ({
                       ? "bg-cantinho-terracotta text-white" 
                       : "bg-gray-100 text-gray-600"
                   }`}>
-                    {getPaymentIcon(method.icon)}
+                    {getPaymentIcon(method.id, method.icon)}
                   </div>
-                  <span className="font-medium text-cantinho-navy">{method.name}</span>
+                  <div className="flex-1">
+                    <span className="font-medium text-cantinho-navy">{method.name}</span>
+                    {method.details && (
+                      <div className="text-xs text-gray-600 mt-1">
+                        {method.details.bank_name && (
+                          <div>Banco: {method.details.bank_name}</div>
+                        )}
+                        {method.details.account_name && (
+                          <div>Titular: {method.details.account_name}</div>
+                        )}
+                        {method.details.phone_number && (
+                          <div>Telefone: {method.details.phone_number}</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {selectedPaymentMethod?.id === method.id && (
                   <CheckCircle className="w-5 h-5 text-cantinho-terracotta" />

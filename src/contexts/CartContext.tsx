@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCartState } from "@/hooks/use-cart-state";
-import { paymentMethods } from "@/utils/cart-helpers";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export type CartItem = {
   id: number;
@@ -24,6 +24,13 @@ export type PaymentMethod = {
   id: string;
   name: string;
   icon: string;
+  details?: {
+    bank_name?: string;
+    account_name?: string;
+    account_iban?: string;
+    swift_code?: string;
+    phone_number?: string;
+  };
 };
 
 export type OrderStatus = 
@@ -98,8 +105,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setOrders,
     favorites,
     setFavorites,
-    deliveryLocations
+    deliveryLocations,
+    paymentMethods
   } = useCartState();
+
+  const { createNotification } = useNotifications();
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setItems(currentItems => {
@@ -184,6 +194,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Order saved successfully:', data);
 
+      // Create notifications for order
+      await createNotification(
+        "Novo Pedido Recebido",
+        `Pedido #${orderId.substring(0, 8)} no valor de ${subtotal + selectedLocation.fee} AOA foi criado`,
+        "order"
+      );
+
+      // Log security event
+      await supabase.rpc('log_security_event', {
+        _action: `Novo pedido criado: #${orderId.substring(0, 8)}`,
+        _details: { 
+          order_id: orderId,
+          customer_name: customerInfo.name,
+          total: subtotal + selectedLocation.fee,
+          items_count: items.length,
+          payment_method: selectedPaymentMethod.name,
+          delivery_location: selectedLocation.name
+        }
+      });
+
       const newOrder: Order = {
         id: orderId,
         items: [...items],
@@ -224,6 +254,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       )
     );
     
+    // Create notification for status update
+    createNotification(
+      "Status do Pedido Atualizado",
+      `Pedido #${orderId.substring(0, 8)} foi atualizado para "${status}"`,
+      "order_update"
+    );
+
+    // Log security event
+    supabase.rpc('log_security_event', {
+      _action: `Status do pedido atualizado: #${orderId.substring(0, 8)} para ${status}`,
+      _details: { order_id: orderId, new_status: status }
+    });
+    
     console.log(`Status atualizado - O pedido ${orderId} foi atualizado para "${status}".`);
   };
   
@@ -233,6 +276,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         order.id === orderId ? { ...order, paymentStatus } : order
       )
     );
+    
+    // Create notification for payment status update
+    createNotification(
+      "Status de Pagamento Atualizado",
+      `Pagamento do pedido #${orderId.substring(0, 8)} foi marcado como "${paymentStatus === 'completed' ? 'pago' : 'pendente'}"`,
+      "payment_update"
+    );
+
+    // Log security event
+    supabase.rpc('log_security_event', {
+      _action: `Status de pagamento atualizado: #${orderId.substring(0, 8)} para ${paymentStatus}`,
+      _details: { order_id: orderId, payment_status: paymentStatus }
+    });
     
     console.log(`Pagamento atualizado - O pagamento do pedido ${orderId} foi marcado como "${paymentStatus}".`);
   };

@@ -1,23 +1,4 @@
-import { DeliveryLocation, PaymentMethod } from "@/contexts/CartContext";
-
-// Default payment methods - these are static configurations
-export const paymentMethods: PaymentMethod[] = [
-  {
-    id: "cash",
-    name: "Dinheiro na Entrega",
-    icon: "💰"
-  },
-  {
-    id: "multicaixa",
-    name: "Multicaixa",
-    icon: "💳"
-  },
-  {
-    id: "bank_transfer",
-    name: "Transferência Bancária",
-    icon: "🏦"
-  }
-];
+import { DeliveryLocation } from "@/contexts/CartContext";
 
 // Default delivery locations - will be replaced by dynamic data from Supabase
 export const deliveryLocations: DeliveryLocation[] = [

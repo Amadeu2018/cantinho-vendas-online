@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCartState } from "@/hooks/use-cart-state";
-import { deliveryLocations, paymentMethods } from "@/utils/cart-helpers";
+import { paymentMethods } from "@/utils/cart-helpers";
 
 export type CartItem = {
   id: number;
@@ -97,7 +97,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     orders,
     setOrders,
     favorites,
-    setFavorites
+    setFavorites,
+    deliveryLocations
   } = useCartState();
 
   const addItem = (item: Omit<CartItem, "quantity">) => {

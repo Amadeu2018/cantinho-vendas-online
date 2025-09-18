@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CartItem, DeliveryLocation, PaymentMethod, Order } from "@/contexts/CartContext";
+import { useDeliveryZones } from "@/hooks/use-delivery-zones";
 
 export const useCartState = () => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -8,6 +9,9 @@ export const useCartState = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
+  
+  // Use the delivery zones hook for real-time sync
+  const { deliveryZones } = useDeliveryZones();
 
   // Load data from localStorage
   useEffect(() => {
@@ -62,6 +66,7 @@ export const useCartState = () => {
     orders,
     setOrders,
     favorites,
-    setFavorites
+    setFavorites,
+    deliveryLocations: deliveryZones
   };
 };

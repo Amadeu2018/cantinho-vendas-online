@@ -84,6 +84,18 @@ const DeliveryFeeManager = () => {
           .eq('id', editingZone.id);
 
         if (error) throw error;
+
+        // Log security event
+        await supabase.rpc('log_security_event', {
+          _action: `Zona de entrega atualizada: ${formData.name}`,
+          _details: { 
+            zone_id: editingZone.id, 
+            previous_name: editingZone.name,
+            new_name: formData.name,
+            previous_fee: editingZone.fee,
+            new_fee: formData.fee
+          }
+        });
         
         toast({
           title: "Sucesso",
@@ -91,16 +103,30 @@ const DeliveryFeeManager = () => {
         });
       } else {
         // Add new zone
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('delivery_zones')
           .insert([{
             name: formData.name,
             fee: formData.fee,
             estimated_time: formData.estimated_time,
             is_active: formData.is_active
-          }]);
+          }])
+          .select();
 
         if (error) throw error;
+
+        // Log security event
+        if (data && data[0]) {
+          await supabase.rpc('log_security_event', {
+            _action: `Nova zona de entrega criada: ${formData.name}`,
+            _details: { 
+              zone_id: data[0].id, 
+              name: formData.name,
+              fee: formData.fee,
+              estimated_time: formData.estimated_time
+            }
+          });
+        }
         
         toast({
           title: "Sucesso",
@@ -133,12 +159,25 @@ const DeliveryFeeManager = () => {
 
   const handleDelete = async (id: string) => {
     try {
+      // Get zone info before deletion for logging
+      const { data: zoneData } = await supabase
+        .from('delivery_zones')
+        .select('name')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('delivery_zones')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      // Log security event
+      await supabase.rpc('log_security_event', {
+        _action: `Zona de entrega removida${zoneData ? `: ${zoneData.name}` : ''}`,
+        _details: { zone_id: id, zone_name: zoneData?.name }
+      });
       
       toast({
         title: "Sucesso",

@@ -76,6 +76,8 @@ const ImageUploadManager = () => {
     setUploading(true);
 
     try {
+      const uploadedFiles = [];
+      
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -85,7 +87,18 @@ const ImageUploadManager = () => {
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
+        uploadedFiles.push({ name: fileName, size: file.size });
       }
+
+      // Log security event for image uploads
+      await supabase.rpc('log_security_event', {
+        _action: `${files.length} imagem(ns) carregada(s)`,
+        _details: { 
+          files_count: files.length,
+          files: uploadedFiles,
+          total_size: Array.from(files).reduce((sum, file) => sum + file.size, 0)
+        }
+      });
 
       toast({
         title: "Upload concluído",
@@ -110,11 +123,24 @@ const ImageUploadManager = () => {
 
   const handleDelete = async (fileName: string) => {
     try {
+      // Get image info before deletion for logging
+      const imageToDelete = images.find(img => img.name === fileName);
+      
       const { error } = await supabase.storage
         .from('product-images')
         .remove([fileName]);
 
       if (error) throw error;
+
+      // Log security event
+      await supabase.rpc('log_security_event', {
+        _action: `Imagem removida: ${fileName}`,
+        _details: { 
+          filename: fileName,
+          size: imageToDelete?.size || 0,
+          url: imageToDelete?.url
+        }
+      });
 
       toast({
         title: "Imagem removida",

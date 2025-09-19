@@ -1,13 +1,17 @@
 import { useCompanySettings } from "./company/use-company-settings";
-import { formatCurrency } from "@/lib/utils";
 
 export const useCurrency = () => {
-  const { settings } = useCompanySettings();
+  const { settings, loading } = useCompanySettings();
   
   const formatPrice = (value: number): string => {
     const currency = settings.currency || "AOA";
     const locale = getLocaleFromCurrency(currency);
-    return formatCurrency(value, currency, locale);
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   };
   
   const getLocaleFromCurrency = (currency: string): string => {
@@ -22,5 +26,9 @@ export const useCurrency = () => {
     }
   };
   
-  return { formatPrice, currency: settings.currency || "AOA" };
+  return { 
+    formatPrice, 
+    currency: settings.currency || "AOA",
+    loading
+  };
 };

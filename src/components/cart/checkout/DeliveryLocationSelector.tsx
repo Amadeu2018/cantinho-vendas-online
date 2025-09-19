@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, CheckCircle } from "lucide-react";
 import { DeliveryLocation } from "@/contexts/CartContext";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface DeliveryLocationSelectorProps {
   locations: DeliveryLocation[];
@@ -16,6 +17,7 @@ const DeliveryLocationSelector = ({
   selectedLocation, 
   onLocationSelect 
 }: DeliveryLocationSelectorProps) => {
+  const { formatPrice } = useCurrency();
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
       <CardHeader>
@@ -48,11 +50,7 @@ const DeliveryLocationSelector = ({
                   {location.estimatedTime}
                 </div>
                 <Badge variant="secondary" className="bg-cantinho-terracotta text-white">
-                  {new Intl.NumberFormat("pt-AO", {
-                    style: "currency",
-                    currency: "AOA",
-                    minimumFractionDigits: 0,
-                  }).format(location.fee)}
+                  {formatPrice(location.fee)}
                 </Badge>
               </div>
             </div>

@@ -11,7 +11,7 @@ export const useAdminOrders = () => {
   const { updateOrderStatus, updatePaymentStatus } = useOrdersActions(orders, setOrders);
   
   // Set up notifications
-  useOrdersNotifications(refreshOrders);
+  useOrdersNotifications({ refreshOrders });
   useStockNotifications();
 
   return { 

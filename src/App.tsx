@@ -30,7 +30,14 @@ import UpdatePassword from "./pages/UpdatePassword";
 import NotificationsPage from "./pages/NotificationsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const AppRoutes = () => {
   // const tempoRoutes = import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;

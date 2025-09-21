@@ -53,6 +53,7 @@ export const useDeliveryZones = () => {
   };
 
   useEffect(() => {
+    console.log('useDeliveryZones: Initializing hook');
     fetchDeliveryZones();
 
     // Subscribe to delivery zone changes
@@ -64,14 +65,15 @@ export const useDeliveryZones = () => {
           schema: 'public', 
           table: 'delivery_zones' 
         }, 
-        () => {
-          console.log('Delivery zones changed, refetching...');
+        (payload) => {
+          console.log('Delivery zones changed, refetching...', payload);
           fetchDeliveryZones();
         }
       )
       .subscribe();
 
     return () => {
+      console.log('useDeliveryZones: Cleaning up subscription');
       subscription.unsubscribe();
     };
   }, []);

@@ -163,11 +163,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Localização ou método de pagamento não selecionado");
     }
 
+    // Get current authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("Usuário não autenticado");
+    }
+
     // Generate a proper UUID for the order ID using crypto.randomUUID()
     const orderId = crypto.randomUUID();
     
     const orderData = {
       id: orderId,
+      customer_id: user.id, // Add customer_id for RLS policy
       items: items,
       customer_info: customerInfo,
       subtotal: subtotal,

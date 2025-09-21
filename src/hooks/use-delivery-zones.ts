@@ -24,29 +24,29 @@ export const useDeliveryZones = () => {
 
       if (data && data.length > 0) {
         const zones: DeliveryLocation[] = data.map((zone) => ({
-          id: parseInt(zone.id.substring(0, 8), 16), // Convert UUID to number for compatibility
+          id: zone.id, // Use UUID directly
           name: zone.name,
           fee: Number(zone.fee),
           estimatedTime: zone.estimated_time
         }));
         setDeliveryZones(zones);
       } else {
-        // Set default zones if none exist in database
+        // Set default zones if none exist in database - using proper UUID format
         setDeliveryZones([
-          { id: 1, name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
-          { id: 2, name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
-          { id: 3, name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
+          { id: "default-1", name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
+          { id: "default-2", name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
+          { id: "default-3", name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
         ]);
       }
     } catch (err) {
       console.error('Error fetching delivery zones:', err);
       setError(err instanceof Error ? err.message : 'Error fetching delivery zones');
       
-      // Set default zones on error
+      // Set default zones on error - using proper UUID format
       setDeliveryZones([
-        { id: 1, name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
-        { id: 2, name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
-        { id: 3, name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
+        { id: "default-1", name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
+        { id: "default-2", name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
+        { id: "default-3", name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
       ]);
     } finally {
       setLoading(false);

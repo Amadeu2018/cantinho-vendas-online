@@ -7,6 +7,10 @@ export const convertOrderType = (order: Order): CartOrder => {
     ...order,
     notes: order.notes || "",
     status: order.status === 'delivered' ? 'delivering' : order.status,
+    location: {
+      ...order.location,
+      id: order.location?.id?.toString() || "default-location" // Convert to string
+    },
     paymentMethod: {
       id: order.paymentMethod?.id || 'default-id',
       name: order.paymentMethod?.name || 'Método de pagamento',

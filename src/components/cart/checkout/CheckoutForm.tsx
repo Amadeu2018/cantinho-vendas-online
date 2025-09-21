@@ -22,7 +22,11 @@ interface CustomerInfo {
   address: string;
 }
 
-const CheckoutForm = () => {
+interface CheckoutFormProps {
+  onSuccess?: (orderId: string) => void;
+}
+
+const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const { 
     items, 
     selectedLocation, 
@@ -149,6 +153,11 @@ const CheckoutForm = () => {
         duration: 5000,
       });
 
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess(order.id);
+      }
+
     } catch (error) {
       console.error('Error submitting order:', error);
       toast.error("Erro ao processar pedido. Tente novamente.");
@@ -258,13 +267,12 @@ const CheckoutForm = () => {
       </Card>
 
       {/* Delivery Location */}
-      {!loadingZones && deliveryZones.length > 0 && (
-        <DeliveryLocationSelector
-          locations={deliveryZones}
-          selectedLocation={selectedLocation}
-          onLocationSelect={setSelectedLocation}
-        />
-      )}
+      <DeliveryLocationSelector
+        locations={deliveryZones}
+        selectedLocation={selectedLocation}
+        onLocationSelect={setSelectedLocation}
+        loading={loadingZones}
+      />
 
       {/* Payment Method */}
       {!loadingMethods && paymentMethods.length > 0 && (

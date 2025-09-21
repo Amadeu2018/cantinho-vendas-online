@@ -5,19 +5,34 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, CheckCircle } from "lucide-react";
 import { DeliveryLocation } from "@/contexts/CartContext";
 import { useCurrency } from "@/hooks/use-currency";
+import DeliveryZoneLoadingState from "./DeliveryZoneLoadingState";
+import NoDeliveryZones from "./NoDeliveryZones";
 
 interface DeliveryLocationSelectorProps {
   locations: DeliveryLocation[];
   selectedLocation: DeliveryLocation | null;
   onLocationSelect: (location: DeliveryLocation) => void;
+  loading?: boolean;
 }
 
 const DeliveryLocationSelector = ({ 
   locations, 
   selectedLocation, 
-  onLocationSelect 
+  onLocationSelect,
+  loading = false
 }: DeliveryLocationSelectorProps) => {
   const { formatPrice } = useCurrency();
+  
+  // Show loading state
+  if (loading) {
+    return <DeliveryZoneLoadingState />;
+  }
+  
+  // Show no zones message if empty
+  if (!locations || locations.length === 0) {
+    return <NoDeliveryZones />;
+  }
+  
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
       <CardHeader>

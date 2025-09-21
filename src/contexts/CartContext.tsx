@@ -14,7 +14,7 @@ export type CartItem = {
 };
 
 export type DeliveryLocation = {
-  id: number;
+  id: string; // Changed to string (UUID)
   name: string;
   fee: number;
   estimatedTime: string;

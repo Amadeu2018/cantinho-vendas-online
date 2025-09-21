@@ -9,7 +9,7 @@ import { useFirstOrder } from "@/hooks/use-first-order";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
-import CheckoutForm from "@/components/cart/CheckoutForm";
+import CheckoutForm from "@/components/cart/checkout/CheckoutForm";
 import OrderStatus from "@/components/cart/OrderStatus";
 import CartItem from "@/components/cart/CartItem";
 import CartHeader from "@/components/cart/cart-page/CartHeader";

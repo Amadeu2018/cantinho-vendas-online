@@ -24,13 +24,13 @@ const CustomerInfoForm = ({ customerInfo, onChange }: CustomerInfoFormProps) => 
 
   // Auto-fill email if user is logged in
   React.useEffect(() => {
-    if (user && user.email && !customerInfo.name) {
+    if (user && user.email && !customerInfo.email) {
       const emailEvent = {
         target: { name: 'email', value: user.email }
       } as React.ChangeEvent<HTMLInputElement>;
       onChange(emailEvent);
     }
-  }, [user, customerInfo.name, onChange]);
+  }, [user?.email]);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e);

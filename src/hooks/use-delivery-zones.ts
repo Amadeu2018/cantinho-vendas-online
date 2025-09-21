@@ -12,42 +12,41 @@ export const useDeliveryZones = () => {
       setLoading(true);
       setError(null);
       
+      console.log('Fetching delivery zones...');
+      
       const { data, error: fetchError } = await supabase
         .from('delivery_zones')
-        .select('*')
+        .select('id, name, fee, estimated_time, is_active')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
+      console.log('Delivery zones response:', { data, error: fetchError });
+
       if (fetchError) {
+        console.error('Supabase fetch error:', fetchError);
         throw fetchError;
       }
 
       if (data && data.length > 0) {
+        console.log('Processing zones data:', data);
         const zones: DeliveryLocation[] = data.map((zone) => ({
-          id: zone.id, // Use UUID directly
+          id: zone.id,
           name: zone.name,
           fee: Number(zone.fee),
           estimatedTime: zone.estimated_time
         }));
+        console.log('Mapped zones:', zones);
         setDeliveryZones(zones);
       } else {
-        // Set default zones if none exist in database - using proper UUID format
-        setDeliveryZones([
-          { id: "default-1", name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
-          { id: "default-2", name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
-          { id: "default-3", name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
-        ]);
+        console.log('No zones found, using defaults');
+        // No zones found - this should not happen as we have data in DB
+        setDeliveryZones([]);
       }
     } catch (err) {
       console.error('Error fetching delivery zones:', err);
       setError(err instanceof Error ? err.message : 'Error fetching delivery zones');
-      
-      // Set default zones on error - using proper UUID format
-      setDeliveryZones([
-        { id: "default-1", name: "Centro da Cidade", fee: 1500, estimatedTime: "20-30 min" },
-        { id: "default-2", name: "Marginal", fee: 2000, estimatedTime: "30-40 min" },
-        { id: "default-3", name: "Talatona", fee: 2500, estimatedTime: "40-50 min" }
-      ]);
+      // On error, set empty array to show the "no zones" state
+      setDeliveryZones([]);
     } finally {
       setLoading(false);
     }

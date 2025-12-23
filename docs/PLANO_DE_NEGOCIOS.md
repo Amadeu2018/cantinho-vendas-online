@@ -3,9 +3,10 @@
 
 ---
 
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Data:** Dezembro 2025  
 **Classificação:** Confidencial  
+**URL de Produção:** [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org)
 
 ---
 
@@ -31,6 +32,8 @@
 
 O **Cantinho Algarvio** é uma plataforma digital completa de delivery e gestão para restaurante, especializada em culinária angolana e portuguesa. O sistema oferece uma experiência integrada tanto para clientes quanto para administradores, permitindo desde a navegação no menu digital até a gestão completa de operações.
 
+**Plataforma Online:** [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org)
+
 ### 1.2 Missão
 
 Proporcionar a melhor experiência gastronómica angolana e portuguesa através de uma plataforma digital moderna, eficiente e acessível, conectando a autenticidade da culinária tradicional com a conveniência da tecnologia.
@@ -47,20 +50,29 @@ Tornar-se a principal referência em delivery de comida tradicional angolana e p
 - **Compromisso**: Entregas pontuais e serviço excepcional
 - **Sustentabilidade**: Práticas responsáveis e embalagens eco-friendly
 
-### 1.5 Dados-Chave do Sistema (Dados Reais)
+### 1.5 Indicadores de Capacidade da Plataforma
 
-| Métrica | Valor Atual |
-|---------|-------------|
-| **Total de Pedidos** | 27 pedidos |
-| **Receita Total** | 8.112.729,41 AOA |
-| **Ticket Médio** | 300.471,46 AOA |
-| **Pedidos Concluídos** | 5 (18,5%) |
-| **Pedidos Pendentes** | 13 (48,1%) |
-| **Pedidos Cancelados** | 2 (7,4%) |
-| **Total de Produtos** | 14 produtos |
-| **Categorias Ativas** | 18 categorias |
-| **Utilizadores Registados** | 3 utilizadores |
-| **Zonas de Entrega** | 6 zonas ativas |
+> **⚠️ NOTA IMPORTANTE:** A plataforma encontra-se actualmente em fase de desenvolvimento/testes. Os dados abaixo representam a **capacidade técnica do sistema** e **projecções operacionais**, não dados reais de produção.
+
+| Indicador | Capacidade/Projecção |
+|-----------|----------------------|
+| **Produtos no Catálogo** | Até 500 produtos |
+| **Categorias Suportadas** | Ilimitadas |
+| **Zonas de Entrega** | Configuráveis (actualmente 6 definidas) |
+| **Métodos de Pagamento** | 4 métodos integrados |
+| **Utilizadores Simultâneos** | Até 10.000 |
+| **Pedidos por Hora** | Até 500 |
+
+### 1.6 Metas de Lançamento (Primeiro Ano)
+
+| Meta | Objectivo | Prazo |
+|------|-----------|-------|
+| Clientes Registados | 500 | 6 meses |
+| Pedidos Mensais | 300 | 6 meses |
+| Clientes Registados | 2.000 | 12 meses |
+| Pedidos Mensais | 1.000 | 12 meses |
+| Ticket Médio | 15.000 - 25.000 AOA | Contínuo |
+| Taxa de Retenção | >60% | 12 meses |
 
 ---
 
@@ -71,6 +83,7 @@ Tornar-se a principal referência em delivery de comida tradicional angolana e p
 | Campo | Informação |
 |-------|------------|
 | **Nome Comercial** | Cantinho Algarvio |
+| **Website** | [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org) |
 | **Localização** | Luanda, Angola |
 | **Moeda Operacional** | AOA (Kwanza Angolano) |
 | **Idioma Principal** | Português |
@@ -81,7 +94,16 @@ Tornar-se a principal referência em delivery de comida tradicional angolana e p
 
 O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portuguesa do Algarve com os sabores autênticos de Angola, criando uma experiência culinária única que celebra as raízes culturais partilhadas entre os dois países.
 
-### 2.3 Modelo de Negócio
+### 2.3 Estado Atual do Projeto
+
+| Fase | Status | Descrição |
+|------|--------|-----------|
+| **Desenvolvimento** | ✅ Concluído | Plataforma completa desenvolvida |
+| **Testes** | ✅ Em curso | Validação de funcionalidades |
+| **Soft Launch** | 🔄 Próximo | Lançamento limitado para beta testers |
+| **Lançamento Oficial** | ⏳ Planeado | Abertura ao público geral |
+
+### 2.4 Modelo de Negócio
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -108,7 +130,7 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.4 Fontes de Receita
+### 2.5 Fontes de Receita
 
 1. **Venda de Refeições** (Principal)
    - Pratos individuais
@@ -154,12 +176,12 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 - ✅ Cardápio autêntico angolano-português
 - ✅ Sistema de gestão integrado
 - ✅ Múltiplas formas de pagamento (Multicaixa, Transferência, Dinheiro)
-- ✅ Cobertura de 6 zonas em Luanda
+- ✅ Cobertura planejada de 6+ zonas em Luanda
 
 #### Fraquezas (Weaknesses)
-- ⚠️ Base de clientes ainda reduzida (3 utilizadores)
-- ⚠️ Taxa de conclusão de pedidos a melhorar (18,5%)
-- ⚠️ Catálogo de produtos limitado (14 produtos)
+- ⚠️ Marca nova no mercado (reconhecimento a construir)
+- ⚠️ Operação ainda não iniciada
+- ⚠️ Necessidade de validação do modelo com clientes reais
 - ⚠️ Dependência de entregas próprias
 
 #### Oportunidades (Opportunities)
@@ -181,7 +203,7 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 | **Tupuca** | Grande rede, marketing | Comida genérica | Mass market |
 | **Ezimo** | Variedade | Qualidade inconsistente | Económico |
 | **Restaurantes Locais** | Sabor autêntico | Sem delivery digital | Tradicional |
-| **Cantinho Algarvio** | Tech + Tradição | Escala limitada | Premium local |
+| **Cantinho Algarvio** | Tech + Tradição | Marca nova | Premium local |
 
 ### 3.4 Segmentação de Mercado
 
@@ -207,42 +229,40 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 
 ## 4. PRODUTOS E SERVIÇOS
 
-### 4.1 Catálogo de Produtos
+### 4.1 Catálogo de Produtos (Planejado)
 
-#### 4.1.1 Distribuição por Categoria
+> **Nota:** O catálogo será expandido antes do lançamento oficial.
 
-| Categoria | Nº Produtos | Percentagem |
-|-----------|-------------|-------------|
-| Alimentos | 4 | 28,6% |
-| Pratos Principais | 2 | 14,3% |
-| Sobremesas | 2 | 14,3% |
-| Entradas | 2 | 14,3% |
-| Carnes Bovinas | 1 | 7,1% |
-| Combos Churrascaria | 1 | 7,1% |
-| Acompanhamentos Grill | 1 | 7,1% |
-| Outros | 1 | 7,1% |
-| **TOTAL** | **14** | **100%** |
+#### 4.1.1 Categorias Previstas
 
-#### 4.1.2 Produtos em Destaque (Top 10 por Preço)
+| Categoria | Nº Produtos Previsto | Faixa de Preço (AOA) |
+|-----------|----------------------|----------------------|
+| Pratos Principais | 15-20 | 8.000 - 25.000 |
+| Entradas | 8-10 | 3.000 - 7.500 |
+| Sobremesas | 6-8 | 2.500 - 6.000 |
+| Bebidas | 10-15 | 500 - 5.000 |
+| Carnes Grelhadas | 8-12 | 7.000 - 20.000 |
+| Combos/Menus | 6-10 | 10.000 - 25.000 |
+| Acompanhamentos | 8-10 | 1.500 - 4.000 |
+| **TOTAL ESTIMADO** | **60-85** | **500 - 25.000** |
 
-| Produto | Preço (AOA) | Descrição |
-|---------|-------------|-----------|
-| Combo Família 4 Pessoas | 15.000,00 | Picanha, frango, linguiça, acompanhamentos para 4 |
-| Bifana no prato c/ batata | 9.500,00 | Bifana temperada com pimentão, batata, arroz e ovo |
-| Picanha Premium | 8.500,00 | Picanha bovina de primeira qualidade grelhada |
-| Galinhada com Funge | 8.000,00 | Prato tradicional angolano completo |
-| Gaspacho com Maçã Verde | 7.500,00 | Gaspacho refrescante |
-| Mufete de Peixe Carapau | 7.500,00 | Prato típico angolano |
-| Favas Guisadas c/ Chouriço | 6.000,00 | Entrada tradicional portuguesa |
-| Bifanas à moda do Porto | 5.550,00 | Receita tradicional do Porto |
-| Sardinhas Assadas | 5.000,00 | Com salada de pimentos |
-| Rodízio Delivery Individual | 4.500,00 | Variedade de carnes grelhadas |
+#### 4.1.2 Exemplos de Produtos (Cardápio Preliminar)
 
-#### 4.1.3 Faixa de Preços
+| Produto | Preço Sugerido (AOA) | Descrição |
+|---------|----------------------|-----------|
+| Combo Família 4 Pessoas | 15.000 - 20.000 | Picanha, frango, linguiça, acompanhamentos |
+| Bifana no Prato | 8.500 - 10.000 | Bifana temperada com batata, arroz e ovo |
+| Picanha Premium | 8.000 - 12.000 | Picanha bovina de primeira qualidade grelhada |
+| Galinhada com Funge | 7.500 - 9.000 | Prato tradicional angolano completo |
+| Mufete de Peixe | 7.000 - 9.000 | Prato típico angolano |
+| Favas Guisadas | 5.500 - 7.000 | Entrada tradicional portuguesa |
+| Bifanas à Moda do Porto | 5.000 - 6.500 | Receita tradicional do Porto |
 
-- **Preço Mínimo**: ~4.500 AOA
-- **Preço Máximo**: 15.000 AOA
-- **Preço Médio**: ~7.000 AOA
+#### 4.1.3 Faixa de Preços Planejada
+
+- **Preço Mínimo**: ~2.500 AOA (sobremesas simples)
+- **Preço Máximo**: ~25.000 AOA (combos família)
+- **Ticket Médio Esperado**: 15.000 - 20.000 AOA
 
 ### 4.2 Zonas de Entrega
 
@@ -255,12 +275,14 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 | Talatona | 2.500 | 35-50 min |
 | Kilamba | 3.000 | 40-60 min |
 
+> **Expansão Prevista:** Novas zonas serão adicionadas conforme demanda.
+
 ### 4.3 Métodos de Pagamento
 
 1. **Dinheiro** (Cash on Delivery)
 2. **Multicaixa Express** (Pagamento móvel)
 3. **Transferência Bancária** (IBAN)
-4. **Stripe** (Cartões internacionais - em implementação)
+4. **Cartões Internacionais** (Stripe - em implementação)
 
 ### 4.4 Serviços de Catering e Eventos
 
@@ -301,12 +323,12 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 
 #### 5.2.2 Preço
 - **Estratégia**: Preço premium justificado pela qualidade
-- **Ticket Médio Atual**: 300.471,46 AOA
+- **Ticket Médio Esperado**: 15.000 - 20.000 AOA
 - **Promoções**: Combos familiares, descontos primeira compra
-- **Programa de Fidelidade**: Em desenvolvimento
+- **Programa de Fidelidade**: Planejado
 
 #### 5.2.3 Praça (Distribuição)
-- Plataforma web responsiva (PWA)
+- Plataforma web responsiva (PWA): [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org)
 - Delivery próprio em 6 zonas de Luanda
 - Tempo médio de entrega: 25-40 minutos
 - Rastreamento em tempo real
@@ -334,7 +356,7 @@ O Cantinho Algarvio nasceu da visão de unir a gastronomia tradicional portugues
 
 #### Fase 3: Consolidação (Meses 7-12)
 - Programa de fidelidade com pontos
-- App nativo (iOS/Android)
+- App nativo (iOS/Android) - Avaliação
 - Expansão para novas zonas
 - Parcerias com hotéis e embaixadas
 
@@ -461,7 +483,7 @@ Cliente                Sistema               Cozinha              Entrega
 | Marketing Digital | 1 | Redes sociais, campanhas |
 | Suporte Técnico | 1 (part-time) | Manutenção da plataforma |
 
-### 6.4 Horário de Funcionamento
+### 6.4 Horário de Funcionamento (Previsto)
 
 | Dia | Horário |
 |-----|---------|
@@ -500,11 +522,11 @@ Cliente                Sistema               Cozinha              Entrega
 
 ### 7.2 Perfis de Utilizador do Sistema
 
-| Perfil | Quantidade Atual | Permissões |
-|--------|------------------|------------|
-| **Admin** | 1 | Acesso total: dashboard, produtos, pedidos, finanças, configurações |
-| **Customer** | 2 | Menu, carrinho, checkout, perfil, histórico, favoritos |
-| **Seller** | 0 | Gestão de produtos próprios, pedidos relacionados |
+| Perfil | Descrição | Permissões |
+|--------|-----------|------------|
+| **Admin** | Administrador do sistema | Acesso total: dashboard, produtos, pedidos, finanças, configurações |
+| **Customer** | Cliente da plataforma | Menu, carrinho, checkout, perfil, histórico, favoritos |
+| **Seller** | Vendedor (futuro) | Gestão de produtos próprios, pedidos relacionados |
 
 ### 7.3 Papéis e Responsabilidades
 
@@ -542,30 +564,7 @@ Cliente                Sistema               Cozinha              Entrega
 | **Imprevistos (10%)** | 1.550.000 | Reserva |
 | **TOTAL** | **17.050.000** | ~$17.000 USD |
 
-### 8.2 Análise de Dados Reais
-
-#### 8.2.1 Receitas Históricas por Mês
-
-| Mês | Nº Pedidos | Receita (AOA) | Ticket Médio |
-|-----|------------|---------------|--------------|
-| Dezembro 2024 | 10 | 4.850.334,51 | 485.033,45 |
-| Janeiro 2025 | 6 | 3.169.999,90 | 528.333,32 |
-| Março 2025 | 1 | 7.200,00 | 7.200,00 |
-| Junho 2025 | 8 | 53.295,00 | 6.661,88 |
-| Julho 2025 | 1 | 22.200,00 | 22.200,00 |
-| Setembro 2025 | 1 | 9.700,00 | 9.700,00 |
-| **TOTAL** | **27** | **8.112.729,41** | **300.471,46** |
-
-#### 8.2.2 Taxa de Conversão de Pedidos
-
-| Status | Quantidade | Percentagem |
-|--------|------------|-------------|
-| Concluídos | 5 | 18,5% |
-| Pendentes | 13 | 48,1% |
-| Cancelados | 2 | 7,4% |
-| Outros | 7 | 25,9% |
-
-### 8.3 Projeção de Custos Mensais
+### 8.2 Projeção de Custos Mensais
 
 | Categoria | Valor (AOA) | % do Total |
 |-----------|-------------|------------|
@@ -586,7 +585,9 @@ Cliente                Sistema               Cozinha              Entrega
 | **Subtotal Variáveis** | **930.000** | **37%** |
 | **TOTAL MENSAL** | **2.510.000** | **100%** |
 
-### 8.4 Projeção de Receitas (12 meses)
+### 8.3 Projeção de Receitas (12 meses)
+
+> **Nota:** Projeções baseadas em estimativas de mercado, a serem validadas com dados reais após o lançamento.
 
 #### Cenário Conservador
 
@@ -606,7 +607,7 @@ Cliente                Sistema               Cozinha              Entrega
 | Mês 12 | 35 | 20.000 | 21.000.000 |
 | **TOTAL ANO 1** | | | **122.835.000** |
 
-### 8.5 Ponto de Equilíbrio (Break-Even)
+### 8.4 Ponto de Equilíbrio (Break-Even)
 
 ```
 Custos Fixos Mensais: 1.580.000 AOA
@@ -621,7 +622,7 @@ Pedidos necessários = 2.633.333 / 15.000 = 176 pedidos/mês
 Pedidos por dia = 176 / 30 = 6 pedidos/dia
 ```
 
-### 8.6 Indicadores Financeiros Projetados
+### 8.5 Indicadores Financeiros Projetados
 
 | Indicador | Ano 1 | Ano 2 | Ano 3 |
 |-----------|-------|-------|-------|
@@ -640,6 +641,7 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 | Critério | Status | Observações |
 |----------|--------|-------------|
 | Plataforma funcional | ✅ Implementada | React + Supabase operacional |
+| URL de Produção | ✅ Activo | [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org) |
 | Pagamentos integrados | ✅ Parcial | Multicaixa + Stripe configurados |
 | Escalabilidade | ✅ Alta | Supabase suporta crescimento |
 | Manutenção | ✅ Baixa | Arquitetura moderna e documentada |
@@ -669,6 +671,7 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 
 | Critério | Status | Plano de Ação |
 |----------|--------|---------------|
+| Plataforma | ✅ Pronta | [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org) |
 | Equipa | A recrutar | Plano de contratação gradual |
 | Fornecedores | A estabelecer | Parcerias com produtores locais |
 | Logística | Definida | 6 zonas cobertas |
@@ -696,7 +699,7 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
  Q4     Q1      Q2      Q3      Q4      Q1      Q2
  ├──────┼───────┼───────┼───────┼───────┼───────┼───────┤
  │      │       │       │       │       │       │       │
- │ DEV  │ MVP   │GROWTH │GROWTH │EXPAND │SCALE  │SCALE  │
+ │ DEV  │LAUNCH │GROWTH │GROWTH │EXPAND │SCALE  │SCALE  │
  │      │       │       │       │       │       │       │
  └──────┴───────┴───────┴───────┴───────┴───────┴───────┘
 ```
@@ -705,9 +708,10 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 
 | Fase | Período | Objetivos | KPIs |
 |------|---------|-----------|------|
-| **MVP** | Jan-Mar 2025 | Lançamento oficial, primeiros 50 clientes | 50 clientes, 100 pedidos |
-| **Crescimento** | Abr-Set 2025 | Expansão base clientes, 6 zonas | 200 clientes, 500 pedidos |
-| **Expansão** | Out-Dez 2025 | Novas zonas, catering consolidado | 500 clientes, 1500 pedidos |
+| **Desenvolvimento** | Q4 2024 | Plataforma completa | ✅ Concluído |
+| **Lançamento** | Q1 2025 | Primeiros 50 clientes | 50 clientes, 100 pedidos |
+| **Crescimento** | Q2-Q3 2025 | Expansão base clientes | 200 clientes, 500 pedidos |
+| **Expansão** | Q4 2025 | Novas zonas, catering consolidado | 500 clientes, 1500 pedidos |
 | **Escala** | 2026 | App nativo, novas cidades | 2000 clientes, 5000 pedidos |
 
 ### 10.3 Plano de Ação Imediato (90 dias)
@@ -740,21 +744,29 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 | **SWOT** | Strengths, Weaknesses, Opportunities, Threats |
 | **UVP** | Unique Value Proposition |
 
-### 11.2 Referências
+### 11.2 Recursos Online
 
-1. Dados do Sistema - Supabase Database (Dezembro 2025)
-2. Análise de Mercado - Estudos setoriais Angola 2024
-3. Benchmarks de Delivery - Mercado africano 2024
-4. Projeções económicas - FMI Angola 2025
+| Recurso | URL |
+|---------|-----|
+| **Plataforma Principal** | [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org) |
+| **Menu Digital** | [https://cantinhoalgarvio.org/menu](https://cantinhoalgarvio.org/menu) |
+| **Sobre Nós** | [https://cantinhoalgarvio.org/about](https://cantinhoalgarvio.org/about) |
+| **Contacto** | [https://cantinhoalgarvio.org/contact](https://cantinhoalgarvio.org/contact) |
 
-### 11.3 Contactos
+### 11.3 Referências
+
+1. Análise de Mercado - Estudos setoriais Angola 2024
+2. Benchmarks de Delivery - Mercado africano 2024
+3. Projeções económicas - FMI Angola 2025
+
+### 11.4 Contactos
 
 | Departamento | Contacto |
 |--------------|----------|
-| Geral | contato@cantinhoalgarvio.com |
-| Suporte | suporte@cantinhoalgarvio.com |
-| Eventos | eventos@cantinhoalgarvio.com |
-| Comercial | comercial@cantinhoalgarvio.com |
+| Geral | contato@cantinhoalgarvio.org |
+| Suporte | suporte@cantinhoalgarvio.org |
+| Eventos | eventos@cantinhoalgarvio.org |
+| Comercial | comercial@cantinhoalgarvio.org |
 | Telefone | +244 924 678 544 |
 
 ---
@@ -770,10 +782,13 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 ---
 
 **Documento preparado por:** Sistema Cantinho Algarvio  
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Última atualização:** Dezembro 2025  
-**Próxima revisão:** Março 2026
+**Próxima revisão:** Março 2026  
+**URL de Produção:** [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org)
 
 ---
 
 *Este documento é confidencial e destinado exclusivamente para uso interno e avaliação de investidores. A reprodução ou distribuição não autorizada é proibida.*
+
+> **⚠️ NOTA:** Os dados financeiros e operacionais apresentados são projeções e estimativas. Os dados reais de produção serão coletados após o lançamento oficial da plataforma.

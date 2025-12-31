@@ -552,17 +552,49 @@ Cliente                Sistema               Cozinha              Entrega
 
 ### 8.1 Investimento Inicial
 
-| Item | Valor (AOA) | Observações |
-|------|-------------|-------------|
-| **Desenvolvimento da Plataforma** | 5.000.000 | Já realizado |
-| **Equipamento de Cozinha** | 3.000.000 | Fogões, fornos, utensílios |
-| **Mobiliário** | 1.500.000 | Mesas, cadeiras, decoração |
-| **Veículos de Entrega** | 2.000.000 | 2 motos + 1 carro |
-| **Capital de Giro Inicial** | 2.500.000 | 3 meses de operação |
-| **Marketing de Lançamento** | 1.000.000 | Campanha inicial |
-| **Licenças e Legalizações** | 500.000 | Alvarás, registos |
-| **Imprevistos (10%)** | 1.550.000 | Reserva |
-| **TOTAL** | **17.050.000** | ~$17.000 USD |
+#### 8.1.1 Equipamentos de Cozinha (Valores Reais - Faturas Proforma)
+
+**Fornecedor: KOLLER** (Pró-forma n.º PP 2025/601 - Data: 27/12/2025)
+
+| Código | Descrição | Preço Unitário (AOA) | Desconto | Total (AOA) |
+|--------|-----------|----------------------|----------|-------------|
+| 10360 | Mesa de trabalho | 350.877,19 | 0% | 350.877,19 |
+| 10405 | Casquinha de gelado | 118.421,05 | 20% | 94.736,84 |
+| 10335 | SXC-22 Moedor de carne | 480.263,16 | 20% | 384.210,53 |
+| 10197 | Forno elétrico de 1 porta 2 tabuleiros | 657.785,09 | 20% | 526.228,07 |
+| 10095 | BL-818 Chapa de hambúrguer elétrica pequena | 218.201,75 | 20% | 174.561,40 |
+| 20010 | Fogão 6 bocas | 526.315,79 | 20% | 421.052,63 |
+| 10363 | Lava loiça duas pias | 458.333,33 | 20% | 366.666,56 |
+| 10379 | Exaustor 1,5m | 1.039.473,68 | 20% | 831.578,94 |
+| | **Subtotal Líquido** | | | **3.149.912,27** |
+| | **IVA (14%)** | | | **440.987,72** |
+| | **TOTAL KOLLER** | | | **3.590.899,99** |
+
+**Fornecedor: Mauena Comércio Geral LDA** (Factura Pró-Forma n.º 10112/2025 - Data: 27/12/2025)
+
+| Artigo | Descrição | Qtd | Preço Unitário (AOA) | Total (AOA) |
+|--------|-----------|-----|----------------------|-------------|
+| 1.00 | KW50-2a (Equipamento Industrial) | 2 | 690.000,00 | 1.380.000,00 |
+| | **TOTAL MAUENA** | | | **1.380.000,00** |
+
+#### 8.1.2 Resumo do Investimento Inicial
+
+| Categoria | Valor (AOA) | Observações |
+|-----------|-------------|-------------|
+| **Equipamentos KOLLER** | 3.590.899,99 | Fatura Pró-forma PP 2025/601 |
+| **Equipamentos Mauena** | 1.380.000,00 | Fatura Pró-forma 10112/2025 |
+| **Subtotal Equipamentos** | **4.970.899,99** | **Valores documentados** |
+| Desenvolvimento da Plataforma | 5.000.000,00 | Já realizado |
+| Mobiliário e Decoração | 1.500.000,00 | Estimativa |
+| Veículos de Entrega | 2.000.000,00 | 2 motos + 1 carro |
+| Capital de Giro Inicial | 2.500.000,00 | 3 meses de operação |
+| Marketing de Lançamento | 1.000.000,00 | Campanha inicial |
+| Licenças e Legalizações | 500.000,00 | Alvarás, registos |
+| **Subtotal** | **17.470.899,99** | |
+| Imprevistos (10%) | 1.747.090,00 | Reserva de contingência |
+| **TOTAL INVESTIMENTO** | **19.217.989,99** | ~$19.200 USD |
+
+> **Nota:** Os valores de equipamentos são baseados em faturas proforma reais datadas de 27/12/2025. Os demais valores são estimativas a serem validadas.
 
 ### 8.2 Projeção de Custos Mensais
 

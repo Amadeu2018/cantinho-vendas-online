@@ -50,12 +50,14 @@ Tornar-se a principal referência em delivery de comida tradicional angolana e p
 - **Compromisso**: Entregas pontuais e serviço excepcional
 - **Sustentabilidade**: Práticas responsáveis e embalagens eco-friendly
 
-### 1.5 Indicadores de Capacidade da Plataforma
+### 1.5 Estado da Plataforma
 
-> **⚠️ NOTA IMPORTANTE:** A plataforma encontra-se actualmente em fase de desenvolvimento/testes. Os dados abaixo representam a **capacidade técnica do sistema** e **projecções operacionais**, não dados reais de produção.
+> **⚠️ NOTA IMPORTANTE:** A plataforma encontra-se **operacional e funcional**, disponível em [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org). O sistema está em constante desenvolvimento e sujeito a **actualizações e melhorias contínuas** para optimizar a experiência do utilizador e as funcionalidades oferecidas.
 
-| Indicador | Capacidade/Projecção |
-|-----------|----------------------|
+### 1.6 Indicadores de Capacidade da Plataforma
+
+| Indicador | Capacidade Técnica |
+|-----------|-------------------|
 | **Produtos no Catálogo** | Até 500 produtos |
 | **Categorias Suportadas** | Ilimitadas |
 | **Zonas de Entrega** | Configuráveis (actualmente 6 definidas) |
@@ -63,7 +65,7 @@ Tornar-se a principal referência em delivery de comida tradicional angolana e p
 | **Utilizadores Simultâneos** | Até 10.000 |
 | **Pedidos por Hora** | Até 500 |
 
-### 1.6 Metas de Lançamento (Primeiro Ano)
+### 1.7 Metas de Lançamento (Primeiro Ano)
 
 | Meta | Objectivo | Prazo |
 |------|-----------|-------|
@@ -596,35 +598,65 @@ Cliente                Sistema               Cozinha              Entrega
 
 > **Nota:** Os valores de equipamentos são baseados em faturas proforma reais datadas de 27/12/2025. Os demais valores são estimativas a serem validadas.
 
-### 8.2 Projeção de Custos Mensais
+### 8.2 Estimativa de Custos Operacionais
 
-| Categoria | Valor (AOA) | % do Total |
-|-----------|-------------|------------|
-| **Custos Fixos** | | |
-| Aluguer | 400.000 | 16% |
-| Salários (equipa básica) | 800.000 | 32% |
-| Utilities (água, luz, gás) | 150.000 | 6% |
-| Internet + Telefone | 50.000 | 2% |
-| Seguros | 80.000 | 3% |
-| Manutenção Plataforma | 100.000 | 4% |
-| **Subtotal Fixos** | **1.580.000** | **63%** |
-| **Custos Variáveis** | | |
-| Matéria-prima (40% receita) | 600.000 | 24% |
-| Embalagens | 100.000 | 4% |
-| Combustível entregas | 150.000 | 6% |
-| Taxas de pagamento (2%) | 30.000 | 1% |
-| Marketing | 50.000 | 2% |
-| **Subtotal Variáveis** | **930.000** | **37%** |
-| **TOTAL MENSAL** | **2.510.000** | **100%** |
+> **⚠️ NOTA:** Os valores apresentados nesta secção são **estimativas indicativas** para efeitos do estudo de viabilidade. Os custos reais deverão ser validados e ajustados conforme a operação.
+
+#### 8.2.1 Custos Diários Estimados
+
+| Categoria | Valor Diário (AOA) | Observações |
+|-----------|-------------------|-------------|
+| Matéria-prima | 20.000 | Baseado em 40% da receita diária |
+| Combustível entregas | 5.000 | Média para 6-10 entregas |
+| Embalagens | 3.333 | Custo por entrega estimado |
+| **TOTAL DIÁRIO** | **28.333** | **Dias úteis de operação** |
+
+#### 8.2.2 Custos Mensais Estimados
+
+| Categoria | Valor Mensal (AOA) | % do Total | Observações |
+|-----------|-------------------|------------|-------------|
+| **CUSTOS FIXOS** | | | |
+| Aluguer | 400.000 | 16% | Espaço comercial |
+| Salários (equipa básica) | 800.000 | 32% | 5-7 colaboradores |
+| Utilities (água, luz, gás) | 150.000 | 6% | Média estimada |
+| Internet + Telefone | 50.000 | 2% | Pacote empresarial |
+| Seguros | 80.000 | 3% | Responsabilidade civil |
+| Manutenção Plataforma | 100.000 | 4% | Suporte técnico |
+| **Subtotal Fixos** | **1.580.000** | **63%** | |
+| **CUSTOS VARIÁVEIS** | | | |
+| Matéria-prima | 600.000 | 24% | 40% da receita |
+| Embalagens | 100.000 | 4% | Por pedido |
+| Combustível entregas | 150.000 | 6% | Motos e veículo |
+| Taxas de pagamento | 30.000 | 1% | 2% das transações |
+| Marketing | 50.000 | 2% | Redes sociais |
+| **Subtotal Variáveis** | **930.000** | **37%** | |
+| **TOTAL MENSAL** | **2.510.000** | **100%** | |
+
+#### 8.2.3 Custos Anuais Estimados
+
+| Categoria | Valor Anual (AOA) | Observações |
+|-----------|------------------|-------------|
+| Custos Fixos | 18.960.000 | 1.580.000 × 12 meses |
+| Custos Variáveis | 11.160.000 | 930.000 × 12 meses |
+| **TOTAL ANUAL** | **30.120.000** | **Estimativa ano 1** |
 
 ### 8.3 Projeção de Receitas (12 meses)
 
-> **Nota:** Projeções baseadas em estimativas de mercado, a serem validadas com dados reais após o lançamento.
+> **⚠️ NOTA IMPORTANTE:** As projeções de receitas apresentadas são **valores indicativos** baseados em estimativas de mercado e benchmarks do setor. Estes dados são apresentados exclusivamente para efeitos do **estudo de viabilidade** e deverão ser validados e ajustados com dados reais após o início das operações.
 
-#### Cenário Conservador
+#### Receitas Diárias Estimadas
 
-| Mês | Pedidos/Dia | Ticket Médio | Receita Mensal |
-|-----|-------------|--------------|----------------|
+| Período | Pedidos/Dia | Ticket Médio (AOA) | Receita Diária (AOA) |
+|---------|-------------|-------------------|---------------------|
+| Mês 1-3 | 5-10 | 15.000-16.000 | 75.000 - 160.000 |
+| Mês 4-6 | 12-18 | 16.000-17.000 | 192.000 - 306.000 |
+| Mês 7-9 | 20-25 | 18.000-18.500 | 360.000 - 462.500 |
+| Mês 10-12 | 27-35 | 19.000-20.000 | 513.000 - 700.000 |
+
+#### Receitas Mensais Estimadas - Cenário Conservador
+
+| Mês | Pedidos/Dia | Ticket Médio (AOA) | Receita Mensal (AOA) |
+|-----|-------------|-------------------|---------------------|
 | Mês 1 | 5 | 15.000 | 2.250.000 |
 | Mês 2 | 7 | 15.000 | 3.150.000 |
 | Mês 3 | 10 | 16.000 | 4.800.000 |
@@ -638,6 +670,14 @@ Cliente                Sistema               Cozinha              Entrega
 | Mês 11 | 30 | 19.000 | 17.100.000 |
 | Mês 12 | 35 | 20.000 | 21.000.000 |
 | **TOTAL ANO 1** | | | **122.835.000** |
+
+#### Receitas Anuais Estimadas
+
+| Ano | Receita Anual (AOA) | Crescimento |
+|-----|--------------------|-----------| 
+| Ano 1 | 122.835.000 | - |
+| Ano 2 | 184.252.500 | +50% |
+| Ano 3 | 257.953.500 | +40% |
 
 ### 8.4 Ponto de Equilíbrio (Break-Even)
 
@@ -656,13 +696,37 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 
 ### 8.5 Indicadores Financeiros Projetados
 
+> **⚠️ NOTA:** Estes indicadores são **projeções indicativas** para efeitos do estudo de viabilidade.
+
 | Indicador | Ano 1 | Ano 2 | Ano 3 |
 |-----------|-------|-------|-------|
-| Receita Bruta | 122.835.000 | 184.252.500 | 257.953.500 |
-| Custos Totais | 98.268.000 | 129.097.500 | 167.669.775 |
-| Lucro Bruto | 24.567.000 | 55.155.000 | 90.283.725 |
+| Receita Bruta (AOA) | 122.835.000 | 184.252.500 | 257.953.500 |
+| Custos Totais (AOA) | 98.268.000 | 129.097.500 | 167.669.775 |
+| Lucro Bruto (AOA) | 24.567.000 | 55.155.000 | 90.283.725 |
 | Margem Bruta | 20% | 30% | 35% |
 | ROI | 44% | 123% | 230% |
+
+### 8.6 Resumo Financeiro - Despesas e Receitas
+
+> **Quadro síntese para análise de viabilidade financeira**
+
+| Período | Despesas Estimadas (AOA) | Receitas Estimadas (AOA) | Resultado (AOA) |
+|---------|-------------------------|-------------------------|-----------------|
+| **DIÁRIO** | 28.333 | 75.000 - 700.000 | Variável |
+| **MENSAL** | 2.510.000 | 2.250.000 - 21.000.000 | Variável |
+| **ANUAL (Ano 1)** | 30.120.000 | 122.835.000 | +92.715.000 |
+
+### 8.7 Necessidade de Financiamento
+
+Com base no investimento inicial e nos custos operacionais estimados, apresenta-se a seguinte análise de necessidade de financiamento:
+
+| Item | Valor (AOA) | Observações |
+|------|-------------|-------------|
+| Investimento Inicial Total | 19.217.989,99 | Conforme secção 8.1 |
+| Capital de Giro (3 meses) | 7.530.000 | 2.510.000 × 3 meses |
+| **NECESSIDADE TOTAL** | **26.747.989,99** | **~$26.750 USD** |
+
+> **Nota:** Recomenda-se que o pedido de financiamento seja acompanhado de uma **carta formal de solicitação de empréstimo** especificando o valor, prazo de retorno e garantias oferecidas (ver Anexo 11.5).
 
 ---
 
@@ -801,6 +865,59 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 | Comercial | comercial@cantinhoalgarvio.org |
 | Telefone | +244 924 678 544 |
 
+### 11.5 Modelo de Carta de Solicitação de Empréstimo
+
+---
+
+**[Local], [Data]**
+
+**À**
+**[Nome da Instituição Financeira]**
+**Departamento de Crédito**
+
+**Assunto:** Solicitação de Empréstimo para Implementação do Projecto "Cantinho Algarvio"
+
+Exmos. Senhores,
+
+Vimos, por este meio, solicitar a apreciação para concessão de **empréstimo no valor de [VALOR A DEFINIR] AOA** (equivalente a aproximadamente $[VALOR USD] USD), destinado à implementação e operacionalização do projecto de restaurante e delivery "**Cantinho Algarvio**".
+
+**1. FINALIDADE DO EMPRÉSTIMO**
+- Aquisição de equipamentos de cozinha industrial
+- Capital de giro para os primeiros meses de operação
+- Marketing e lançamento da plataforma
+
+**2. VALOR SOLICITADO**
+- Investimento Inicial: 19.217.989,99 AOA
+- Capital de Giro: 7.530.000,00 AOA
+- **Total Solicitado:** [A DEFINIR COM BASE NA DISPONIBILIDADE DO PROMOTOR]
+
+**3. PRAZO DE RETORNO PROPOSTO**
+- Prazo: [24/36/48] meses
+- Carência: [6] meses
+- Modalidade: Prestações mensais fixas
+
+**4. GARANTIAS OFERECIDAS**
+- [Descrever garantias reais: imóveis, equipamentos, etc.]
+- [Descrever garantias pessoais: avales, fianças, etc.]
+- [Descrever outras garantias: seguros, penhor de créditos, etc.]
+
+**5. ANEXOS**
+- Plano de Negócios completo
+- Faturas proforma dos equipamentos
+- Documentos de identificação do(s) promotor(es)
+- Comprovativo de morada
+- [Outros documentos relevantes]
+
+Colocamo-nos à disposição para prestar quaisquer esclarecimentos adicionais.
+
+Com os melhores cumprimentos,
+
+___________________________________
+**[Nome do Promotor/Representante Legal]**
+**NIF:** [Número de Identificação Fiscal]
+**Telefone:** +244 924 678 544
+**Email:** contato@cantinhoalgarvio.org
+
 ---
 
 ## APROVAÇÕES
@@ -814,8 +931,8 @@ Pedidos por dia = 176 / 30 = 6 pedidos/dia
 ---
 
 **Documento preparado por:** Sistema Cantinho Algarvio  
-**Versão:** 1.1  
-**Última atualização:** Dezembro 2025  
+**Versão:** 1.2  
+**Última atualização:** Janeiro 2026  
 **Próxima revisão:** Março 2026  
 **URL de Produção:** [https://cantinhoalgarvio.org](https://cantinhoalgarvio.org)
 

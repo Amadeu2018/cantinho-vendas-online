@@ -29,6 +29,7 @@ import ResetPassword from "./pages/ResetPassword";
 import UpdatePassword from "./pages/UpdatePassword";
 import NotificationsPage from "./pages/NotificationsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
+import BusinessPlanPDF from "./pages/BusinessPlanPDF";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ const AppRoutes = () => {
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/notificacoes" element={<NotificationsPage />} />
       <Route path="/rastrear-pedido" element={<OrderTrackingPage />} />
+      <Route path="/plano-de-negocios" element={<BusinessPlanPDF />} />
       {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
       <Route path="*" element={<NotFound />} />
     </Routes>

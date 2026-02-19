@@ -53,6 +53,18 @@ const MobileMenu = ({ isOpen, onClose, onFirstOrder, onPremiumCatering }: Mobile
         </div>
 
         <div className="flex flex-col h-full">
+          {/* Login/User section - Top of sidebar for visibility */}
+          {!user && (
+            <div className="p-5 border-b-2 border-cantinho-terracotta/20 bg-gradient-to-r from-cantinho-cream/50 to-white">
+              <Link to="/auth/login" className="w-full" onClick={onClose}>
+                <Button className="w-full bg-cantinho-terracotta hover:bg-cantinho-terracotta/90 shadow-lg font-semibold h-14 text-base">
+                  <User className="w-6 h-6 mr-3" />
+                  Entrar / Registar
+                </Button>
+              </Link>
+            </div>
+          )}
+
           {/* Quick Actions - Mobile Priority */}
           <div className="p-5 border-b border-gray-100">
             <div className="space-y-4">

@@ -1,28 +1,49 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Utensils, Truck, Star, Clock, Gift, Phone } from "lucide-react";
+import heroBg1 from "@/assets/hero-bg-1.jpg";
+import heroBg2 from "@/assets/hero-bg-2.jpg";
+import heroBg3 from "@/assets/hero-bg-3.jpg";
+
+const heroImages = [heroBg1, heroBg2, heroBg3];
+
 const Hero = () => {
-  const [animationState, setAnimationState] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationState(prev => (prev + 1) % 100);
-    }, 70);
-    return () => clearInterval(interval);
+  const [currentImage, setCurrentImage] = useState(0);
+  const [nextImage, setNextImage] = useState(1);
+  const [transitioning, setTransitioning] = useState(false);
+
+  const cycleImage = useCallback(() => {
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentImage(prev => (prev + 1) % heroImages.length);
+      setNextImage(prev => (prev + 1) % heroImages.length);
+      setTransitioning(false);
+    }, 1500);
   }, []);
-  const backgroundOpacity = 0.7 + Math.sin(animationState / 10) * 0.1;
-  const backgroundScale = 1 + Math.sin(animationState / 15) * 0.02;
+
+  useEffect(() => {
+    const interval = setInterval(cycleImage, 6000);
+    return () => clearInterval(interval);
+  }, [cycleImage]);
+
   return <div className="relative min-h-[85vh] sm:min-h-[90vh] overflow-hidden">
       {/* Enhanced gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-cantinho-navy/85 via-cantinho-navy/70 to-cantinho-terracotta/75 z-10"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-20"></div>
       
-      {/* Dynamic background */}
-      <div className="absolute inset-0 bg-cover bg-center transition-all duration-[7000ms] ease-in-out" style={{
-      backgroundImage: "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04')",
-      opacity: backgroundOpacity,
-      transform: `scale(${backgroundScale})`
-    }}></div>
+      {/* Animated background slideshow */}
+      {heroImages.map((img, index) => (
+        <div
+          key={index}
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[2000ms] ease-in-out"
+          style={{
+            backgroundImage: `url('${img}')`,
+            opacity: index === currentImage ? (transitioning ? 0 : 0.8) : index === nextImage && transitioning ? 0.8 : 0,
+            transform: `scale(${index === currentImage ? (transitioning ? 1.1 : 1.05) : 1})`,
+          }}
+        />
+      ))}
       
       {/* Floating elements */}
       <div className="absolute top-16 right-4 sm:top-20 sm:right-20 w-20 h-20 sm:w-32 sm:h-32 bg-cantinho-sand/20 rounded-full blur-xl animate-pulse z-5"></div>

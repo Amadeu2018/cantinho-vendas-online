@@ -94,8 +94,10 @@ const Navbar = () => {
                 </Button>
               </Link>
               
-              {/* User menu - Visible on all screens */}
-              <UserDropdown />
+              {/* User menu - Desktop only */}
+              <div className="hidden lg:block">
+                <UserDropdown />
+              </div>
 
               {/* Mobile menu button */}
               <Button 
